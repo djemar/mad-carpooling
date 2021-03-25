@@ -39,6 +39,7 @@
         android:gravity="center_vertical">
 
         <EditText
+            android:id="@+id/edit_fullName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="16dp"
@@ -47,6 +48,7 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
 
         <EditText
+            android:id="@+id/edit_nickname"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:inputType="text"
@@ -55,6 +57,7 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         <EditText
+            android:id="@+id/edit_email"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:inputType="textEmailAddress"
@@ -63,6 +66,7 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         <EditText
+            android:id="@+id/edit_location"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:inputType="text"
