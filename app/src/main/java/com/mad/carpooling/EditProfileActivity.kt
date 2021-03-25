@@ -26,11 +26,20 @@ class EditProfileActivity : AppCompatActivity() {
         nicknameEditText = findViewById<EditText>(R.id.edit_nickname)
         emailEditText = findViewById<EditText>(R.id.edit_email)
         locationEditText = findViewById<EditText>(R.id.edit_location)
+
+        initProfile()
+
         val cameraButton = findViewById<ImageButton>(R.id.camera_button)
         registerForContextMenu(cameraButton)
         cameraButton.setOnClickListener { openContextMenu(cameraButton)}
     }
 
+    private fun initProfile() {
+        fullNameEditText.setText(intent.getStringExtra("fullName"))
+        nicknameEditText.setText(intent.getStringExtra("nickname"))
+        emailEditText.setText(intent.getStringExtra("email"))
+        locationEditText.setText(intent.getStringExtra("location"))
+    }
 
     override fun onCreateContextMenu(menu: ContextMenu, v: View,
                                      menuInfo: ContextMenu.ContextMenuInfo ?) {
