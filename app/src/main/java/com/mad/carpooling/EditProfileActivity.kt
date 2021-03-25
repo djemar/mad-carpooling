@@ -17,17 +17,17 @@ class EditProfileActivity : AppCompatActivity() {
 
         val cameraButton = findViewById<ImageButton>(R.id.camera_button)
         registerForContextMenu(cameraButton)
+        cameraButton.setOnClickListener { openContextMenu(cameraButton)}
     }
 
     override fun onCreateContextMenu(menu: ContextMenu, v: View,
-                                     menuInfo: ContextMenu.ContextMenuInfo) {
+                                     menuInfo: ContextMenu.ContextMenuInfo ?) {
         super.onCreateContextMenu(menu, v, menuInfo)
         val inflater: MenuInflater = menuInflater
         inflater.inflate(R.menu.camera_context_menu, menu)
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
-        val info = item.menuInfo as AdapterView.AdapterContextMenuInfo
         return when (item.itemId) {
             R.id.context_gallery -> {
                 Toast.makeText(this, "Open Gallery", Toast.LENGTH_SHORT).show()
