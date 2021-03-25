@@ -1,22 +1,52 @@
 package com.mad.carpooling
 
+import android.app.Activity
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.widget.Toast
+import android.widget.TextView
 
 class ShowProfileActivity : AppCompatActivity() {
+    private lateinit var fullNameTextView : TextView
+    private lateinit var nicknameTextView : TextView
+    private lateinit var emailTextView : TextView
+    private lateinit var locationTextView : TextView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_profile)
+
+        fullNameTextView = findViewById<TextView>(R.id.text_fullName)
+        nicknameTextView = findViewById<TextView>(R.id.text_nickname)
+        emailTextView = findViewById<TextView>(R.id.text_email)
+        locationTextView = findViewById<TextView>(R.id.text_location)
+    }
+
+    fun editProfile(){
+        val intentEditProfileActivity = Intent(this, EditProfileActivity::class.java)
+            .also {
+                it.putExtra("fullName", fullNameTextView.text.toString())
+                it.putExtra("nickname", nicknameTextView.text.toString())
+                it.putExtra("email", emailTextView.text.toString())
+                it.putExtra("location", locationTextView.text.toString())
+            }
+        startActivityForResult(intentEditProfileActivity, 1)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode == 1 && resultCode == Activity.RESULT_OK){
+            //TODO
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.edit -> {
-                Toast.makeText(this, "Edit", Toast.LENGTH_SHORT).show()
+                editProfile()
                 true
             }
             else -> super.onOptionsItemSelected(item)
