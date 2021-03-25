@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Carpooling</string>
+    <string name="full_name">Full Name</string>
+    <string name="nickname">Nickname</string>
+    <string name="email_address">email@address</string>
+    <string name="location">Location</string>
 </resources>
