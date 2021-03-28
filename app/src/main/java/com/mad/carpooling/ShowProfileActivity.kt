@@ -42,7 +42,7 @@ class ShowProfileActivity : AppCompatActivity() {
     }
 
     private fun initProfile() {
-        val sharedPref = this.getSharedPreferences("pref",Context.MODE_PRIVATE) ?: return
+        val sharedPref = this.getSharedPreferences("profile_pref", Context.MODE_PRIVATE) ?: return
         val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
         if(jsonString != null) {
             val jsonObject = JSONObject(jsonString)

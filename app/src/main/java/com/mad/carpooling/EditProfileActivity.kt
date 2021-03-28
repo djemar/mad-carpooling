@@ -119,7 +119,7 @@ class EditProfileActivity : AppCompatActivity() {
         jsonObj.put("json_location", locationEditText.text.toString())
         jsonObj.put("json_profilePic", filename)
 
-        val sharedPref = this.getSharedPreferences("pref", Context.MODE_PRIVATE) ?: return
+        val sharedPref = this.getSharedPreferences("profile_pref", Context.MODE_PRIVATE) ?: return
         with(sharedPref.edit()) {
             putString(getString(R.string.saved_profile_data), jsonObj.toString())
             apply()
