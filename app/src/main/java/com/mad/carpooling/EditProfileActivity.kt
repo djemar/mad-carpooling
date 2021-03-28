@@ -1,11 +1,10 @@
 package com.mad.carpooling
 
+import android.app.Activity
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.ContextMenu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.view.View
+import android.view.*
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
@@ -62,6 +61,30 @@ class EditProfileActivity : AppCompatActivity() {
         }
     }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.save -> {
+                setResult(Activity.RESULT_OK, Intent().also{
+                    it.putExtra("save_fullName", fullNameEditText.text.toString())
+                    it.putExtra("save_nickname", nicknameEditText.text.toString())
+                    it.putExtra("save_email", emailEditText.text.toString())
+                    it.putExtra("save_location", locationEditText.text.toString())
+                })
+                finish()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        super.onCreateOptionsMenu(menu)
+
+        val inflater: MenuInflater = menuInflater
+        inflater.inflate(R.menu.edit_profile_menu, menu)
+        return true
+    }
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putString("state_fullName", fullNameEditText.text.toString())

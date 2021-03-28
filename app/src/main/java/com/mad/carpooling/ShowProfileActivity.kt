@@ -39,7 +39,11 @@ class ShowProfileActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if(requestCode == 1 && resultCode == Activity.RESULT_OK){
-            //TODO
+            fullNameTextView.text = (data?.getStringExtra("save_fullName"))
+            nicknameTextView.text = (data?.getStringExtra("save_nickname"))
+            emailTextView.text = (data?.getStringExtra("save_email"))
+            locationTextView.text = (data?.getStringExtra("save_location"))
+        } else if(requestCode == 1 && resultCode == Activity.RESULT_CANCELED){
         }
     }
 
