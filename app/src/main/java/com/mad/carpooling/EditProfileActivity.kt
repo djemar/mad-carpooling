@@ -91,10 +91,13 @@ class EditProfileActivity : AppCompatActivity() {
                     it.putExtra("save_nickname", nicknameEditText.text.toString())
                     it.putExtra("save_email", emailEditText.text.toString())
                     it.putExtra("save_location", locationEditText.text.toString())
-                    it.putExtra(
-                        "save_profilePic",
-                        (profilePicEdit.drawable as BitmapDrawable).bitmap
-                    )
+                    if (profilePicEdit.drawable is VectorDrawable)
+                        it.putExtra("profilePic", null as Bitmap?)
+                    else
+                        it.putExtra(
+                            "save_profilePic",
+                            (profilePicEdit.drawable as BitmapDrawable).bitmap
+                        )
                 })
 
                 saveToSharedPref()
@@ -107,7 +110,7 @@ class EditProfileActivity : AppCompatActivity() {
 
     private fun saveToSharedPref() {
         val filename = "profile_pic_img"
-        val fileContents = (profilePicEdit.drawable as BitmapDrawable).bitmap
+        val fileContents = (profilePicEdit.drawable as BitmapDrawable).bitmap //TODO check that it is not a VectorDrawable
         val fileOutputStream = openFileOutput(filename, Context.MODE_PRIVATE)
         fileContents.compress(Bitmap.CompressFormat.PNG, 85, fileOutputStream)
         fileOutputStream.close()

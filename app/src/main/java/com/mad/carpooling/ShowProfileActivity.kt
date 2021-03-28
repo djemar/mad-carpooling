@@ -61,10 +61,13 @@ class ShowProfileActivity : AppCompatActivity() {
                 it.putExtra("nickname", nicknameTextView.text.toString())
                 it.putExtra("email", emailTextView.text.toString())
                 it.putExtra("location", locationTextView.text.toString())
-                if (profilePic.drawable is VectorDrawable)
+                if (profilePicImageView.drawable is VectorDrawable)
                     it.putExtra("profilePic", null as Bitmap?)
                 else
-                    it.putExtra("profilePic", (profilePic.drawable as BitmapDrawable).bitmap)
+                    it.putExtra(
+                        "profilePic",
+                        (profilePicImageView.drawable as BitmapDrawable).bitmap
+                    )
 
             }
         startActivityForResult(intentEditProfileActivity, 1)
