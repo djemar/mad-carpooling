@@ -17,10 +17,11 @@
         android:clickable="true">
 
     <ImageView
+        android:id="@+id/edit_profile_pic"
         android:src="@drawable/ic_baseline_account_circle"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center"/>
+        android:layout_gravity="center" />
 
         <ImageButton
             android:id="@+id/camera_button"

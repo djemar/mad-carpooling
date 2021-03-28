@@ -1,14 +1,14 @@
 package com.mad.carpooling
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.*
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 
 
 class EditProfileActivity : AppCompatActivity() {
@@ -16,6 +16,9 @@ class EditProfileActivity : AppCompatActivity() {
     private lateinit var nicknameEditText : EditText
     private lateinit var emailEditText : EditText
     private lateinit var locationEditText : EditText
+    private lateinit var profilePicEdit : ImageView
+    private var REQUEST_IMAGE_CAPTURE = 1
+    private var isPictureChanged = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,11 +56,21 @@ class EditProfileActivity : AppCompatActivity() {
                 Toast.makeText(this, "Open Gallery", Toast.LENGTH_SHORT).show()
                 true
             }
-            R.id.context_camera -> {
-                Toast.makeText(this, "Open Camera", Toast.LENGTH_SHORT).show()
+            R.id.context_camera ->{
+                dispatchTakePictureIntent()
                 true
             }
             else -> super.onContextItemSelected(item)
+        }
+    }
+
+    private fun dispatchTakePictureIntent() {
+        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        try {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
+        } catch (e: ActivityNotFoundException) {
+            // display error state to the user
+            Toast.makeText(this, "Error opening the camera", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -69,6 +82,7 @@ class EditProfileActivity : AppCompatActivity() {
                     it.putExtra("save_nickname", nicknameEditText.text.toString())
                     it.putExtra("save_email", emailEditText.text.toString())
                     it.putExtra("save_location", locationEditText.text.toString())
+                    it.putExtra("save_profilePic", isPictureChanged) //TODO
                 })
                 finish()
                 true
@@ -83,8 +97,19 @@ class EditProfileActivity : AppCompatActivity() {
 
         val inflater: MenuInflater = menuInflater
         inflater.inflate(R.menu.edit_profile_menu, menu)
+
         return true
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            val imageBitmap = data?.extras?.get("data") as Bitmap
+            profilePicEdit.setImageBitmap(imageBitmap)
+            isPictureChanged = true
+        }
+    }
+
 
     override fun onBackPressed() {
         super.onBackPressed()
