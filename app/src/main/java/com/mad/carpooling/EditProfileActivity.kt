@@ -2,14 +2,19 @@ package com.mad.carpooling
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.*
-import android.widget.*
+import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import org.json.JSONObject
 
 
 class EditProfileActivity : AppCompatActivity() {
@@ -81,19 +86,45 @@ class EditProfileActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.save -> {
-                setResult(Activity.RESULT_OK, Intent().also{
+                setResult(Activity.RESULT_OK, Intent().also {
                     it.putExtra("save_fullName", fullNameEditText.text.toString())
                     it.putExtra("save_nickname", nicknameEditText.text.toString())
                     it.putExtra("save_email", emailEditText.text.toString())
                     it.putExtra("save_location", locationEditText.text.toString())
-                    it.putExtra("save_profilePic", (profilePicEdit.drawable as BitmapDrawable).bitmap)
+                    it.putExtra(
+                        "save_profilePic",
+                        (profilePicEdit.drawable as BitmapDrawable).bitmap
+                    )
                 })
-                finish()
+
+                saveToSharedPref()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
 
+    }
+
+    private fun saveToSharedPref() {
+        val filename = "profile_pic_img"
+        val fileContents = (profilePicEdit.drawable as BitmapDrawable).bitmap
+        val fileOutputStream = openFileOutput(filename, Context.MODE_PRIVATE)
+        fileContents.compress(Bitmap.CompressFormat.PNG, 85, fileOutputStream)
+        fileOutputStream.close()
+
+        val jsonObj = JSONObject()
+        jsonObj.put("json_fullName", fullNameEditText.text.toString())
+        jsonObj.put("json_nickname", nicknameEditText.text.toString())
+        jsonObj.put("json_email", emailEditText.text.toString())
+        jsonObj.put("json_location", locationEditText.text.toString())
+        jsonObj.put("json_profilePic", filename)
+
+        val sharedPref = this.getSharedPreferences("pref", Context.MODE_PRIVATE) ?: return
+        with(sharedPref.edit()) {
+            putString(getString(R.string.saved_profile_data), jsonObj.toString())
+            apply()
+        }
+        finish()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

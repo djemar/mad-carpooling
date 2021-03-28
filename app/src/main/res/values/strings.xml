@@ -8,4 +8,5 @@
     <string name="select_from_gallery">Select from gallery</string>
     <string name="take_a_new_photo">Take a new photo</string>
     <string name="save">Save</string>
+    <string name="saved_profile_data">saved_data</string>
 </resources>
