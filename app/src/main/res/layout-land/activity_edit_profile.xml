@@ -10,18 +10,28 @@
     tools:context=".ShowProfileActivity">
 
     <FrameLayout
-        android:layout_height="match_parent"
         android:layout_width="0dp"
+        android:layout_height="match_parent"
         android:layout_weight="1"
-        android:focusable="true"
-        android:clickable="true">
+        android:clickable="true"
+        android:focusable="true">
 
-        <ImageView
-            android:id="@+id/edit_profile_pic"
-            android:src="@drawable/ic_baseline_account_circle"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"/>
+        <androidx.cardview.widget.CardView
+            android:layout_width="192dp"
+            android:layout_height="192dp"
+            android:layout_gravity="center"
+            app:cardCornerRadius="96dp"
+            app:cardElevation="0dp">
+
+            <ImageView
+                android:id="@+id/edit_profile_pic"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_baseline_account_circle" />
+
+        </androidx.cardview.widget.CardView>
 
         <ImageButton
             android:id="@+id/camera_button"
@@ -32,19 +42,19 @@
     </FrameLayout>
 
     <LinearLayout
-        android:layout_height="match_parent"
         android:layout_width="0dp"
+        android:layout_height="match_parent"
         android:layout_weight="2"
-        android:paddingStart="16dp"
+        android:gravity="center_vertical"
         android:orientation="vertical"
-        android:gravity="center_vertical">
+        android:paddingStart="16dp">
 
         <EditText
             android:id="@+id/edit_fullName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingBottom="16dp"
             android:inputType="textPersonName"
+            android:paddingBottom="16dp"
             android:text="@string/full_name"
             android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
 

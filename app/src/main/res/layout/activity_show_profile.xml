@@ -9,13 +9,29 @@
     android:paddingEnd="16dp"
     tools:context=".ShowProfileActivity">
 
-    <ImageView
-        android:id="@+id/profile_pic"
-        android:src="@drawable/ic_baseline_account_circle"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_gravity="center"/>
+        android:gravity="center">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="192dp"
+            android:layout_height="192dp"
+            android:layout_gravity="center"
+            app:cardCornerRadius="96dp"
+            app:cardElevation="0dp">
+
+            <ImageView
+                android:id="@+id/profile_pic"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_baseline_account_circle" />
+
+        </androidx.cardview.widget.CardView>
+    </FrameLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
