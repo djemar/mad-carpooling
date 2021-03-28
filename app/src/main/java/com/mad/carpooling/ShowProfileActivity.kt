@@ -8,6 +8,7 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.TextView
+import android.widget.Toast
 
 class ShowProfileActivity : AppCompatActivity() {
     private lateinit var fullNameTextView : TextView
@@ -44,6 +45,7 @@ class ShowProfileActivity : AppCompatActivity() {
             emailTextView.text = (data?.getStringExtra("save_email"))
             locationTextView.text = (data?.getStringExtra("save_location"))
         } else if(requestCode == 1 && resultCode == Activity.RESULT_CANCELED){
+            Toast.makeText(this, "RESULT_CANCELED", Toast.LENGTH_SHORT).show()
         }
     }
 

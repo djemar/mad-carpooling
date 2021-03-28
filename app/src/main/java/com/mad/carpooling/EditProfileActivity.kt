@@ -85,6 +85,13 @@ class EditProfileActivity : AppCompatActivity() {
         inflater.inflate(R.menu.edit_profile_menu, menu)
         return true
     }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        setResult(Activity.RESULT_CANCELED)
+        finish()
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putString("state_fullName", fullNameEditText.text.toString())
