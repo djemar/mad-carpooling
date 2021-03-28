@@ -2,19 +2,25 @@ package com.mad.carpooling
 
 import android.app.Activity
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.VectorDrawable
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+
 
 class ShowProfileActivity : AppCompatActivity() {
-    private lateinit var fullNameTextView : TextView
-    private lateinit var nicknameTextView : TextView
-    private lateinit var emailTextView : TextView
-    private lateinit var locationTextView : TextView
+    private lateinit var fullNameTextView: TextView
+    private lateinit var nicknameTextView: TextView
+    private lateinit var emailTextView: TextView
+    private lateinit var locationTextView: TextView
+    private lateinit var profilePic: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,27 +30,37 @@ class ShowProfileActivity : AppCompatActivity() {
         nicknameTextView = findViewById<TextView>(R.id.text_nickname)
         emailTextView = findViewById<TextView>(R.id.text_email)
         locationTextView = findViewById<TextView>(R.id.text_location)
+        profilePic = findViewById<ImageView>(R.id.profile_pic)
     }
 
-    fun editProfile(){
+    fun editProfile() {
         val intentEditProfileActivity = Intent(this, EditProfileActivity::class.java)
             .also {
                 it.putExtra("fullName", fullNameTextView.text.toString())
                 it.putExtra("nickname", nicknameTextView.text.toString())
                 it.putExtra("email", emailTextView.text.toString())
                 it.putExtra("location", locationTextView.text.toString())
+                if (profilePic.drawable is VectorDrawable)
+                    it.putExtra("profilePic", null as Bitmap?)
+                else
+                    it.putExtra("profilePic", (profilePic.drawable as BitmapDrawable).bitmap)
+
             }
         startActivityForResult(intentEditProfileActivity, 1)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if(requestCode == 1 && resultCode == Activity.RESULT_OK){
+        if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
             fullNameTextView.text = (data?.getStringExtra("save_fullName"))
             nicknameTextView.text = (data?.getStringExtra("save_nickname"))
             emailTextView.text = (data?.getStringExtra("save_email"))
             locationTextView.text = (data?.getStringExtra("save_location"))
-        } else if(requestCode == 1 && resultCode == Activity.RESULT_CANCELED){
+            val newPicture = data?.getParcelableExtra("save_profilePic") as Bitmap?
+            if (newPicture != null) {
+                profilePic.setImageBitmap(newPicture)
+            }
+        } else if (requestCode == 1 && resultCode == Activity.RESULT_CANCELED) {
             Toast.makeText(this, "RESULT_CANCELED", Toast.LENGTH_SHORT).show()
         }
     }
@@ -58,7 +74,7 @@ class ShowProfileActivity : AppCompatActivity() {
             else -> super.onOptionsItemSelected(item)
         }
 
-        }
+    }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         super.onCreateOptionsMenu(menu)

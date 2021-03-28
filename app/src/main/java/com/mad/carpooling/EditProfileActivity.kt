@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
@@ -18,7 +19,6 @@ class EditProfileActivity : AppCompatActivity() {
     private lateinit var locationEditText : EditText
     private lateinit var profilePicEdit : ImageView
     private var REQUEST_IMAGE_CAPTURE = 1
-    private var isPictureChanged = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +28,7 @@ class EditProfileActivity : AppCompatActivity() {
         nicknameEditText = findViewById<EditText>(R.id.edit_nickname)
         emailEditText = findViewById<EditText>(R.id.edit_email)
         locationEditText = findViewById<EditText>(R.id.edit_location)
+        profilePicEdit = findViewById<ImageView>(R.id.edit_profile_pic)
 
         initProfile()
 
@@ -41,6 +42,9 @@ class EditProfileActivity : AppCompatActivity() {
         nicknameEditText.setText(intent.getStringExtra("nickname"))
         emailEditText.setText(intent.getStringExtra("email"))
         locationEditText.setText(intent.getStringExtra("location"))
+        val image = intent.getParcelableExtra("profilePic") as Bitmap?
+        if (image != null)
+            profilePicEdit.setImageBitmap(image)
     }
 
     override fun onCreateContextMenu(menu: ContextMenu, v: View,
@@ -82,7 +86,7 @@ class EditProfileActivity : AppCompatActivity() {
                     it.putExtra("save_nickname", nicknameEditText.text.toString())
                     it.putExtra("save_email", emailEditText.text.toString())
                     it.putExtra("save_location", locationEditText.text.toString())
-                    it.putExtra("save_profilePic", isPictureChanged) //TODO
+                    it.putExtra("save_profilePic", (profilePicEdit.drawable as BitmapDrawable).bitmap)
                 })
                 finish()
                 true
@@ -106,7 +110,6 @@ class EditProfileActivity : AppCompatActivity() {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             val imageBitmap = data?.extras?.get("data") as Bitmap
             profilePicEdit.setImageBitmap(imageBitmap)
-            isPictureChanged = true
         }
     }
 
