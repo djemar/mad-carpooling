@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.VectorDrawable
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.*
@@ -18,11 +19,11 @@ import org.json.JSONObject
 
 
 class EditProfileActivity : AppCompatActivity() {
-    private lateinit var fullNameEditText : EditText
-    private lateinit var nicknameEditText : EditText
-    private lateinit var emailEditText : EditText
-    private lateinit var locationEditText : EditText
-    private lateinit var profilePicEdit : ImageView
+    private lateinit var fullNameEditText: EditText
+    private lateinit var nicknameEditText: EditText
+    private lateinit var emailEditText: EditText
+    private lateinit var locationEditText: EditText
+    private lateinit var profilePicEdit: ImageView
     private var REQUEST_IMAGE_CAPTURE = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,7 +40,7 @@ class EditProfileActivity : AppCompatActivity() {
 
         val cameraButton = findViewById<ImageButton>(R.id.camera_button)
         registerForContextMenu(cameraButton)
-        cameraButton.setOnClickListener { openContextMenu(cameraButton)}
+        cameraButton.setOnClickListener { openContextMenu(cameraButton) }
     }
 
     private fun initProfile() {
@@ -52,8 +53,10 @@ class EditProfileActivity : AppCompatActivity() {
             profilePicEdit.setImageBitmap(image)
     }
 
-    override fun onCreateContextMenu(menu: ContextMenu, v: View,
-                                     menuInfo: ContextMenu.ContextMenuInfo ?) {
+    override fun onCreateContextMenu(
+        menu: ContextMenu, v: View,
+        menuInfo: ContextMenu.ContextMenuInfo?
+    ) {
         super.onCreateContextMenu(menu, v, menuInfo)
         val inflater: MenuInflater = menuInflater
         inflater.inflate(R.menu.camera_context_menu, menu)
@@ -65,7 +68,7 @@ class EditProfileActivity : AppCompatActivity() {
                 Toast.makeText(this, "Open Gallery", Toast.LENGTH_SHORT).show()
                 true
             }
-            R.id.context_camera ->{
+            R.id.context_camera -> {
                 dispatchTakePictureIntent()
                 true
             }

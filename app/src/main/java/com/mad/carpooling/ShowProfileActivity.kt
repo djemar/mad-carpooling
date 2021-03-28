@@ -18,15 +18,12 @@ import androidx.appcompat.app.AppCompatActivity
 import org.json.JSONObject
 
 
-
-
-
 class ShowProfileActivity : AppCompatActivity() {
     private lateinit var fullNameTextView: TextView
     private lateinit var nicknameTextView: TextView
     private lateinit var emailTextView: TextView
     private lateinit var locationTextView: TextView
-    private lateinit var profilePic: ImageView
+    private lateinit var profilePicImageView: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,7 +33,7 @@ class ShowProfileActivity : AppCompatActivity() {
         nicknameTextView = findViewById<TextView>(R.id.text_nickname)
         emailTextView = findViewById<TextView>(R.id.text_email)
         locationTextView = findViewById<TextView>(R.id.text_location)
-        profilePic = findViewById<ImageView>(R.id.profile_pic)
+        profilePicImageView = findViewById<ImageView>(R.id.profile_pic)
 
         initProfile()
     }
@@ -44,13 +41,21 @@ class ShowProfileActivity : AppCompatActivity() {
     private fun initProfile() {
         val sharedPref = this.getSharedPreferences("profile_pref", Context.MODE_PRIVATE) ?: return
         val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
-        if(jsonString != null) {
+        if (jsonString != null) {
             val jsonObject = JSONObject(jsonString)
             fullNameTextView.text = jsonObject.getString("json_fullName")
             nicknameTextView.text = jsonObject.getString("json_nickname")
             emailTextView.text = jsonObject.getString("json_email")
             locationTextView.text = jsonObject.getString("json_location")
-            profilePic.setImageBitmap(BitmapFactory.decodeStream(openFileInput(jsonObject.getString("json_profilePic"))))
+            profilePicImageView.setImageBitmap(
+                BitmapFactory.decodeStream(
+                    openFileInput(
+                        jsonObject.getString(
+                            "json_profilePic"
+                        )
+                    )
+                )
+            )
         }
     }
 
@@ -82,7 +87,7 @@ class ShowProfileActivity : AppCompatActivity() {
             locationTextView.text = (data?.getStringExtra("save_location"))
             val newPicture = data?.getParcelableExtra("save_profilePic") as Bitmap?
             if (newPicture != null) {
-                profilePic.setImageBitmap(newPicture)
+                profilePicImageView.setImageBitmap(newPicture)
             }
         } else if (requestCode == 1 && resultCode == Activity.RESULT_CANCELED) {
             Toast.makeText(this, "RESULT_CANCELED", Toast.LENGTH_SHORT).show()
