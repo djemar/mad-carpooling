@@ -19,21 +19,21 @@ import org.json.JSONObject
 
 
 class ShowProfileActivity : AppCompatActivity() {
-    private lateinit var fullNameTextView: TextView
-    private lateinit var nicknameTextView: TextView
-    private lateinit var emailTextView: TextView
-    private lateinit var locationTextView: TextView
-    private lateinit var profilePicImageView: ImageView
+    private lateinit var tvFullName: TextView
+    private lateinit var tvNickname: TextView
+    private lateinit var tvEmail: TextView
+    private lateinit var tvLocation: TextView
+    private lateinit var ivProfilePic: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_profile)
 
-        fullNameTextView = findViewById<TextView>(R.id.text_fullName)
-        nicknameTextView = findViewById<TextView>(R.id.text_nickname)
-        emailTextView = findViewById<TextView>(R.id.text_email)
-        locationTextView = findViewById<TextView>(R.id.text_location)
-        profilePicImageView = findViewById<ImageView>(R.id.profile_pic)
+        tvFullName = findViewById<TextView>(R.id.text_fullName)
+        tvNickname = findViewById<TextView>(R.id.text_nickname)
+        tvEmail = findViewById<TextView>(R.id.text_email)
+        tvLocation = findViewById<TextView>(R.id.text_location)
+        ivProfilePic = findViewById<ImageView>(R.id.profile_pic)
 
         initProfile()
     }
@@ -43,11 +43,11 @@ class ShowProfileActivity : AppCompatActivity() {
         val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
         if (jsonString != null) {
             val jsonObject = JSONObject(jsonString)
-            fullNameTextView.text = jsonObject.getString("json_fullName")
-            nicknameTextView.text = jsonObject.getString("json_nickname")
-            emailTextView.text = jsonObject.getString("json_email")
-            locationTextView.text = jsonObject.getString("json_location")
-            profilePicImageView.setImageBitmap(
+            tvFullName.text = jsonObject.getString("json_fullName")
+            tvNickname.text = jsonObject.getString("json_nickname")
+            tvEmail.text = jsonObject.getString("json_email")
+            tvLocation.text = jsonObject.getString("json_location")
+            ivProfilePic.setImageBitmap(
                 BitmapFactory.decodeStream(
                     openFileInput(
                         jsonObject.getString(
@@ -62,16 +62,16 @@ class ShowProfileActivity : AppCompatActivity() {
     fun editProfile() {
         val intentEditProfileActivity = Intent(this, EditProfileActivity::class.java)
             .also {
-                it.putExtra("fullName", fullNameTextView.text.toString())
-                it.putExtra("nickname", nicknameTextView.text.toString())
-                it.putExtra("email", emailTextView.text.toString())
-                it.putExtra("location", locationTextView.text.toString())
-                if (profilePicImageView.drawable is VectorDrawable)
+                it.putExtra("fullName", tvFullName.text.toString())
+                it.putExtra("nickname", tvNickname.text.toString())
+                it.putExtra("email", tvEmail.text.toString())
+                it.putExtra("location", tvLocation.text.toString())
+                if (ivProfilePic.drawable is VectorDrawable)
                     it.putExtra("profilePic", null as Bitmap?)
                 else
                     it.putExtra(
                         "profilePic",
-                        (profilePicImageView.drawable as BitmapDrawable).bitmap
+                        (ivProfilePic.drawable as BitmapDrawable).bitmap
                     )
 
             }
@@ -81,13 +81,13 @@ class ShowProfileActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
-            fullNameTextView.text = (data?.getStringExtra("save_fullName"))
-            nicknameTextView.text = (data?.getStringExtra("save_nickname"))
-            emailTextView.text = (data?.getStringExtra("save_email"))
-            locationTextView.text = (data?.getStringExtra("save_location"))
+            tvFullName.text = (data?.getStringExtra("save_fullName"))
+            tvNickname.text = (data?.getStringExtra("save_nickname"))
+            tvEmail.text = (data?.getStringExtra("save_email"))
+            tvLocation.text = (data?.getStringExtra("save_location"))
             val newPicture = data?.getParcelableExtra("save_profilePic") as Bitmap?
             if (newPicture != null) {
-                profilePicImageView.setImageBitmap(newPicture)
+                ivProfilePic.setImageBitmap(newPicture)
             }
         } else if (requestCode == 1 && resultCode == Activity.RESULT_CANCELED) {
             Toast.makeText(this, "RESULT_CANCELED", Toast.LENGTH_SHORT).show()

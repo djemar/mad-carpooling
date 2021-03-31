@@ -19,22 +19,22 @@ import org.json.JSONObject
 
 
 class EditProfileActivity : AppCompatActivity() {
-    private lateinit var fullNameEditText: EditText
-    private lateinit var nicknameEditText: EditText
-    private lateinit var emailEditText: EditText
-    private lateinit var locationEditText: EditText
-    private lateinit var profilePicEdit: ImageView
+    private lateinit var etFullName: EditText
+    private lateinit var etNickname: EditText
+    private lateinit var etEmail: EditText
+    private lateinit var etLocation: EditText
+    private lateinit var ivEditProfilePic: ImageView
     private var REQUEST_IMAGE_CAPTURE = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_profile)
 
-        fullNameEditText = findViewById<EditText>(R.id.edit_fullName)
-        nicknameEditText = findViewById<EditText>(R.id.edit_nickname)
-        emailEditText = findViewById<EditText>(R.id.edit_email)
-        locationEditText = findViewById<EditText>(R.id.edit_location)
-        profilePicEdit = findViewById<ImageView>(R.id.edit_profile_pic)
+        etFullName = findViewById<EditText>(R.id.edit_fullName)
+        etNickname = findViewById<EditText>(R.id.edit_nickname)
+        etEmail = findViewById<EditText>(R.id.edit_email)
+        etLocation = findViewById<EditText>(R.id.edit_location)
+        ivEditProfilePic = findViewById<ImageView>(R.id.edit_profile_pic)
 
         initProfile()
 
@@ -44,13 +44,13 @@ class EditProfileActivity : AppCompatActivity() {
     }
 
     private fun initProfile() {
-        fullNameEditText.setText(intent.getStringExtra("fullName"))
-        nicknameEditText.setText(intent.getStringExtra("nickname"))
-        emailEditText.setText(intent.getStringExtra("email"))
-        locationEditText.setText(intent.getStringExtra("location"))
+        etFullName.setText(intent.getStringExtra("fullName"))
+        etNickname.setText(intent.getStringExtra("nickname"))
+        etEmail.setText(intent.getStringExtra("email"))
+        etLocation.setText(intent.getStringExtra("location"))
         val image = intent.getParcelableExtra("profilePic") as Bitmap?
         if (image != null)
-            profilePicEdit.setImageBitmap(image)
+            ivEditProfilePic.setImageBitmap(image)
     }
 
     override fun onCreateContextMenu(
@@ -90,16 +90,16 @@ class EditProfileActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.save -> {
                 setResult(Activity.RESULT_OK, Intent().also {
-                    it.putExtra("save_fullName", fullNameEditText.text.toString())
-                    it.putExtra("save_nickname", nicknameEditText.text.toString())
-                    it.putExtra("save_email", emailEditText.text.toString())
-                    it.putExtra("save_location", locationEditText.text.toString())
-                    if (profilePicEdit.drawable is VectorDrawable)
+                    it.putExtra("save_fullName", etFullName.text.toString())
+                    it.putExtra("save_nickname", etNickname.text.toString())
+                    it.putExtra("save_email", etEmail.text.toString())
+                    it.putExtra("save_location", etLocation.text.toString())
+                    if (ivEditProfilePic.drawable is VectorDrawable)
                         it.putExtra("profilePic", null as Bitmap?)
                     else
                         it.putExtra(
                             "save_profilePic",
-                            (profilePicEdit.drawable as BitmapDrawable).bitmap
+                            (ivEditProfilePic.drawable as BitmapDrawable).bitmap
                         )
                 })
 
@@ -113,16 +113,16 @@ class EditProfileActivity : AppCompatActivity() {
 
     private fun saveToSharedPref() {
         val filename = "profile_pic_img"
-        val fileContents = (profilePicEdit.drawable as BitmapDrawable).bitmap //TODO check that it is not a VectorDrawable
+        val fileContents = (ivEditProfilePic.drawable as BitmapDrawable).bitmap //TODO check that it is not a VectorDrawable
         val fileOutputStream = openFileOutput(filename, Context.MODE_PRIVATE)
         fileContents.compress(Bitmap.CompressFormat.PNG, 85, fileOutputStream)
         fileOutputStream.close()
 
         val jsonObj = JSONObject()
-        jsonObj.put("json_fullName", fullNameEditText.text.toString())
-        jsonObj.put("json_nickname", nicknameEditText.text.toString())
-        jsonObj.put("json_email", emailEditText.text.toString())
-        jsonObj.put("json_location", locationEditText.text.toString())
+        jsonObj.put("json_fullName", etFullName.text.toString())
+        jsonObj.put("json_nickname", etNickname.text.toString())
+        jsonObj.put("json_email", etEmail.text.toString())
+        jsonObj.put("json_location", etLocation.text.toString())
         jsonObj.put("json_profilePic", filename)
 
         val sharedPref = this.getSharedPreferences("profile_pref", Context.MODE_PRIVATE) ?: return
@@ -146,7 +146,7 @@ class EditProfileActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             val imageBitmap = data?.extras?.get("data") as Bitmap
-            profilePicEdit.setImageBitmap(imageBitmap)
+            ivEditProfilePic.setImageBitmap(imageBitmap)
         }
     }
 
@@ -159,18 +159,18 @@ class EditProfileActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putString("state_fullName", fullNameEditText.text.toString())
-        outState.putString("state_nickname", nicknameEditText.text.toString())
-        outState.putString("state_email", emailEditText.text.toString())
-        outState.putString("state_location", locationEditText.text.toString())
+        outState.putString("state_fullName", etFullName.text.toString())
+        outState.putString("state_nickname", etNickname.text.toString())
+        outState.putString("state_email", etEmail.text.toString())
+        outState.putString("state_location", etLocation.text.toString())
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        fullNameEditText.setText(savedInstanceState.getString("state_fullName"))
-        nicknameEditText.setText(savedInstanceState.getString("state_nickname"))
-        emailEditText.setText(savedInstanceState.getString("state_email"))
-        locationEditText.setText(savedInstanceState.getString("state_location"))
+        etFullName.setText(savedInstanceState.getString("state_fullName"))
+        etNickname.setText(savedInstanceState.getString("state_nickname"))
+        etEmail.setText(savedInstanceState.getString("state_email"))
+        etLocation.setText(savedInstanceState.getString("state_location"))
     }
 
 }
