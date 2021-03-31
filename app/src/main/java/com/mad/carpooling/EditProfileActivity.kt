@@ -30,17 +30,17 @@ class EditProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_profile)
 
-        etFullName = findViewById<EditText>(R.id.edit_fullName)
-        etNickname = findViewById<EditText>(R.id.edit_nickname)
-        etEmail = findViewById<EditText>(R.id.edit_email)
-        etLocation = findViewById<EditText>(R.id.edit_location)
-        ivEditProfilePic = findViewById<ImageView>(R.id.edit_profile_pic)
+        etFullName = findViewById<EditText>(R.id.et_fullName)
+        etNickname = findViewById<EditText>(R.id.et_nickname)
+        etEmail = findViewById<EditText>(R.id.et_email)
+        etLocation = findViewById<EditText>(R.id.et_location)
+        ivEditProfilePic = findViewById<ImageView>(R.id.et_profile_pic)
 
         initProfile()
 
-        val cameraButton = findViewById<ImageButton>(R.id.camera_button)
-        registerForContextMenu(cameraButton)
-        cameraButton.setOnClickListener { openContextMenu(cameraButton) }
+        val btnCamera = findViewById<ImageButton>(R.id.btn_camera)
+        registerForContextMenu(btnCamera)
+        btnCamera.setOnClickListener { openContextMenu(btnCamera) }
     }
 
     private fun initProfile() {
@@ -59,16 +59,16 @@ class EditProfileActivity : AppCompatActivity() {
     ) {
         super.onCreateContextMenu(menu, v, menuInfo)
         val inflater: MenuInflater = menuInflater
-        inflater.inflate(R.menu.camera_context_menu, menu)
+        inflater.inflate(R.menu.ctx_menu_camera, menu)
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.context_gallery -> {
+            R.id.ctx_gallery -> {
                 Toast.makeText(this, "Open Gallery", Toast.LENGTH_SHORT).show()
                 true
             }
-            R.id.context_camera -> {
+            R.id.ctx_camera -> {
                 dispatchTakePictureIntent()
                 true
             }
@@ -137,7 +137,7 @@ class EditProfileActivity : AppCompatActivity() {
         super.onCreateOptionsMenu(menu)
 
         val inflater: MenuInflater = menuInflater
-        inflater.inflate(R.menu.edit_profile_menu, menu)
+        inflater.inflate(R.menu.menu_edit_profile, menu)
 
         return true
     }

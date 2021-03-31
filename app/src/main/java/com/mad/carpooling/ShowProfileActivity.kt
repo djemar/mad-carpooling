@@ -29,11 +29,11 @@ class ShowProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_profile)
 
-        tvFullName = findViewById<TextView>(R.id.text_fullName)
-        tvNickname = findViewById<TextView>(R.id.text_nickname)
-        tvEmail = findViewById<TextView>(R.id.text_email)
-        tvLocation = findViewById<TextView>(R.id.text_location)
-        ivProfilePic = findViewById<ImageView>(R.id.profile_pic)
+        tvFullName = findViewById<TextView>(R.id.tv_fullName)
+        tvNickname = findViewById<TextView>(R.id.tv_nickname)
+        tvEmail = findViewById<TextView>(R.id.tv_email)
+        tvLocation = findViewById<TextView>(R.id.tv_location)
+        ivProfilePic = findViewById<ImageView>(R.id.iv_profile_pic)
 
         initProfile()
     }
@@ -109,7 +109,7 @@ class ShowProfileActivity : AppCompatActivity() {
         super.onCreateOptionsMenu(menu)
 
         val inflater: MenuInflater = menuInflater
-        inflater.inflate(R.menu.profile_menu, menu)
+        inflater.inflate(R.menu.menu_profile, menu)
         return true
     }
 }

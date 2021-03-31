@@ -24,7 +24,7 @@
             app:cardElevation="0dp">
 
             <ImageView
-                android:id="@+id/edit_profile_pic"
+                android:id="@+id/et_profile_pic"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
@@ -34,7 +34,7 @@
         </androidx.cardview.widget.CardView>
 
         <ImageButton
-            android:id="@+id/camera_button"
+            android:id="@+id/btn_camera"
             android:layout_width="64dp"
             android:layout_height="64dp"
             android:layout_gravity="center|bottom|end"
@@ -48,7 +48,7 @@
         android:orientation="vertical">
 
         <EditText
-            android:id="@+id/edit_fullName"
+            android:id="@+id/et_fullName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPersonName"
@@ -57,7 +57,7 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
 
         <EditText
-            android:id="@+id/edit_nickname"
+            android:id="@+id/et_nickname"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
@@ -66,7 +66,7 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         <EditText
-            android:id="@+id/edit_email"
+            android:id="@+id/et_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textEmailAddress"
@@ -75,7 +75,7 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         <EditText
-            android:id="@+id/edit_location"
+            android:id="@+id/et_location"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
