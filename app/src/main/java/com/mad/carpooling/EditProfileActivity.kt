@@ -11,6 +11,8 @@ import android.graphics.drawable.BitmapDrawable
 import android.media.ExifInterface
 import android.os.Bundle
 import android.provider.MediaStore
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.*
 import android.widget.EditText
 import android.widget.ImageButton
@@ -28,6 +30,7 @@ class EditProfileActivity : AppCompatActivity() {
     private lateinit var etEmail: EditText
     private lateinit var etLocation: EditText
     private lateinit var ivEditProfilePic: ImageView
+    private lateinit var optionsMenu: Menu
     private var REQUEST_IMAGE_CAPTURE = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,6 +50,24 @@ class EditProfileActivity : AppCompatActivity() {
         btnCamera.setOnClickListener { openContextMenu(btnCamera) }
     }
 
+    private fun checkFullName() {
+        val textWatcher = object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if(optionsMenu != null) {
+                    optionsMenu.findItem(R.id.save).isEnabled = etFullName.text.length > 0
+                }
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+            }
+
+        }
+
+        etFullName.addTextChangedListener(textWatcher)
+    }
     private fun initProfile() {
         etFullName.setText(intent.getStringExtra("fullName"))
         etNickname.setText(intent.getStringExtra("nickname"))
@@ -136,8 +157,15 @@ class EditProfileActivity : AppCompatActivity() {
 
         val inflater: MenuInflater = menuInflater
         inflater.inflate(R.menu.menu_edit_profile, menu)
-
+        if (menu != null) {
+            optionsMenu = menu
+        }
         return true
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        checkFullName()
+        return super.onPrepareOptionsMenu(menu)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
