@@ -79,8 +79,11 @@ class ShowProfileActivity : AppCompatActivity() {
             tvNickname.text = (data?.getStringExtra("save_nickname"))
             tvEmail.text = (data?.getStringExtra("save_email"))
             tvLocation.text = (data?.getStringExtra("save_location"))
-            BitmapFactory.decodeFile(data?.getStringExtra("save_profilePic"))?.also { bitmap ->
-                ivProfilePic.setImageBitmap(bitmap)
+            val newPhoto = data?.getStringExtra("save_profilePic")
+            if (newPhoto != null) {
+                BitmapFactory.decodeFile(newPhoto)?.also { bitmap ->
+                    ivProfilePic.setImageBitmap(bitmap)
+                }
             }
 
         } /*else if (requestCode == 1 && resultCode == Activity.RESULT_CANCELED) { //debug

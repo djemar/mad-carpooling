@@ -35,7 +35,7 @@ class EditProfileActivity : AppCompatActivity() {
     private lateinit var etLocation: EditText
     private lateinit var ivEditProfilePic: ImageView
     private lateinit var optionsMenu: Menu
-    private lateinit var currentPhotoPath: String
+    private var currentPhotoPath : String? = null
     private var REQUEST_IMAGE_CAPTURE = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -191,7 +191,7 @@ class EditProfileActivity : AppCompatActivity() {
                     it.putExtra("save_nickname", etNickname.text.toString())
                     it.putExtra("save_email", etEmail.text.toString())
                     it.putExtra("save_location", etLocation.text.toString())
-                    if(::currentPhotoPath.isInitialized){
+                    if(currentPhotoPath != null){
                     it.putExtra("save_profilePic", currentPhotoPath)
                     }
                 })
@@ -277,7 +277,7 @@ class EditProfileActivity : AppCompatActivity() {
         outState.putString("state_nickname", etNickname.text.toString())
         outState.putString("state_email", etEmail.text.toString())
         outState.putString("state_location", etLocation.text.toString())
-        if(::currentPhotoPath.isInitialized){
+        if(currentPhotoPath != null){
             outState.putString("state_profilePic", currentPhotoPath)
         }
 
@@ -289,8 +289,8 @@ class EditProfileActivity : AppCompatActivity() {
         etNickname.setText(savedInstanceState.getString("state_nickname"))
         etEmail.setText(savedInstanceState.getString("state_email"))
         etLocation.setText(savedInstanceState.getString("state_location"))
-        currentPhotoPath = savedInstanceState.getString("state_profilePic").toString()
-        if (currentPhotoPath != "null"){
+        currentPhotoPath = savedInstanceState.getString("state_profilePic")
+        if (currentPhotoPath != null){
         BitmapFactory.decodeFile(currentPhotoPath)?.also { bitmap ->
             ivEditProfilePic.setImageBitmap(bitmap)
         }}
