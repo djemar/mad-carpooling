@@ -48,10 +48,9 @@ class EditProfileActivity : AppCompatActivity() {
         etLocation = findViewById<EditText>(R.id.et_location)
         ivEditProfilePic = findViewById<ImageView>(R.id.et_profile_pic)
 
-        if (savedInstanceState == null) {
-            initProfile()
-        } else
-            restoreProfile(savedInstanceState)
+        //savedInstanceState check?
+        initProfile()
+
 
         val btnCamera = findViewById<ImageButton>(R.id.btn_camera)
         registerForContextMenu(btnCamera)
@@ -64,26 +63,28 @@ class EditProfileActivity : AppCompatActivity() {
         etEmail.setText(intent.getStringExtra("email"))
         etLocation.setText(intent.getStringExtra("location"))
 
-        val sharedPref = this.getSharedPreferences("profile_pref", Context.MODE_PRIVATE) ?: return
-        val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
-        if (jsonString != null) {
-            val jsonObject = JSONObject(jsonString)
-            ivEditProfilePic.setImageBitmap(
-                BitmapFactory.decodeStream(
-                    openFileInput(
-                        jsonObject.getString(
-                            "json_profilePic"
+        if (currentPhotoPath != null) {
+            BitmapFactory.decodeFile(currentPhotoPath)?.also { bitmap ->
+                ivEditProfilePic.setImageBitmap(bitmap)
+            }
+        } else {
+            val sharedPref =
+                this.getSharedPreferences("profile_pref", Context.MODE_PRIVATE) ?: return
+            val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
+            if (jsonString != null) {
+                val jsonObject = JSONObject(jsonString)
+                ivEditProfilePic.setImageBitmap(
+                    BitmapFactory.decodeStream(
+                        openFileInput(
+                            jsonObject.getString(
+                                "json_profilePic"
+                            )
                         )
                     )
                 )
-            )
+            }
         }
     }
-
-    private fun restoreProfile(savedInstanceState: Bundle) {
-        onRestoreInstanceState(savedInstanceState)
-    }
-
 
     private fun checkFullName() {
         val textWatcher = object : TextWatcher {
@@ -91,7 +92,7 @@ class EditProfileActivity : AppCompatActivity() {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                if(optionsMenu != null) {
+                if (optionsMenu != null) {
                     optionsMenu.findItem(R.id.save).isEnabled = etFullName.text.length > 0
                 }
             }
