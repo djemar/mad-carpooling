@@ -158,12 +158,13 @@ class EditProfileActivity : AppCompatActivity() {
 
     private fun setPic() {
         // Get the dimensions of the View
-        val targetW: Int = ivEditProfilePic.width
-        val targetH: Int = ivEditProfilePic.height
+        val targetW: Int = 512
+        val targetH: Int = 512
 
         val bmOptions = BitmapFactory.Options().apply {
             // Get the dimensions of the bitmap
             inJustDecodeBounds = true
+
 
             BitmapFactory.decodeFile(currentPhotoPath, this)
 
@@ -179,10 +180,33 @@ class EditProfileActivity : AppCompatActivity() {
             inPurgeable = true
         }
         BitmapFactory.decodeFile(currentPhotoPath, bmOptions)?.also { bitmap ->
-            ivEditProfilePic.setImageBitmap(bitmap)
+            val ei = currentPhotoPath?.let { ExifInterface(it) }
+            val orientation: Int? = ei?.getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_UNDEFINED
+            )
+
+            var rotatedBitmap: Bitmap? = null
+            when (orientation) {
+                ExifInterface.ORIENTATION_ROTATE_90 -> rotatedBitmap = rotateImage(bitmap, 90f)
+                ExifInterface.ORIENTATION_ROTATE_180 -> rotatedBitmap = rotateImage(bitmap, 180f)
+                ExifInterface.ORIENTATION_ROTATE_270 -> rotatedBitmap = rotateImage(bitmap, 270f)
+                ExifInterface.ORIENTATION_NORMAL -> rotatedBitmap = bitmap
+                else -> rotatedBitmap = bitmap
+            }
+
+            ivEditProfilePic.setImageBitmap(rotatedBitmap)
         }
     }
 
+    fun rotateImage(source: Bitmap, angle: Float): Bitmap? {
+        val matrix = Matrix()
+        matrix.postRotate(angle)
+        return Bitmap.createBitmap(
+            source, 0, 0, source.width, source.height,
+            matrix, true
+        )
+    }
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.save -> {
