@@ -83,9 +83,9 @@ class ShowProfileActivity : AppCompatActivity() {
             if (newPicture != null) {
                 ivProfilePic.setImageBitmap(newPicture)
             }
-        } else if (requestCode == 1 && resultCode == Activity.RESULT_CANCELED) {
+        } /*else if (requestCode == 1 && resultCode == Activity.RESULT_CANCELED) { //debug
             Toast.makeText(this, "RESULT_CANCELED", Toast.LENGTH_SHORT).show()
-        }
+        }*/
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
