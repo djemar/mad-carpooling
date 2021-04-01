@@ -67,7 +67,7 @@ class ShowProfileActivity : AppCompatActivity() {
                 it.putExtra("nickname", tvNickname.text.toString())
                 it.putExtra("email", tvEmail.text.toString())
                 it.putExtra("location", tvLocation.text.toString())
-                it.putExtra("profilePic", (ivProfilePic.drawable).toBitmap())
+                it.putExtra("profilePic", (ivProfilePic.drawable as BitmapDrawable).bitmap)
             }
         startActivityForResult(intentEditProfileActivity, 1)
     }

@@ -1,12 +1,14 @@
 package com.mad.carpooling
 
+import android.R.attr.bitmap
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.VectorDrawable
+import android.media.ExifInterface
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.*
@@ -17,6 +19,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.toBitmap
 import org.json.JSONObject
+import java.io.ByteArrayOutputStream
 
 
 class EditProfileActivity : AppCompatActivity() {
@@ -95,7 +98,7 @@ class EditProfileActivity : AppCompatActivity() {
                     it.putExtra("save_nickname", etNickname.text.toString())
                     it.putExtra("save_email", etEmail.text.toString())
                     it.putExtra("save_location", etLocation.text.toString())
-                    it.putExtra("save_profilePic", (ivEditProfilePic.drawable).toBitmap())
+                    it.putExtra("save_profilePic", (ivEditProfilePic.drawable as BitmapDrawable).bitmap)
                 })
 
                 saveToSharedPref()
@@ -110,7 +113,7 @@ class EditProfileActivity : AppCompatActivity() {
         val filename = "profile_pic_img"
         val fileContents = (ivEditProfilePic.drawable).toBitmap()
         val fileOutputStream = openFileOutput(filename, Context.MODE_PRIVATE)
-        fileContents?.compress(Bitmap.CompressFormat.PNG, 85, fileOutputStream)
+        fileContents?.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream)
         fileOutputStream.close()
 
         val jsonObj = JSONObject()
@@ -145,7 +148,6 @@ class EditProfileActivity : AppCompatActivity() {
         }
     }
 
-
     override fun onBackPressed() {
         super.onBackPressed()
         setResult(Activity.RESULT_CANCELED)
@@ -158,7 +160,7 @@ class EditProfileActivity : AppCompatActivity() {
         outState.putString("state_nickname", etNickname.text.toString())
         outState.putString("state_email", etEmail.text.toString())
         outState.putString("state_location", etLocation.text.toString())
-        outState.putParcelable("state_profilePic", (ivEditProfilePic.drawable).toBitmap())
+        outState.putParcelable("state_profilePic", (ivEditProfilePic.drawable as BitmapDrawable).bitmap)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
