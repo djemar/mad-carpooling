@@ -1,11 +1,14 @@
 package com.mad.carpooling
 
+import android.R.attr.bitmap
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -24,8 +27,6 @@ import androidx.core.graphics.drawable.toBitmap
 import org.json.JSONObject
 import java.io.File
 import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.*
 
 
 class EditProfileActivity : AppCompatActivity() {
@@ -35,7 +36,7 @@ class EditProfileActivity : AppCompatActivity() {
     private lateinit var etLocation: EditText
     private lateinit var ivEditProfilePic: ImageView
     private lateinit var optionsMenu: Menu
-    private var currentPhotoPath : String? = null
+    private var currentPhotoPath: String? = null
     private var REQUEST_IMAGE_CAPTURE = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -104,7 +105,6 @@ class EditProfileActivity : AppCompatActivity() {
 
         etFullName.addTextChangedListener(textWatcher)
     }
-
 
     override fun onCreateContextMenu(
         menu: ContextMenu, v: View,
@@ -208,6 +208,7 @@ class EditProfileActivity : AppCompatActivity() {
             matrix, true
         )
     }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.save -> {
@@ -216,8 +217,8 @@ class EditProfileActivity : AppCompatActivity() {
                     it.putExtra("save_nickname", etNickname.text.toString())
                     it.putExtra("save_email", etEmail.text.toString())
                     it.putExtra("save_location", etLocation.text.toString())
-                    if(currentPhotoPath != null){
-                    it.putExtra("save_profilePic", currentPhotoPath)
+                    if (currentPhotoPath != null) {
+                        it.putExtra("save_profilePic", currentPhotoPath)
                     }
                 })
 
@@ -302,7 +303,7 @@ class EditProfileActivity : AppCompatActivity() {
         outState.putString("state_nickname", etNickname.text.toString())
         outState.putString("state_email", etEmail.text.toString())
         outState.putString("state_location", etLocation.text.toString())
-        if(currentPhotoPath != null){
+        if (currentPhotoPath != null) {
             outState.putString("state_profilePic", currentPhotoPath)
         }
 
@@ -315,10 +316,11 @@ class EditProfileActivity : AppCompatActivity() {
         etEmail.setText(savedInstanceState.getString("state_email"))
         etLocation.setText(savedInstanceState.getString("state_location"))
         currentPhotoPath = savedInstanceState.getString("state_profilePic")
-        if (currentPhotoPath != null){
-        BitmapFactory.decodeFile(currentPhotoPath)?.also { bitmap ->
-            ivEditProfilePic.setImageBitmap(bitmap)
-        }}
+        if (currentPhotoPath != null) {
+            BitmapFactory.decodeFile(currentPhotoPath)?.also { bitmap ->
+                ivEditProfilePic.setImageBitmap(bitmap)
+            }
+        }
 
     }
 
