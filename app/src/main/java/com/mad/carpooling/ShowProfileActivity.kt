@@ -15,6 +15,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.drawable.toBitmap
 import org.json.JSONObject
 
 
@@ -66,14 +67,7 @@ class ShowProfileActivity : AppCompatActivity() {
                 it.putExtra("nickname", tvNickname.text.toString())
                 it.putExtra("email", tvEmail.text.toString())
                 it.putExtra("location", tvLocation.text.toString())
-                if (ivProfilePic.drawable is VectorDrawable)
-                    it.putExtra("profilePic", null as Bitmap?)
-                else
-                    it.putExtra(
-                        "profilePic",
-                        (ivProfilePic.drawable as BitmapDrawable).bitmap
-                    )
-
+                it.putExtra("profilePic", (ivProfilePic.drawable).toBitmap())
             }
         startActivityForResult(intentEditProfileActivity, 1)
     }

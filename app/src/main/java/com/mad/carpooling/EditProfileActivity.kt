@@ -15,6 +15,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.drawable.toBitmap
 import org.json.JSONObject
 
 
@@ -94,13 +95,7 @@ class EditProfileActivity : AppCompatActivity() {
                     it.putExtra("save_nickname", etNickname.text.toString())
                     it.putExtra("save_email", etEmail.text.toString())
                     it.putExtra("save_location", etLocation.text.toString())
-                    if (ivEditProfilePic.drawable is VectorDrawable)
-                        it.putExtra("profilePic", null as Bitmap?)
-                    else
-                        it.putExtra(
-                            "save_profilePic",
-                            (ivEditProfilePic.drawable as BitmapDrawable).bitmap
-                        )
+                    it.putExtra("save_profilePic", (ivEditProfilePic.drawable).toBitmap())
                 })
 
                 saveToSharedPref()
@@ -113,9 +108,9 @@ class EditProfileActivity : AppCompatActivity() {
 
     private fun saveToSharedPref() {
         val filename = "profile_pic_img"
-        val fileContents = (ivEditProfilePic.drawable as BitmapDrawable).bitmap //TODO check that it is not a VectorDrawable
+        val fileContents = (ivEditProfilePic.drawable).toBitmap()
         val fileOutputStream = openFileOutput(filename, Context.MODE_PRIVATE)
-        fileContents.compress(Bitmap.CompressFormat.PNG, 85, fileOutputStream)
+        fileContents?.compress(Bitmap.CompressFormat.PNG, 85, fileOutputStream)
         fileOutputStream.close()
 
         val jsonObj = JSONObject()
@@ -163,6 +158,7 @@ class EditProfileActivity : AppCompatActivity() {
         outState.putString("state_nickname", etNickname.text.toString())
         outState.putString("state_email", etEmail.text.toString())
         outState.putString("state_location", etLocation.text.toString())
+        outState.putParcelable("state_profilePic", (ivEditProfilePic.drawable).toBitmap())
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -171,6 +167,7 @@ class EditProfileActivity : AppCompatActivity() {
         etNickname.setText(savedInstanceState.getString("state_nickname"))
         etEmail.setText(savedInstanceState.getString("state_email"))
         etLocation.setText(savedInstanceState.getString("state_location"))
+        ivEditProfilePic.setImageBitmap(savedInstanceState.getParcelable("state_profilePic"))
     }
 
 }
