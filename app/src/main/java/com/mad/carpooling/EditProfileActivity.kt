@@ -1,15 +1,11 @@
 package com.mad.carpooling
 
-import android.R.attr.bitmap
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Matrix
-import android.graphics.drawable.BitmapDrawable
-import android.media.ExifInterface
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -26,7 +22,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toBitmap
 import org.json.JSONObject
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -41,8 +36,6 @@ class EditProfileActivity : AppCompatActivity() {
     private lateinit var ivEditProfilePic: ImageView
     private lateinit var optionsMenu: Menu
     private lateinit var currentPhotoPath: String
-    private lateinit var uri : Uri
-
     private var REQUEST_IMAGE_CAPTURE = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,12 +48,42 @@ class EditProfileActivity : AppCompatActivity() {
         etLocation = findViewById<EditText>(R.id.et_location)
         ivEditProfilePic = findViewById<ImageView>(R.id.et_profile_pic)
 
-        initProfile()
+        if (savedInstanceState == null) {
+            initProfile()
+        } else
+            restoreProfile(savedInstanceState)
 
         val btnCamera = findViewById<ImageButton>(R.id.btn_camera)
         registerForContextMenu(btnCamera)
         btnCamera.setOnClickListener { openContextMenu(btnCamera) }
     }
+
+    private fun initProfile() {
+        etFullName.setText(intent.getStringExtra("fullName"))
+        etNickname.setText(intent.getStringExtra("nickname"))
+        etEmail.setText(intent.getStringExtra("email"))
+        etLocation.setText(intent.getStringExtra("location"))
+
+        val sharedPref = this.getSharedPreferences("profile_pref", Context.MODE_PRIVATE) ?: return
+        val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
+        if (jsonString != null) {
+            val jsonObject = JSONObject(jsonString)
+            ivEditProfilePic.setImageBitmap(
+                BitmapFactory.decodeStream(
+                    openFileInput(
+                        jsonObject.getString(
+                            "json_profilePic"
+                        )
+                    )
+                )
+            )
+        }
+    }
+
+    private fun restoreProfile(savedInstanceState: Bundle) {
+        onRestoreInstanceState(savedInstanceState)
+    }
+
 
     private fun checkFullName() {
         val textWatcher = object : TextWatcher {
@@ -81,26 +104,6 @@ class EditProfileActivity : AppCompatActivity() {
         etFullName.addTextChangedListener(textWatcher)
     }
 
-    private fun initProfile() {
-        etFullName.setText(intent.getStringExtra("fullName"))
-        etNickname.setText(intent.getStringExtra("nickname"))
-        etEmail.setText(intent.getStringExtra("email"))
-        etLocation.setText(intent.getStringExtra("location"))
-        val sharedPref = this.getSharedPreferences("profile_pref", Context.MODE_PRIVATE) ?: return
-        val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
-        if (jsonString != null) {
-            val jsonObject = JSONObject(jsonString)
-        ivEditProfilePic.setImageBitmap(
-            BitmapFactory.decodeStream(
-                openFileInput(
-                    jsonObject.getString(
-                        "json_profilePic"
-                    )
-                )
-            )
-        )
-        }
-    }
 
     override fun onCreateContextMenu(
         menu: ContextMenu, v: View,
@@ -144,7 +147,6 @@ class EditProfileActivity : AppCompatActivity() {
                         "com.example.android.fileprovider",
                         it
                     )
-                    uri = photoURI
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
                     startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
                 }
@@ -189,7 +191,9 @@ class EditProfileActivity : AppCompatActivity() {
                     it.putExtra("save_nickname", etNickname.text.toString())
                     it.putExtra("save_email", etEmail.text.toString())
                     it.putExtra("save_location", etLocation.text.toString())
+                    if(::currentPhotoPath.isInitialized){
                     it.putExtra("save_profilePic", currentPhotoPath)
+                    }
                 })
 
                 saveToSharedPref()
@@ -204,7 +208,7 @@ class EditProfileActivity : AppCompatActivity() {
         val filename = "profile_pic_img"
         val fileContents = (ivEditProfilePic.drawable).toBitmap()
         val fileOutputStream = openFileOutput(filename, Context.MODE_PRIVATE)
-        fileContents?.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream)
+        fileContents.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream)
         fileOutputStream.close()
 
         val jsonObj = JSONObject()
@@ -238,7 +242,6 @@ class EditProfileActivity : AppCompatActivity() {
         return super.onPrepareOptionsMenu(menu)
     }
 
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
@@ -246,11 +249,11 @@ class EditProfileActivity : AppCompatActivity() {
         }
     }
 
-
     @Throws(IOException::class)
     private fun createImageFile(): File {
         // Create an image file name
-        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+        //val timeStamp: String = SimpleDateFormat("new-photo", Locale.ITALY).format(Date())
+        val timeStamp: String = "new-photo"
         val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         return File.createTempFile(
             "JPEG_${timeStamp}_", /* prefix */
@@ -261,7 +264,6 @@ class EditProfileActivity : AppCompatActivity() {
             currentPhotoPath = absolutePath
         }
     }
-
 
     override fun onBackPressed() {
         super.onBackPressed()
@@ -275,7 +277,9 @@ class EditProfileActivity : AppCompatActivity() {
         outState.putString("state_nickname", etNickname.text.toString())
         outState.putString("state_email", etEmail.text.toString())
         outState.putString("state_location", etLocation.text.toString())
-        outState.putString("state_profilePic", currentPhotoPath)
+        if(::currentPhotoPath.isInitialized){
+            outState.putString("state_profilePic", currentPhotoPath)
+        }
 
     }
 
@@ -285,9 +289,11 @@ class EditProfileActivity : AppCompatActivity() {
         etNickname.setText(savedInstanceState.getString("state_nickname"))
         etEmail.setText(savedInstanceState.getString("state_email"))
         etLocation.setText(savedInstanceState.getString("state_location"))
-        BitmapFactory.decodeFile(savedInstanceState.getString("state_profilePic"))?.also { bitmap ->
+        currentPhotoPath = savedInstanceState.getString("state_profilePic").toString()
+        if (currentPhotoPath != "null"){
+        BitmapFactory.decodeFile(currentPhotoPath)?.also { bitmap ->
             ivEditProfilePic.setImageBitmap(bitmap)
-        }
+        }}
 
     }
 
