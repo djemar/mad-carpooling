@@ -9,10 +9,11 @@
     android:paddingEnd="16dp"
     tools:context=".ShowProfileActivity">
 
-    <FrameLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:layout_marginBottom="16dp"
         android:clickable="true"
         android:focusable="true">
 
@@ -21,7 +22,11 @@
             android:layout_height="192dp"
             android:layout_gravity="center"
             app:cardCornerRadius="96dp"
-            app:cardElevation="0dp">
+            app:cardElevation="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
                 android:id="@+id/et_profile_pic"
@@ -29,7 +34,7 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:scaleType="centerCrop"
-                android:src="@drawable/ic_baseline_account_circle" />
+                android:src="@drawable/png_john" />
 
         </androidx.cardview.widget.CardView>
 
@@ -37,9 +42,13 @@
             android:id="@+id/btn_camera"
             android:layout_width="64dp"
             android:layout_height="64dp"
-            android:layout_gravity="center|bottom|end"
-            android:src="@drawable/ic_baseline_camera" />
-    </FrameLayout>
+            android:layout_gravity="center|bottom"
+            android:background="@drawable/shape_round"
+            android:backgroundTint="#EEEEEE"
+            android:src="@drawable/ic_baseline_camera"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -47,41 +56,70 @@
         android:layout_weight="2"
         android:orientation="vertical">
 
-        <EditText
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/full_name"
+            android:paddingBottom="16dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_fullName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPersonName"
             android:paddingBottom="16dp"
-            android:text="@string/full_name"
-            android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
+            android:selectAllOnFocus="true"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
-        <EditText
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/nickname"
+            android:paddingBottom="16dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_nickname"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
             android:paddingBottom="16dp"
-            android:text="@string/nickname"
+            android:selectAllOnFocus="true"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <EditText
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/email_address"
+            android:paddingBottom="16dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textEmailAddress"
             android:paddingBottom="16dp"
-            android:text="@string/email_address"
+            android:selectAllOnFocus="true"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <EditText
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/location"
+            android:paddingBottom="16dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_location"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
             android:paddingBottom="16dp"
-            android:text="@string/location"
+            android:selectAllOnFocus="true"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+        </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
 
 </LinearLayout>

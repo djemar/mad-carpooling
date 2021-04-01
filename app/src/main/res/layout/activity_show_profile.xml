@@ -28,7 +28,7 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:scaleType="centerCrop"
-                android:src="@drawable/ic_baseline_account_circle" />
+                android:src="@drawable/png_john" />
 
         </androidx.cardview.widget.CardView>
     </FrameLayout>
@@ -43,33 +43,35 @@
             android:id="@+id/tv_fullName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingBottom="16dp"
-            android:text="@string/full_name"
-            android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
+            android:paddingBottom="48dp"
+            android:gravity="center"
+            android:text="@string/default_fullName"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+            android:textColor="@color/black" />
 
         <TextView
             android:id="@+id/tv_nickname"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="16dp"
-            android:text="@string/nickname"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+            android:text="@string/default_nickname"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
         <TextView
             android:id="@+id/tv_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="16dp"
-            android:text="@string/email_address"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+            android:text="@string/default_email"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
         <TextView
             android:id="@+id/tv_location"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="16dp"
-            android:text="@string/location"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+            android:text="@string/default_location"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
     </LinearLayout>
 
 </LinearLayout>

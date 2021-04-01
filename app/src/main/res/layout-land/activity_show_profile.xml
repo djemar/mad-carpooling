@@ -27,7 +27,7 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:scaleType="centerCrop"
-                android:src="@drawable/ic_baseline_account_circle" />
+                android:src="@drawable/png_john" />
 
         </androidx.cardview.widget.CardView>
     </FrameLayout>
@@ -46,6 +46,7 @@
             android:layout_height="wrap_content"
             android:paddingBottom="16dp"
             android:text="@string/full_name"
+            android:textColor="@color/black"
             android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
 
         <TextView
