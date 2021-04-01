@@ -6,22 +6,31 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.graphics.drawable.BitmapDrawable
 import android.media.ExifInterface
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.*
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toBitmap
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class EditProfileActivity : AppCompatActivity() {
@@ -31,6 +40,9 @@ class EditProfileActivity : AppCompatActivity() {
     private lateinit var etLocation: EditText
     private lateinit var ivEditProfilePic: ImageView
     private lateinit var optionsMenu: Menu
+    private lateinit var currentPhotoPath: String
+    private lateinit var uri : Uri
+
     private var REQUEST_IMAGE_CAPTURE = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,14 +80,26 @@ class EditProfileActivity : AppCompatActivity() {
 
         etFullName.addTextChangedListener(textWatcher)
     }
+
     private fun initProfile() {
         etFullName.setText(intent.getStringExtra("fullName"))
         etNickname.setText(intent.getStringExtra("nickname"))
         etEmail.setText(intent.getStringExtra("email"))
         etLocation.setText(intent.getStringExtra("location"))
-        val image = intent.getParcelableExtra("profilePic") as Bitmap?
-        if (image != null)
-            ivEditProfilePic.setImageBitmap(image)
+        val sharedPref = this.getSharedPreferences("profile_pref", Context.MODE_PRIVATE) ?: return
+        val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
+        if (jsonString != null) {
+            val jsonObject = JSONObject(jsonString)
+        ivEditProfilePic.setImageBitmap(
+            BitmapFactory.decodeStream(
+                openFileInput(
+                    jsonObject.getString(
+                        "json_profilePic"
+                    )
+                )
+            )
+        )
+        }
     }
 
     override fun onCreateContextMenu(
@@ -104,10 +128,56 @@ class EditProfileActivity : AppCompatActivity() {
     private fun dispatchTakePictureIntent() {
         val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         try {
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
+            takePictureIntent.also {
+                // Create the File where the photo should go
+                val photoFile: File? = try {
+                    createImageFile()
+                } catch (ex: IOException) {
+                    // Error occurred while creating the File
+                    Log.e("photoFile", "Error creating file")
+                    null
+                }
+                // Continue only if the File was successfully created
+                photoFile?.also {
+                    val photoURI: Uri = FileProvider.getUriForFile(
+                        this,
+                        "com.example.android.fileprovider",
+                        it
+                    )
+                    uri = photoURI
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
+                }
+            }
         } catch (e: ActivityNotFoundException) {
             // display error state to the user
-            Toast.makeText(this, "Error opening the camera", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun setPic() {
+        // Get the dimensions of the View
+        val targetW: Int = ivEditProfilePic.width
+        val targetH: Int = ivEditProfilePic.height
+
+        val bmOptions = BitmapFactory.Options().apply {
+            // Get the dimensions of the bitmap
+            inJustDecodeBounds = true
+
+            BitmapFactory.decodeFile(currentPhotoPath, this)
+
+            val photoW: Int = outWidth
+            val photoH: Int = outHeight
+
+            // Determine how much to scale down the image
+            val scaleFactor: Int = Math.max(1, Math.min(photoW / targetW, photoH / targetH))
+
+            // Decode the image file into a Bitmap sized to fill the View
+            inJustDecodeBounds = false
+            inSampleSize = scaleFactor
+            inPurgeable = true
+        }
+        BitmapFactory.decodeFile(currentPhotoPath, bmOptions)?.also { bitmap ->
+            ivEditProfilePic.setImageBitmap(bitmap)
         }
     }
 
@@ -119,7 +189,7 @@ class EditProfileActivity : AppCompatActivity() {
                     it.putExtra("save_nickname", etNickname.text.toString())
                     it.putExtra("save_email", etEmail.text.toString())
                     it.putExtra("save_location", etLocation.text.toString())
-                    it.putExtra("save_profilePic", (ivEditProfilePic.drawable as BitmapDrawable).bitmap)
+                    it.putExtra("save_profilePic", currentPhotoPath)
                 })
 
                 saveToSharedPref()
@@ -168,13 +238,30 @@ class EditProfileActivity : AppCompatActivity() {
         return super.onPrepareOptionsMenu(menu)
     }
 
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            val imageBitmap = data?.extras?.get("data") as Bitmap
-            ivEditProfilePic.setImageBitmap(imageBitmap)
+            setPic()
         }
     }
+
+
+    @Throws(IOException::class)
+    private fun createImageFile(): File {
+        // Create an image file name
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+        val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile(
+            "JPEG_${timeStamp}_", /* prefix */
+            ".jpg", /* suffix */
+            storageDir /* directory */
+        ).apply {
+            // Save a file: path for use with ACTION_VIEW intents
+            currentPhotoPath = absolutePath
+        }
+    }
+
 
     override fun onBackPressed() {
         super.onBackPressed()
@@ -188,7 +275,8 @@ class EditProfileActivity : AppCompatActivity() {
         outState.putString("state_nickname", etNickname.text.toString())
         outState.putString("state_email", etEmail.text.toString())
         outState.putString("state_location", etLocation.text.toString())
-        outState.putParcelable("state_profilePic", (ivEditProfilePic.drawable as BitmapDrawable).bitmap)
+        outState.putString("state_profilePic", currentPhotoPath)
+
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -197,7 +285,10 @@ class EditProfileActivity : AppCompatActivity() {
         etNickname.setText(savedInstanceState.getString("state_nickname"))
         etEmail.setText(savedInstanceState.getString("state_email"))
         etLocation.setText(savedInstanceState.getString("state_location"))
-        ivEditProfilePic.setImageBitmap(savedInstanceState.getParcelable("state_profilePic"))
+        BitmapFactory.decodeFile(savedInstanceState.getString("state_profilePic"))?.also { bitmap ->
+            ivEditProfilePic.setImageBitmap(bitmap)
+        }
+
     }
 
 }

@@ -67,7 +67,7 @@ class ShowProfileActivity : AppCompatActivity() {
                 it.putExtra("nickname", tvNickname.text.toString())
                 it.putExtra("email", tvEmail.text.toString())
                 it.putExtra("location", tvLocation.text.toString())
-                it.putExtra("profilePic", (ivProfilePic.drawable as BitmapDrawable).bitmap)
+                //it.putExtra("profilePic", (ivProfilePic.drawable as BitmapDrawable).bitmap)
             }
         startActivityForResult(intentEditProfileActivity, 1)
     }
@@ -79,10 +79,10 @@ class ShowProfileActivity : AppCompatActivity() {
             tvNickname.text = (data?.getStringExtra("save_nickname"))
             tvEmail.text = (data?.getStringExtra("save_email"))
             tvLocation.text = (data?.getStringExtra("save_location"))
-            val newPicture = data?.getParcelableExtra("save_profilePic") as Bitmap?
-            if (newPicture != null) {
-                ivProfilePic.setImageBitmap(newPicture)
+            BitmapFactory.decodeFile(data?.getStringExtra("save_profilePic"))?.also { bitmap ->
+                ivProfilePic.setImageBitmap(bitmap)
             }
+
         } /*else if (requestCode == 1 && resultCode == Activity.RESULT_CANCELED) { //debug
             Toast.makeText(this, "RESULT_CANCELED", Toast.LENGTH_SHORT).show()
         }*/

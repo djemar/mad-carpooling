@@ -55,7 +55,7 @@
             android:layout_height="wrap_content"
             android:paddingBottom="16dp"
             android:text="@string/default_nickname"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
         <TextView
             android:id="@+id/tv_email"
@@ -63,7 +63,7 @@
             android:layout_height="wrap_content"
             android:paddingBottom="16dp"
             android:text="@string/default_email"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
         <TextView
             android:id="@+id/tv_location"
@@ -71,7 +71,7 @@
             android:layout_height="wrap_content"
             android:paddingBottom="16dp"
             android:text="@string/default_location"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
     </LinearLayout>
 
 </LinearLayout>
