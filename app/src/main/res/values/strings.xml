@@ -2,8 +2,12 @@
     <string name="app_name">Carpooling</string>
     <string name="full_name">Full Name</string>
     <string name="nickname">Nickname</string>
-    <string name="email_address">email@address</string>
+    <string name="email_address">E-mail</string>
     <string name="location">Location</string>
+    <string name="default_fullName">John Wick</string>
+    <string name="default_nickname">Babayaga</string>
+    <string name="default_email">johnny@continental.com</string>
+    <string name="default_location">Torino</string>
     <string name="edit">Edit</string>
     <string name="select_from_gallery">Select from gallery</string>
     <string name="take_a_new_photo">Take a new photo</string>
