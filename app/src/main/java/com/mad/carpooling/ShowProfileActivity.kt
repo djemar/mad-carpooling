@@ -75,15 +75,24 @@ class ShowProfileActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
-            tvFullName.text = (data?.getStringExtra("save_fullName"))
-            tvNickname.text = (data?.getStringExtra("save_nickname"))
-            tvEmail.text = (data?.getStringExtra("save_email"))
-            tvLocation.text = (data?.getStringExtra("save_location"))
-            val newPhoto = data?.getStringExtra("save_profilePic")
-            if (newPhoto != null) {
-                BitmapFactory.decodeFile(newPhoto)?.also { bitmap ->
-                    ivProfilePic.setImageBitmap(bitmap)
-                }
+            val sharedPref =
+                this.getSharedPreferences("profile_pref", Context.MODE_PRIVATE) ?: return
+            val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
+            if (jsonString != null) {
+                val jsonObject = JSONObject(jsonString)
+                tvFullName.text = (data?.getStringExtra("save_fullName"))
+                tvNickname.text = (data?.getStringExtra("save_nickname"))
+                tvEmail.text = (data?.getStringExtra("save_email"))
+                tvLocation.text = (data?.getStringExtra("save_location"))
+                ivProfilePic.setImageBitmap(
+                    BitmapFactory.decodeStream(
+                        openFileInput(
+                            jsonObject.getString(
+                                "json_profilePic"
+                            )
+                        )
+                    )
+                )
             }
 
         } /*else if (requestCode == 1 && resultCode == Activity.RESULT_CANCELED) { //debug
