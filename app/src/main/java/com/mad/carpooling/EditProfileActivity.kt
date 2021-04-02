@@ -1,6 +1,5 @@
 package com.mad.carpooling
 
-import android.R.attr.bitmap
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -26,6 +25,7 @@ import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toBitmap
 import org.json.JSONObject
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 
 
@@ -38,6 +38,8 @@ class EditProfileActivity : AppCompatActivity() {
     private lateinit var optionsMenu: Menu
     private var currentPhotoPath: String? = null
     private var REQUEST_IMAGE_CAPTURE = 1
+    private var TMP_FILENAME_IMG = "temp_profile_pic_img.jpg"
+    private var FILENAME_IMG = "profile_pic_img.jpg"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -157,6 +159,22 @@ class EditProfileActivity : AppCompatActivity() {
         }
     }
 
+    @Throws(IOException::class)
+    private fun createImageFile(): File {
+        // Create an image file name
+        //val timeStamp: String = SimpleDateFormat("new-photo", Locale.ITALY).format(Date())
+        val timeStamp: String = "new-photo"
+        val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile(
+            "JPEG_${timeStamp}_", /* prefix */
+            ".jpg", /* suffix */
+            storageDir /* directory */
+        ).apply {
+            // Save a file: path for use with ACTION_VIEW intents
+            currentPhotoPath = absolutePath
+        }
+    }
+
     private fun setPic() {
         // Get the dimensions of the View
         val targetW: Int = 512
@@ -181,27 +199,34 @@ class EditProfileActivity : AppCompatActivity() {
             inPurgeable = true
         }
         BitmapFactory.decodeFile(currentPhotoPath, bmOptions)?.also { bitmap ->
-            val ei = currentPhotoPath?.let { ExifInterface(it) }
-            val orientation: Int? = ei?.getAttributeInt(
-                ExifInterface.TAG_ORIENTATION,
-                ExifInterface.ORIENTATION_UNDEFINED
-            )
 
-            var rotatedBitmap: Bitmap? = null
-            when (orientation) {
-                ExifInterface.ORIENTATION_ROTATE_90 -> rotatedBitmap = rotateImage(bitmap, 90f)
-                ExifInterface.ORIENTATION_ROTATE_180 -> rotatedBitmap = rotateImage(bitmap, 180f)
-                ExifInterface.ORIENTATION_ROTATE_270 -> rotatedBitmap = rotateImage(bitmap, 270f)
-                ExifInterface.ORIENTATION_NORMAL -> rotatedBitmap = bitmap
-                else -> rotatedBitmap = bitmap
-            }
-
-            ivEditProfilePic.setImageBitmap(rotatedBitmap)
+            ivEditProfilePic.setImageBitmap(validateBitmapOrientation(bitmap))
         }
     }
 
-    fun rotateImage(source: Bitmap, angle: Float): Bitmap? {
+    private fun validateBitmapOrientation(bitmap: Bitmap): Bitmap? {
+        val ei = currentPhotoPath?.let { ExifInterface(it) }
+        val orientation: Int? = ei?.getAttributeInt(
+            ExifInterface.TAG_ORIENTATION,
+            ExifInterface.ORIENTATION_UNDEFINED
+        )
+
+        var rotatedBitmap: Bitmap? = null
+        when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> rotatedBitmap = rotateImage(bitmap, 90f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> rotatedBitmap = rotateImage(bitmap, 180f)
+            ExifInterface.ORIENTATION_ROTATE_270 -> rotatedBitmap = rotateImage(bitmap, 270f)
+            ExifInterface.ORIENTATION_NORMAL -> rotatedBitmap = bitmap
+            else -> rotatedBitmap = bitmap
+        }
+
+        saveRotatedBitmap(rotatedBitmap)
+        return rotatedBitmap
+    }
+
+    private fun rotateImage(source: Bitmap, angle: Float): Bitmap? {
         val matrix = Matrix()
+
         matrix.postRotate(angle)
         return Bitmap.createBitmap(
             source, 0, 0, source.width, source.height,
@@ -227,22 +252,42 @@ class EditProfileActivity : AppCompatActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    private fun saveRotatedBitmap(rotatedBitmap: Bitmap?) {
+        val oldFile = File(currentPhotoPath!!)
+        val filename = TMP_FILENAME_IMG
+        val imgPath = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val myFile = File(imgPath, filename)
+        val fileOutputStream = FileOutputStream(myFile)
 
+        rotatedBitmap?.compress(Bitmap.CompressFormat.JPEG, 90, fileOutputStream)
+        fileOutputStream.close()
+        oldFile.delete()    // delete old img with wrong orientation, maybe is better to add a check if successful?
+        currentPhotoPath = myFile.absolutePath  // update the path to point to the new fixed img
+    }
+
+    private fun saveProfileImg() {
+        val imgPath = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val filename = FILENAME_IMG
+        val tmpFile = File(imgPath, TMP_FILENAME_IMG)
+        val myFile = File(imgPath, filename)
+        val fileOutputStream = openFileOutput(filename, Context.MODE_PRIVATE)
+
+        (ivEditProfilePic.drawable).toBitmap()
+            .compress(Bitmap.CompressFormat.JPEG, 90, fileOutputStream)
+        fileOutputStream.close()
+
+        tmpFile.delete()
     }
 
     private fun saveToSharedPref() {
-        val filename = "profile_pic_img"
-        val fileContents = (ivEditProfilePic.drawable).toBitmap()
-        val fileOutputStream = openFileOutput(filename, Context.MODE_PRIVATE)
-        fileContents.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream)
-        fileOutputStream.close()
+        saveProfileImg()
 
         val jsonObj = JSONObject()
         jsonObj.put("json_fullName", etFullName.text.toString())
         jsonObj.put("json_nickname", etNickname.text.toString())
         jsonObj.put("json_email", etEmail.text.toString())
         jsonObj.put("json_location", etLocation.text.toString())
-        jsonObj.put("json_profilePic", filename)
+        jsonObj.put("json_profilePic", FILENAME_IMG)
 
         val sharedPref = this.getSharedPreferences("profile_pref", Context.MODE_PRIVATE) ?: return
         with(sharedPref.edit()) {
@@ -272,22 +317,6 @@ class EditProfileActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             setPic()
-        }
-    }
-
-    @Throws(IOException::class)
-    private fun createImageFile(): File {
-        // Create an image file name
-        //val timeStamp: String = SimpleDateFormat("new-photo", Locale.ITALY).format(Date())
-        val timeStamp: String = "new-photo"
-        val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        return File.createTempFile(
-            "JPEG_${timeStamp}_", /* prefix */
-            ".jpg", /* suffix */
-            storageDir /* directory */
-        ).apply {
-            // Save a file: path for use with ACTION_VIEW intents
-            currentPhotoPath = absolutePath
         }
     }
 
