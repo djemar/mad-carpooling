@@ -44,7 +44,7 @@
             android:layout_height="64dp"
             android:layout_gravity="center|bottom"
             android:background="@drawable/shape_round"
-            android:backgroundTint="#EEEEEE"
+            android:backgroundTint="?attr/colorButtonNormal"
             android:src="@drawable/ic_baseline_camera"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
