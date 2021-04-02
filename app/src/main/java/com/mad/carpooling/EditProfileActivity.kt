@@ -89,48 +89,6 @@ class EditProfileActivity : AppCompatActivity() {
         }
     }
 
-    private fun checkFullName() {
-        val textWatcher = object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                if (optionsMenu != null) {
-                    optionsMenu.findItem(R.id.save).isEnabled = etFullName.text.length > 0
-                }
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-            }
-
-        }
-
-        etFullName.addTextChangedListener(textWatcher)
-    }
-
-    override fun onCreateContextMenu(
-        menu: ContextMenu, v: View,
-        menuInfo: ContextMenu.ContextMenuInfo?
-    ) {
-        super.onCreateContextMenu(menu, v, menuInfo)
-        val inflater: MenuInflater = menuInflater
-        inflater.inflate(R.menu.ctx_menu_camera, menu)
-    }
-
-    override fun onContextItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.ctx_gallery -> {
-                Toast.makeText(this, "Open Gallery", Toast.LENGTH_SHORT).show()
-                true
-            }
-            R.id.ctx_camera -> {
-                dispatchTakePictureIntent()
-                true
-            }
-            else -> super.onContextItemSelected(item)
-        }
-    }
-
     private fun dispatchTakePictureIntent() {
         val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         try {
@@ -234,24 +192,6 @@ class EditProfileActivity : AppCompatActivity() {
         )
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.save -> {
-                setResult(Activity.RESULT_OK, Intent().also {
-                    it.putExtra("save_fullName", etFullName.text.toString())
-                    it.putExtra("save_nickname", etNickname.text.toString())
-                    it.putExtra("save_email", etEmail.text.toString())
-                    it.putExtra("save_location", etLocation.text.toString())
-                    if (currentPhotoPath != null) {
-                        it.putExtra("save_profilePic", currentPhotoPath)
-                    }
-                })
-
-                saveToSharedPref()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
     private fun saveRotatedBitmap(rotatedBitmap: Bitmap?) {
         val oldFile = File(currentPhotoPath!!)
         val filename = TMP_FILENAME_IMG
@@ -297,6 +237,25 @@ class EditProfileActivity : AppCompatActivity() {
         finish()
     }
 
+    private fun checkFullName() {
+        val textWatcher = object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (optionsMenu != null) {
+                    optionsMenu.findItem(R.id.save).isEnabled = etFullName.text.length > 0
+                }
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+            }
+
+        }
+
+        etFullName.addTextChangedListener(textWatcher)
+    }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         super.onCreateOptionsMenu(menu)
 
@@ -311,6 +270,51 @@ class EditProfileActivity : AppCompatActivity() {
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
         checkFullName()
         return super.onPrepareOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.save -> {
+                setResult(Activity.RESULT_OK, Intent().also {
+                    it.putExtra("save_fullName", etFullName.text.toString())
+                    it.putExtra("save_nickname", etNickname.text.toString())
+                    it.putExtra("save_email", etEmail.text.toString())
+                    it.putExtra("save_location", etLocation.text.toString())
+                    if (currentPhotoPath != null) {
+                        it.putExtra("save_profilePic", currentPhotoPath)
+                    }
+                })
+
+                saveToSharedPref()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+
+    }
+
+    override fun onCreateContextMenu(
+        menu: ContextMenu,
+        v: View,
+        menuInfo: ContextMenu.ContextMenuInfo?
+    ) {
+        super.onCreateContextMenu(menu, v, menuInfo)
+        val inflater: MenuInflater = menuInflater
+        inflater.inflate(R.menu.ctx_menu_camera, menu)
+    }
+
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.ctx_gallery -> {
+                Toast.makeText(this, "Open Gallery", Toast.LENGTH_SHORT).show()
+                true
+            }
+            R.id.ctx_camera -> {
+                dispatchTakePictureIntent()
+                true
+            }
+            else -> super.onContextItemSelected(item)
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
