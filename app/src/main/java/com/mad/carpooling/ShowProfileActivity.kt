@@ -40,19 +40,19 @@ class ShowProfileActivity : AppCompatActivity() {
     }
 
     private fun initProfile() {
-        val sharedPref = this.getSharedPreferences("profile_pref", Context.MODE_PRIVATE) ?: return
+        val sharedPref = this.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE) ?: return
         val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
         if (jsonString != null) {
             val jsonObject = JSONObject(jsonString)
-            tvFullName.text = jsonObject.getString("json_fullName")
-            tvNickname.text = jsonObject.getString("json_nickname")
-            tvEmail.text = jsonObject.getString("json_email")
-            tvLocation.text = jsonObject.getString("json_location")
+            tvFullName.text = jsonObject.getString("json_fullName.group05.lab1")
+            tvNickname.text = jsonObject.getString("json_nickname.group05.lab1")
+            tvEmail.text = jsonObject.getString("json_email.group05.lab1")
+            tvLocation.text = jsonObject.getString("json_location.group05.lab1")
             ivProfilePic.setImageBitmap(
                 BitmapFactory.decodeStream(
                     openFileInput(
                         jsonObject.getString(
-                            "json_profilePic"
+                            "json_profilePic.group05.lab1"
                         )
                     )
                 )
@@ -63,10 +63,10 @@ class ShowProfileActivity : AppCompatActivity() {
     fun editProfile() {
         val intentEditProfileActivity = Intent(this, EditProfileActivity::class.java)
             .also {
-                it.putExtra("fullName", tvFullName.text.toString())
-                it.putExtra("nickname", tvNickname.text.toString())
-                it.putExtra("email", tvEmail.text.toString())
-                it.putExtra("location", tvLocation.text.toString())
+                it.putExtra("fullName.group05.lab1", tvFullName.text.toString())
+                it.putExtra("nickname.group05.lab1", tvNickname.text.toString())
+                it.putExtra("email.group05.lab1", tvEmail.text.toString())
+                it.putExtra("location.group05.lab1", tvLocation.text.toString())
                 //it.putExtra("profilePic", (ivProfilePic.drawable as BitmapDrawable).bitmap)
             }
         startActivityForResult(intentEditProfileActivity, 1)
@@ -76,19 +76,19 @@ class ShowProfileActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
             val sharedPref =
-                this.getSharedPreferences("profile_pref", Context.MODE_PRIVATE) ?: return
+                this.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE) ?: return
             val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
             if (jsonString != null) {
                 val jsonObject = JSONObject(jsonString)
-                tvFullName.text = (data?.getStringExtra("save_fullName"))
-                tvNickname.text = (data?.getStringExtra("save_nickname"))
-                tvEmail.text = (data?.getStringExtra("save_email"))
-                tvLocation.text = (data?.getStringExtra("save_location"))
+                tvFullName.text = (data?.getStringExtra("save_fullName.group05.lab1"))
+                tvNickname.text = (data?.getStringExtra("save_nickname.group05.lab1"))
+                tvEmail.text = (data?.getStringExtra("save_email.group05.lab1"))
+                tvLocation.text = (data?.getStringExtra("save_location.group05.lab1"))
                 ivProfilePic.setImageBitmap(
                     BitmapFactory.decodeStream(
                         openFileInput(
                             jsonObject.getString(
-                                "json_profilePic"
+                                "json_profilePic.group05.lab1"
                             )
                         )
                     )

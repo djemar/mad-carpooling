@@ -63,10 +63,10 @@ class EditProfileActivity : AppCompatActivity() {
     }
 
     private fun initProfile() {
-        etFullName.setText(intent.getStringExtra("fullName"))
-        etNickname.setText(intent.getStringExtra("nickname"))
-        etEmail.setText(intent.getStringExtra("email"))
-        etLocation.setText(intent.getStringExtra("location"))
+        etFullName.setText(intent.getStringExtra("fullName.group05.lab1"))
+        etNickname.setText(intent.getStringExtra("nickname.group05.lab1"))
+        etEmail.setText(intent.getStringExtra("email.group05.lab1"))
+        etLocation.setText(intent.getStringExtra("location.group05.lab1"))
 
         if (currentPhotoPath != null) {
             BitmapFactory.decodeFile(currentPhotoPath)?.also { bitmap ->
@@ -74,7 +74,7 @@ class EditProfileActivity : AppCompatActivity() {
             }
         } else {
             val sharedPref =
-                this.getSharedPreferences("profile_pref", Context.MODE_PRIVATE) ?: return
+                this.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE) ?: return
             val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
             if (jsonString != null) {
                 val jsonObject = JSONObject(jsonString)
@@ -82,7 +82,7 @@ class EditProfileActivity : AppCompatActivity() {
                     BitmapFactory.decodeStream(
                         openFileInput(
                             jsonObject.getString(
-                                "json_profilePic"
+                                "json_profilePic.group05.lab1"
                             )
                         )
                     )
@@ -107,7 +107,7 @@ class EditProfileActivity : AppCompatActivity() {
                 photoFile?.also {
                     val photoURI: Uri = FileProvider.getUriForFile(
                         this,
-                        "com.mad.fileprovider",
+                        "com.mad.group05.fileprovider",
                         it
                     )
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
@@ -224,13 +224,13 @@ class EditProfileActivity : AppCompatActivity() {
         saveProfileImg()
 
         val jsonObj = JSONObject()
-        jsonObj.put("json_fullName", etFullName.text.toString())
-        jsonObj.put("json_nickname", etNickname.text.toString())
-        jsonObj.put("json_email", etEmail.text.toString())
-        jsonObj.put("json_location", etLocation.text.toString())
-        jsonObj.put("json_profilePic", FILENAME_IMG)
+        jsonObj.put("json_fullName.group05.lab1", etFullName.text.toString())
+        jsonObj.put("json_nickname.group05.lab1", etNickname.text.toString())
+        jsonObj.put("json_email.group05.lab1", etEmail.text.toString())
+        jsonObj.put("json_location.group05.lab1", etLocation.text.toString())
+        jsonObj.put("json_profilePic.group05.lab1", FILENAME_IMG)
 
-        val sharedPref = this.getSharedPreferences("profile_pref", Context.MODE_PRIVATE) ?: return
+        val sharedPref = this.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE) ?: return
         with(sharedPref.edit()) {
             putString(getString(R.string.saved_profile_data), jsonObj.toString())
             apply()
@@ -277,12 +277,12 @@ class EditProfileActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.save -> {
                 setResult(Activity.RESULT_OK, Intent().also {
-                    it.putExtra("save_fullName", etFullName.text.toString())
-                    it.putExtra("save_nickname", etNickname.text.toString())
-                    it.putExtra("save_email", etEmail.text.toString())
-                    it.putExtra("save_location", etLocation.text.toString())
-                    if (currentPhotoPath != null) {
-                        it.putExtra("save_profilePic", currentPhotoPath)
+                    it.putExtra("save_fullName.group05.lab1", etFullName.text.toString())
+                    it.putExtra("save_nickname.group05.lab1", etNickname.text.toString())
+                    it.putExtra("save_email.group05.lab1", etEmail.text.toString())
+                    it.putExtra("save_location.group05.lab1", etLocation.text.toString())
+                    if (currentPhotoPath != null) { //TODO is this necessary?
+                        it.putExtra("save_profilePic.group05.lab1", currentPhotoPath)
                     }
                 })
 
@@ -333,23 +333,23 @@ class EditProfileActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putString("state_fullName", etFullName.text.toString())
-        outState.putString("state_nickname", etNickname.text.toString())
-        outState.putString("state_email", etEmail.text.toString())
-        outState.putString("state_location", etLocation.text.toString())
+        outState.putString("state_fullName.group05.lab1", etFullName.text.toString())
+        outState.putString("state_nickname.group05.lab1", etNickname.text.toString())
+        outState.putString("state_email.group05.lab1", etEmail.text.toString())
+        outState.putString("state_location.group05.lab1", etLocation.text.toString())
         if (currentPhotoPath != null) {
-            outState.putString("state_profilePic", currentPhotoPath)
+            outState.putString("state_profilePic.group05.lab1", currentPhotoPath)
         }
 
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        etFullName.setText(savedInstanceState.getString("state_fullName"))
-        etNickname.setText(savedInstanceState.getString("state_nickname"))
-        etEmail.setText(savedInstanceState.getString("state_email"))
-        etLocation.setText(savedInstanceState.getString("state_location"))
-        currentPhotoPath = savedInstanceState.getString("state_profilePic")
+        etFullName.setText(savedInstanceState.getString("state_fullName.group05.lab1"))
+        etNickname.setText(savedInstanceState.getString("state_nickname.group05.lab1"))
+        etEmail.setText(savedInstanceState.getString("state_email.group05.lab1"))
+        etLocation.setText(savedInstanceState.getString("state_location.group05.lab1"))
+        currentPhotoPath = savedInstanceState.getString("state_profilePic.group05.lab1")
         if (currentPhotoPath != null) {
             BitmapFactory.decodeFile(currentPhotoPath)?.also { bitmap ->
                 ivEditProfilePic.setImageBitmap(bitmap)
