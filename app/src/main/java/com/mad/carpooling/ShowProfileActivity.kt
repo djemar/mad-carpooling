@@ -30,6 +30,8 @@ class ShowProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_profile)
 
+        setSupportActionBar(findViewById(R.id.my_toolbar))
+
         tvFullName = findViewById<TextView>(R.id.tv_fullName)
         tvNickname = findViewById<TextView>(R.id.tv_nickname)
         tvEmail = findViewById<TextView>(R.id.tv_email)

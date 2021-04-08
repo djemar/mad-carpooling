@@ -47,6 +47,9 @@ class EditProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_profile)
 
+        setSupportActionBar(findViewById(R.id.my_toolbar))
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
         etFullName = findViewById<EditText>(R.id.et_fullName)
         etNickname = findViewById<EditText>(R.id.et_nickname)
         etEmail = findViewById<EditText>(R.id.et_email)
