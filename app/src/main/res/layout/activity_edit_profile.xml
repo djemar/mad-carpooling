@@ -12,8 +12,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
         android:layout_marginBottom="16dp"
+        android:layout_weight="1"
         android:clickable="true"
         android:focusable="true">
 
@@ -43,8 +43,9 @@
             android:layout_width="64dp"
             android:layout_height="64dp"
             android:layout_gravity="center|bottom"
+            android:layout_margin="4dp"
             android:background="@drawable/shape_round"
-            android:backgroundTint="?attr/colorButtonNormal"
+            android:elevation="4dp"
             android:src="@drawable/ic_baseline_camera"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
