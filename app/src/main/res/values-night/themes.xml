@@ -12,19 +12,14 @@
         <!-- Status bar color.
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>-->
         <!-- Customize your theme here. -->
-        
-
+        <item name="toolbarStyle">@style/MyToolbarStyle</item>
     </style>
 
-    <style name="MyToolbarStyle" parent="Widget.MaterialComponents.Toolbar.Surface">
-        <item name="titleTextColor">?attr/colorOnPrimary</item>
+    <style name="MyToolbarStyle" parent="Widget.MaterialComponents.Toolbar.PrimarySurface">
+        <item name="toolbarNavigationButtonStyle">@style/MyToolbarTheme</item>
     </style>
 
     <style name="MyToolbarTheme" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar">
-        <item name="colorControlNormal">?attr/colorOnPrimary</item>
-        <item name="android:actionMenuTextColor">@color/toolbar_icon_color</item>
-        <item name="background">@style/Widget.MaterialComponents.Toolbar.PrimarySurface</item>
-        <item name="elevationOverlayEnabled">true</item>
     </style>
 
 </resources>  
