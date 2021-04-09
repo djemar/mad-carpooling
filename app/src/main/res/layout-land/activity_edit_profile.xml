@@ -5,10 +5,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:nestedScrollingEnabled="true"
-    android:orientation="horizontal"
-    android:paddingStart="16dp"
-    android:paddingEnd="16dp"
+    android:orientation="vertical"
     tools:context=".EditProfileActivity">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/my_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:elevation="8dp"
+        android:theme="@style/MyToolbarTheme"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingEnd="16dp"
+        android:paddingStart="16dp"
+        android:orientation="horizontal">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="0dp"
@@ -144,5 +156,5 @@
         </com.google.android.material.textfield.TextInputLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-
+    </LinearLayout>
 </LinearLayout>
