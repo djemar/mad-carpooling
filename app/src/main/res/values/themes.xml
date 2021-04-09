@@ -16,7 +16,7 @@
         <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
     </style>
 
-    <style name="MyToolbarStyle" parent="Widget.MaterialComponents.Toolbar">
+    <style name="MyToolbarStyle" parent="Widget.MaterialComponents.Toolbar.Primary">
         <item name="titleTextColor">?attr/colorOnPrimary</item>
         <item name="toolbarNavigationButtonStyle">@style/MyToolbarTheme</item>
     </style>
