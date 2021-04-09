@@ -227,10 +227,10 @@ class EditProfileActivity : AppCompatActivity() {
         saveProfileImg()
 
         val jsonObj = JSONObject()
-        jsonObj.put("json_fullName.group05.lab1", etFullName.text.toString())
-        jsonObj.put("json_nickname.group05.lab1", etNickname.text.toString())
-        jsonObj.put("json_email.group05.lab1", etEmail.text.toString())
-        jsonObj.put("json_location.group05.lab1", etLocation.text.toString())
+        jsonObj.put("json_fullName.group05.lab1", etFullName.text.trim().toString())
+        jsonObj.put("json_nickname.group05.lab1", etNickname.text.trim().toString())
+        jsonObj.put("json_email.group05.lab1", etEmail.text.trim().toString())
+        jsonObj.put("json_location.group05.lab1", etLocation.text.trim().toString())
         jsonObj.put("json_profilePic.group05.lab1", FILENAME_IMG)
 
         val sharedPref = this.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE) ?: return
@@ -248,7 +248,7 @@ class EditProfileActivity : AppCompatActivity() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if (optionsMenu != null) {
-                    optionsMenu.findItem(R.id.save).isEnabled = etFullName.text.length > 0
+                    optionsMenu.findItem(R.id.save).isEnabled = etFullName.text.trim().length > 0
                 }
             }
 
@@ -280,10 +280,10 @@ class EditProfileActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.save -> {
                 setResult(Activity.RESULT_OK, Intent().also {
-                    it.putExtra("save_fullName.group05.lab1", etFullName.text.toString())
-                    it.putExtra("save_nickname.group05.lab1", etNickname.text.toString())
-                    it.putExtra("save_email.group05.lab1", etEmail.text.toString())
-                    it.putExtra("save_location.group05.lab1", etLocation.text.toString())
+                    it.putExtra("save_fullName.group05.lab1", etFullName.text.trim().toString())
+                    it.putExtra("save_nickname.group05.lab1", etNickname.text.trim().toString())
+                    it.putExtra("save_email.group05.lab1", etEmail.text.trim().toString())
+                    it.putExtra("save_location.group05.lab1", etLocation.text.trim().toString())
                     if (currentPhotoPath != null) { //TODO is this necessary?
                         it.putExtra("save_profilePic.group05.lab1", currentPhotoPath)
                     }
@@ -336,10 +336,10 @@ class EditProfileActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putString("state_fullName.group05.lab1", etFullName.text.toString())
-        outState.putString("state_nickname.group05.lab1", etNickname.text.toString())
-        outState.putString("state_email.group05.lab1", etEmail.text.toString())
-        outState.putString("state_location.group05.lab1", etLocation.text.toString())
+        outState.putString("state_fullName.group05.lab1", etFullName.text.trim().toString())
+        outState.putString("state_nickname.group05.lab1", etNickname.text.trim().toString())
+        outState.putString("state_email.group05.lab1", etEmail.text.trim().toString())
+        outState.putString("state_location.group05.lab1", etLocation.text.trim().toString())
         if (currentPhotoPath != null) {
             outState.putString("state_profilePic.group05.lab1", currentPhotoPath)
         }
