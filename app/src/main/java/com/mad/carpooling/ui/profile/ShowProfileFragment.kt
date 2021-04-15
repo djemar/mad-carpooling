@@ -5,41 +5,41 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
+import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toolbar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.mad.carpooling.R
-import com.mad.carpooling.ui.profile_edit.EditProfileActivity
+import com.mad.carpooling.ui.profile_edit.EditProfileFragment
 import org.json.JSONObject
 
 
-class ShowProfileActivity : AppCompatActivity() {
+class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
     private lateinit var tvFullName: TextView
     private lateinit var tvNickname: TextView
     private lateinit var tvEmail: TextView
     private lateinit var tvLocation: TextView
     private lateinit var ivProfilePic: ImageView
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_show_profile)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        setSupportActionBar(findViewById(R.id.my_toolbar))
+        setHasOptionsMenu(true)
 
-        tvFullName = findViewById<TextView>(R.id.tv_fullName)
-        tvNickname = findViewById<TextView>(R.id.tv_nickname)
-        tvEmail = findViewById<TextView>(R.id.tv_email)
-        tvLocation = findViewById<TextView>(R.id.tv_location)
-        ivProfilePic = findViewById<ImageView>(R.id.iv_profile_pic)
+        tvFullName = view.findViewById<TextView>(R.id.tv_fullName)
+        tvNickname = view.findViewById<TextView>(R.id.tv_nickname)
+        tvEmail = view.findViewById<TextView>(R.id.tv_email)
+        tvLocation = view.findViewById<TextView>(R.id.tv_location)
+        ivProfilePic = view.findViewById<ImageView>(R.id.iv_profile_pic)
 
         initProfile()
     }
 
     private fun initProfile() {
-        val sharedPref = this.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE) ?: return
+        val sharedPref = context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE) ?: return
         val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
         if (jsonString != null) {
             val jsonObject = JSONObject(jsonString)
@@ -49,7 +49,7 @@ class ShowProfileActivity : AppCompatActivity() {
             tvLocation.text = jsonObject.getString("json_location.group05.lab1")
             ivProfilePic.setImageBitmap(
                 BitmapFactory.decodeStream(
-                    openFileInput(
+                    activity?.openFileInput(
                         jsonObject.getString(
                             "json_profilePic.group05.lab1"
                         )
@@ -60,22 +60,21 @@ class ShowProfileActivity : AppCompatActivity() {
     }
 
     fun editProfile() {
-        val intentEditProfileActivity = Intent(this, EditProfileActivity::class.java)
-            .also {
-                it.putExtra("fullName.group05.lab1", tvFullName.text.toString())
-                it.putExtra("nickname.group05.lab1", tvNickname.text.toString())
-                it.putExtra("email.group05.lab1", tvEmail.text.toString())
-                it.putExtra("location.group05.lab1", tvLocation.text.toString())
-                //it.putExtra("profilePic", (ivProfilePic.drawable as BitmapDrawable).bitmap)
-            }
-        startActivityForResult(intentEditProfileActivity, 1)
+        val bundle = Bundle()
+
+        bundle.putString("fullName.group05.lab1", tvFullName.text.toString())
+        bundle.putString("nickname.group05.lab1", tvNickname.text.toString())
+        bundle.putString("email.group05.lab1", tvEmail.text.toString())
+        bundle.putString("location.group05.lab1", tvLocation.text.toString())
+
+        findNavController().navigate(R.id.action_nav_show_profile_to_nav_edit_profile, bundle)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
             val sharedPref =
-                this.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE) ?: return
+                context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE) ?: return
             val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
             if (jsonString != null) {
                 val jsonObject = JSONObject(jsonString)
@@ -85,7 +84,7 @@ class ShowProfileActivity : AppCompatActivity() {
                 tvLocation.text = (data?.getStringExtra("save_location.group05.lab1"))
                 ivProfilePic.setImageBitmap(
                     BitmapFactory.decodeStream(
-                        openFileInput(
+                        activity?.openFileInput(
                             jsonObject.getString(
                                 "json_profilePic.group05.lab1"
                             )
@@ -110,11 +109,9 @@ class ShowProfileActivity : AppCompatActivity() {
 
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        super.onCreateOptionsMenu(menu)
-
-        val inflater: MenuInflater = menuInflater
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_profile, menu)
-        return true
+        super.onCreateOptionsMenu(menu, inflater)
     }
+
 }

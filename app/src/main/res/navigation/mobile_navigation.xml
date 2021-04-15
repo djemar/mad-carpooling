@@ -13,15 +13,23 @@
 
     <fragment
         android:id="@+id/nav_show_profile"
-        android:name="com.mad.carpooling.ui.profile.ShowProfileActivity"
+        android:name="com.mad.carpooling.ui.profile.ShowProfileFragment"
         android:label="@string/menu_show_profile"
-        tools:layout="@layout/activity_show_profile" />
+        tools:layout="@layout/fragment_show_profile" >
+        <action
+            android:id="@+id/action_nav_show_profile_to_nav_edit_profile"
+            app:destination="@id/nav_edit_profile" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_edit_profile"
-        android:name="com.mad.carpooling.ui.profile_edit.EditProfileActivity"
+        android:name="com.mad.carpooling.ui.profile_edit.EditProfileFragment"
         android:label="@string/menu_edit_profile"
-        tools:layout="@layout/activity_edit_profile" />
+        tools:layout="@layout/fragment_edit_profile" >
+        <action
+            android:id="@+id/action_nav_edit_profile_to_nav_show_profile"
+            app:destination="@id/nav_show_profile" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_trip_details"
