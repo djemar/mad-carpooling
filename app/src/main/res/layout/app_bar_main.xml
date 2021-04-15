@@ -11,12 +11,12 @@
         android:layout_height="wrap_content"
         android:theme="@style/Theme.Carpooling.AppBarOverlay">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/my_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/Theme.Carpooling.PopupOverlay" />
+            android:elevation="8dp"
+            android:theme="@style/MyToolbarTheme"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 

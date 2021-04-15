@@ -5,14 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.profile.ShowProfileActivity">
-
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/my_toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:elevation="8dp"
-        android:theme="@style/MyToolbarTheme"/>
+    tools:context=".ui.profile.ShowProfileFragment">
 
     <FrameLayout
         android:layout_width="match_parent"
