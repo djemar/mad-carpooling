@@ -13,11 +13,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Carpooling">
         <activity
-            android:name=".EditProfileActivity"
-            android:parentActivityName=".ShowProfileActivity">
+            android:name=".ui.profile_edit.EditProfileActivity"
+            android:parentActivityName=".ui.profile.ShowProfileActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ShowProfileActivity" />
+                android:value=".ui.profile.ShowProfileActivity" />
         </activity>
         <activity android:name=".MainActivity"
             android:label="@string/title_activity_main"

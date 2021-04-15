@@ -3,23 +3,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_home">
+    app:startDestination="@+id/nav_trip_list">
 
     <fragment
-        android:id="@+id/nav_home"
-        android:name="com.mad.carpooling.ui.home.HomeFragment"
+        android:id="@+id/nav_trip_list"
+        android:name="com.mad.carpooling.ui.trip_list.TripListFragment"
         android:label="@string/menu_home"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_trip_list" />
 
     <fragment
-        android:id="@+id/nav_gallery"
-        android:name="com.mad.carpooling.ui.gallery.GalleryFragment"
+        android:id="@+id/nav_show_profile"
+        android:name="com.mad.carpooling.ui.profile.GalleryFragment"
         android:label="@string/menu_gallery"
         tools:layout="@layout/fragment_gallery" />
 
     <fragment
-        android:id="@+id/nav_slideshow"
-        android:name="com.mad.carpooling.ui.slideshow.SlideshowFragment"
+        android:id="@+id/nav_trip_details"
+        android:name="com.mad.carpooling.ui.trip_details.TripDetailsFragment"
         android:label="@string/menu_slideshow"
-        tools:layout="@layout/fragment_slideshow" />
+        tools:layout="@layout/fragment_trip_details" />
 </navigation>

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:nestedScrollingEnabled="true"
     android:orientation="vertical"
-    tools:context=".EditProfileActivity">
+    tools:context=".ui.profile_edit.EditProfileActivity">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/my_toolbar"

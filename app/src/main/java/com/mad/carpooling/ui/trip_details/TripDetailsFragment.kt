@@ -1,4 +1,4 @@
-package com.mad.carpooling.ui.gallery
+package com.mad.carpooling.ui.trip_details
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,20 +10,20 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.mad.carpooling.R
 
-class GalleryFragment : Fragment() {
+class TripDetailsFragment : Fragment() {
 
-    private lateinit var galleryViewModel: GalleryViewModel
+    private lateinit var tripDetailsViewModel: TripDetailsViewModel
 
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
-        galleryViewModel =
-                ViewModelProvider(this).get(GalleryViewModel::class.java)
-        val root = inflater.inflate(R.layout.fragment_gallery, container, false)
-        val textView: TextView = root.findViewById(R.id.text_gallery)
-        galleryViewModel.text.observe(viewLifecycleOwner, Observer {
+        tripDetailsViewModel =
+                ViewModelProvider(this).get(TripDetailsViewModel::class.java)
+        val root = inflater.inflate(R.layout.fragment_trip_details, container, false)
+        val textView: TextView = root.findViewById(R.id.text_slideshow)
+        tripDetailsViewModel.text.observe(viewLifecycleOwner, Observer {
             textView.text = it
         })
         return root

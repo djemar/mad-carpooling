@@ -1,4 +1,4 @@
-package com.mad.carpooling
+package com.mad.carpooling.ui.profile_edit
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
@@ -23,6 +23,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toBitmap
+import com.mad.carpooling.R
 import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
