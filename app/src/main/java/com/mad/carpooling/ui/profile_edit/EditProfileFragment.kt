@@ -55,13 +55,6 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
 
         setHasOptionsMenu(true)
 
-        val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
-            activity?.setResult(Activity.RESULT_CANCELED)
-            findNavController().navigate(
-                R.id.action_nav_edit_profile_to_nav_show_profile
-            )
-        }
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
