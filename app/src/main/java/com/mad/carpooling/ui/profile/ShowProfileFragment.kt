@@ -3,17 +3,17 @@ package com.mad.carpooling.ui.profile
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.view.*
+import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toolbar
-import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.navigation.NavigationView
 import com.mad.carpooling.R
-import com.mad.carpooling.ui.profile_edit.EditProfileFragment
 import org.json.JSONObject
 
 
@@ -39,7 +39,9 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
     }
 
     private fun initProfile() {
-        val sharedPref = context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE) ?: return
+        val sharedPref =
+            context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
+                ?: return
         val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
         if (jsonString != null) {
             val jsonObject = JSONObject(jsonString)
@@ -47,16 +49,30 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
             tvNickname.text = jsonObject.getString("json_nickname.group05.lab1")
             tvEmail.text = jsonObject.getString("json_email.group05.lab1")
             tvLocation.text = jsonObject.getString("json_location.group05.lab1")
-            ivProfilePic.setImageBitmap(
-                BitmapFactory.decodeStream(
-                    activity?.openFileInput(
-                        jsonObject.getString(
-                            "json_profilePic.group05.lab1"
-                        )
+            val bitmap: Bitmap = BitmapFactory.decodeStream(
+                activity?.openFileInput(
+                    jsonObject.getString(
+                        "json_profilePic.group05.lab1"
                     )
                 )
             )
+            ivProfilePic.setImageBitmap(bitmap)
+            initDrawerHeader(bitmap)
         }
+
+    }
+
+    private fun initDrawerHeader(bitmap: Bitmap) {
+        val navView: NavigationView? = activity?.findViewById(R.id.nav_view)
+        val headerView: View? = navView?.getHeaderView(0)
+        val ivProfileHeader: ImageView? = headerView?.findViewById(R.id.nav_header_profile_pic)
+        val tvFullNameHeader: TextView? = headerView?.findViewById(R.id.nav_header_fullName)
+        val tvNicknameHeader: TextView? = headerView?.findViewById(R.id.nav_header_nickname)
+
+        tvFullNameHeader?.text = tvFullName.text
+        tvNicknameHeader?.text = tvNickname.text
+        ivProfileHeader?.setImageBitmap(bitmap)
+
     }
 
     fun editProfile() {
@@ -74,7 +90,8 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
             val sharedPref =
-                context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE) ?: return
+                context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
+                    ?: return
             val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
             if (jsonString != null) {
                 val jsonObject = JSONObject(jsonString)
