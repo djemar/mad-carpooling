@@ -31,6 +31,27 @@
             app:exitAnim="@anim/fragment_close_exit"
             app:popEnterAnim="@anim/fragment_open_enter"
             app:popExitAnim="@anim/fragment_close_exit" />
+        <argument
+            android:name="fullname"
+            app:argType="string"
+            android:defaultValue="Fullname" />
+        <argument
+            android:name="nickname"
+            app:argType="string"
+            android:defaultValue="Nickname" />
+        <argument
+            android:name="email"
+            app:argType="string"
+            android:defaultValue="Email" />
+        <argument
+            android:name="location"
+            app:argType="string"
+            android:defaultValue="Location" />
+        <argument
+            android:name="currentPhotoPath"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="null" />
     </fragment>
 
     <fragment
@@ -45,6 +66,22 @@
             app:exitAnim="@anim/fragment_close_exit"
             app:popEnterAnim="@android:anim/accelerate_decelerate_interpolator"
             app:popExitAnim="@android:anim/slide_out_right" />
+        <argument
+            android:name="fullname"
+            app:argType="string"
+            android:defaultValue="Fullname" />
+        <argument
+            android:name="nickname"
+            app:argType="string"
+            android:defaultValue="Nickname" />
+        <argument
+            android:name="email"
+            app:argType="string"
+            android:defaultValue="Email" />
+        <argument
+            android:name="location"
+            app:argType="string"
+            android:defaultValue="Location" />
     </fragment>
 
     <fragment

@@ -22,10 +22,10 @@ class TripListFragment : Fragment() {
         tripListViewModel =
                 ViewModelProvider(this).get(TripListViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_trip_list, container, false)
-        val textView: TextView = root.findViewById(R.id.text_home)
+        /*val textView: TextView = root.findViewById(R.id.text_home)
         tripListViewModel.text.observe(viewLifecycleOwner, Observer {
             textView.text = it
-        })
+        })*/
         return root
     }
 }
