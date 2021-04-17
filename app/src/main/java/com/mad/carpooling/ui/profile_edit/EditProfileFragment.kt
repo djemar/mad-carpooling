@@ -22,11 +22,11 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.addCallback
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.onNavDestinationSelected
 import com.mad.carpooling.R
 import org.json.JSONObject
 import java.io.File
@@ -262,7 +262,7 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                optionsMenu.findItem(R.id.save).isEnabled = etFullName.text.trim().length > 0
+                optionsMenu.findItem(R.id.nav_show_profile).isEnabled = etFullName.text.trim().length > 0
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -286,7 +286,7 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.save -> {
+            R.id.nav_show_profile -> {
                 val bundle = Bundle()
                 bundle.putString("save_fullName.group05.lab1", etFullName.text.trim().toString())
                 bundle.putString("save_nickname.group05.lab1", etNickname.text.trim().toString())
@@ -304,7 +304,7 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
                 )
                 true
             }
-            else -> super.onOptionsItemSelected(item)
+            else -> item.onNavDestinationSelected(findNavController()) || super.onOptionsItemSelected(item)
         }
 
     }

@@ -6,12 +6,16 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.onNavDestinationSelected
 import com.google.android.material.navigation.NavigationView
 import com.mad.carpooling.R
 import org.json.JSONObject
@@ -117,11 +121,13 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.edit -> {
+            R.id.nav_edit_profile -> {
                 editProfile()
                 true
             }
-            else -> super.onOptionsItemSelected(item)
+            else -> item.onNavDestinationSelected(findNavController()) || super.onOptionsItemSelected(
+                item
+            )
         }
 
     }
