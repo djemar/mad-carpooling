@@ -12,16 +12,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Carpooling">
-        <activity
-            android:name=".ui.profile_edit.EditProfileFragment"
-            android:parentActivityName=".ui.profile.ShowProfileFragment">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.profile.ShowProfileFragment" />
-        </activity>
-        <activity android:name=".MainActivity"
-            android:label="@string/title_activity_main"
-            android:theme="@style/Theme.Carpooling.NoActionBar">
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
