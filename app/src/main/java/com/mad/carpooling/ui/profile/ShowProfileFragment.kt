@@ -81,26 +81,18 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
 
     }
 
-/*fun editProfile() {
-    val bundle = Bundle()
-
-    bundle.putString("fullName.group05.lab1", tvFullName.text.toString())
-    bundle.putString("nickname.group05.lab1", tvNickname.text.toString())
-    bundle.putString("email.group05.lab1", tvEmail.text.toString())
-    bundle.putString("location.group05.lab1", tvLocation.text.toString())
-
-    findNavController().navigate(R.id.action_nav_show_profile_to_nav_edit_profile, bundle)
-}*/
+    fun editProfile() {
+        val action = ShowProfileFragmentDirections.actionNavShowProfileToNavEditProfile(
+            tvFullName.text.toString(),
+            tvNickname.text.toString(), tvEmail.text.toString(), tvLocation.text.toString()
+        )
+        findNavController().navigate(action)
+    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.nav_edit_profile -> {
-                // editProfile()
-                val action = ShowProfileFragmentDirections.actionNavShowProfileToNavEditProfile(
-                    tvFullName.text.toString(),
-                    tvNickname.text.toString(), tvEmail.text.toString(), tvLocation.text.toString()
-                )
-                findNavController().navigate(action)
+                editProfile()
                 true
             }
             else -> item.onNavDestinationSelected(findNavController()) || super.onOptionsItemSelected(
