@@ -249,7 +249,7 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
         jsonObj.put("json_nickname.group05.lab1", etNickname.text.trim().toString())
         jsonObj.put("json_email.group05.lab1", etEmail.text.trim().toString())
         jsonObj.put("json_location.group05.lab1", etLocation.text.trim().toString())
-        jsonObj.put("json_profilePic.group05.lab1", FILENAME_IMG)
+        jsonObj.put("json_profilePic.group05.lab1", currentPhotoPath)
 
         val sharedPref =
             context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
