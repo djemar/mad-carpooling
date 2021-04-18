@@ -209,6 +209,7 @@
                 android:id="@+id/cv_departure"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
                 android:layout_margin="8dp">
 
                 <LinearLayout
@@ -269,6 +270,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    app:cardCornerRadius="12dp"
                     android:layout_margin="8dp">
 
                     <LinearLayout
@@ -303,6 +305,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    app:cardCornerRadius="12dp"
                     android:layout_margin="8dp">
 
                     <LinearLayout
@@ -345,6 +348,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="4dp"
+                    app:cardCornerRadius="12dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/cv_price"
                     app:layout_constraintStart_toStartOf="parent"
@@ -380,6 +384,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="4dp"
+                    app:cardCornerRadius="12dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/cv_passenger"
@@ -432,7 +437,7 @@
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:cardCornerRadius="8dp"
+                    app:cardCornerRadius="12dp"
                     app:strokeColor="?attr/colorPrimary"
                     app:strokeWidth="4dp">
 
