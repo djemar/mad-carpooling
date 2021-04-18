@@ -30,7 +30,6 @@ import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.onNavDestinationSelected
 import com.google.android.material.snackbar.Snackbar
 import com.mad.carpooling.R
-import com.mad.carpooling.ui.profile.ShowProfileFragmentDirections
 import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
@@ -74,41 +73,49 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
         etLocation = view.findViewById<EditText>(R.id.et_location)
         ivEditProfilePic = view.findViewById<ImageView>(R.id.et_profile_pic)
 
-        //savedInstanceState check?
-        initProfile()
+        initProfile(savedInstanceState)
 
         val btnCamera = view.findViewById<ImageButton>(R.id.btn_camera)
         registerForContextMenu(btnCamera)
         btnCamera.setOnClickListener { activity?.openContextMenu(btnCamera) }
     }
 
-    private fun initProfile() {
-        val args: EditProfileFragmentArgs by navArgs()
-        etFullName.setText(args.fullname)
-        etNickname.setText(args.nickname)
-        etEmail.setText(args.email)
-        etLocation.setText(args.location)
-
-        if (currentPhotoPath != null) {
-            BitmapFactory.decodeFile(currentPhotoPath)?.also { bitmap ->
-                ivEditProfilePic.setImageBitmap(bitmap)
-            }
-        } else {
+    private fun initProfile(savedInstanceState: Bundle?) {
+        if (savedInstanceState == null) {    // view created navigating from ShowProfileFragment
+            val args: EditProfileFragmentArgs by navArgs()
+            etFullName.setText(args.fullname)
+            etNickname.setText(args.nickname)
+            etEmail.setText(args.email)
+            etLocation.setText(args.location)
             val sharedPref =
                 context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
                     ?: return
             val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
             if (jsonString != null) {
                 val jsonObject = JSONObject(jsonString)
-                ivEditProfilePic.setImageBitmap(
-                    BitmapFactory.decodeStream(
-                        activity?.openFileInput(
-                            jsonObject.getString(
-                                "json_profilePic.group05.lab1"
-                            )
+                currentPhotoPath = jsonObject.getString("json_profilePic.group05.lab1")
+            }
+        } else {
+            currentPhotoPath = savedInstanceState.getString("state_currentPhoto")
+            if (currentPhotoPath != null) {
+                BitmapFactory.decodeFile(currentPhotoPath)?.also { bitmap ->
+                    ivEditProfilePic.setImageBitmap(bitmap)
+                }
+            } else {
+                val sharedPref =
+                    context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
+                        ?: return
+                val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
+                if (jsonString != null) {
+                    val jsonObject = JSONObject(jsonString)
+                    BitmapFactory.decodeFile(
+                        jsonObject.getString(
+                            "json_profilePic.group05.lab1"
                         )
-                    )
-                )
+                    )?.also { bitmap ->
+                        ivEditProfilePic.setImageBitmap(bitmap)
+                    }
+                }
             }
         }
     }
@@ -295,17 +302,8 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.nav_show_profile -> { //save
-                /*val bundle = Bundle()
-                bundle.putString("save_fullName.group05.lab1", etFullName.text.trim().toString())
-                bundle.putString("save_nickname.group05.lab1", etNickname.text.trim().toString())
-                bundle.putString("save_email.group05.lab1", etEmail.text.trim().toString())
-                bundle.putString("save_location.group05.lab1", etLocation.text.trim().toString())
-
-                if (currentPhotoPath != null) { //TODO is this necessary?
-                    bundle.putString("save_profilePic.group05.lab1", currentPhotoPath)
-                }*/
-
                 saveToSharedPref()
+
                 val action = EditProfileFragmentDirections.actionNavEditProfileToNavShowProfile(
                     etFullName.text.trim().toString(),
                     etNickname.text.trim().toString(),
@@ -314,10 +312,7 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
                     currentPhotoPath
                 )
                 findNavController().navigate(action)
-/*                findNavController().navigate(
-                    R.id.action_nav_edit_profile_to_nav_show_profile,
-                    bundle
-                )*/
+
                 Snackbar.make(requireView(), "Profile saved", Snackbar.LENGTH_SHORT).show()
                 true
             }
@@ -359,6 +354,9 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        if (currentPhotoPath != null) outState.putString("state_currentPhoto", currentPhotoPath)
+    }
 //    override fun onSaveInstanceState(outState: Bundle) {
 //        super.onSaveInstanceState(outState)
 //        outState.putString("state_fullName.group05.lab1", etFullName.text.trim().toString())
