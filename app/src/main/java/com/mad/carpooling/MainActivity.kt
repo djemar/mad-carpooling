@@ -54,15 +54,11 @@ class MainActivity : AppCompatActivity() {
             val jsonObject = JSONObject(jsonString)
             tvFullNameHeader.text = jsonObject.getString("json_fullName.group05.lab1")
             tvNicknameHeader.text = jsonObject.getString("json_nickname.group05.lab1")
-            ivProfileHeader.setImageBitmap(
-                BitmapFactory.decodeStream(
-                    openFileInput(
-                        jsonObject.getString(
-                            "json_profilePic.group05.lab1"
-                        )
-                    )
-                )
-            )
+            BitmapFactory.decodeFile(jsonObject.getString(
+                "json_profilePic.group05.lab1"
+            ))?.also { bitmap ->
+                ivProfileHeader.setImageBitmap(bitmap)
+            }
         }
     }
 
