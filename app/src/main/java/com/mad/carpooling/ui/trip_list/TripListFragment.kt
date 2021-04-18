@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -25,7 +26,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
         val rv = view.findViewById<RecyclerView>(R.id.triplist_rv)
         rv.layoutManager = LinearLayoutManager(context)
         //just an example, real trips needed
-        val triplist = (1..5).map { Trip("Trip$it") }.toMutableList()
+        val triplist = (1..20).map { Trip("From_to $it", "duration $it", "price $it") }.toMutableList()
         val tripAdapter = TripAdapter(triplist)
         rv.adapter = tripAdapter
 
@@ -36,7 +37,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
     }
 }
 
-class Trip(val name: String){
+class Trip(val location: String, val duration: String, val price: String){
 
 }
 
@@ -44,14 +45,21 @@ class TripAdapter(val triplist: List<Trip>): RecyclerView.Adapter<TripAdapter.Tr
 
     class TripViewHolder(v: View): RecyclerView.ViewHolder(v){
 
-        val tripId = v.findViewById<TextView>(R.id.trip)
+        val tripLayout = v.findViewById<RelativeLayout>(R.id.trip)
+        val location = v.findViewById<TextView>(R.id.from_to)
+        val duration = v.findViewById<TextView>(R.id.duration)
+        val price = v.findViewById<TextView>(R.id.price)
         val button = v.findViewById<Button>(R.id.edit)
         var navController: NavController? = null
 
         fun bind(trip: Trip){
-            tripId.text = trip.name
-            tripId.setOnClickListener{
-                navController = Navigation.findNavController(tripId)
+
+            location.text = trip.location
+            duration.text = trip.duration
+            price.text = trip.price
+
+            tripLayout.setOnClickListener{
+                navController = Navigation.findNavController(tripLayout)
                 navController!!.navigate(R.id.action_nav_trip_list_to_nav_trip_details)
             }
             button.setOnClickListener {

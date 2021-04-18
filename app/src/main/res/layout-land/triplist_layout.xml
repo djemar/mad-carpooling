@@ -9,24 +9,60 @@
         android:layout_margin="8dp"
         >
 
-        <TextView
-            android:id="@+id/trip"
+        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clickable="true"
-            android:text="Example"
-            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-            android:layout_gravity="start"
-            android:layout_margin="4dp"
-            />
+            android:layout_height="wrap_content"
+            android:id="@+id/trip"
+            android:clickable="true">
+
+            <TextView
+                android:id="@+id/from_to"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="Departure and arrival location"
+                android:paddingStart="4dp"
+                android:paddingTop="4dp"
+                android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                />
+
+            <TextView
+                android:id="@+id/duration"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/from_to"
+                android:layout_gravity="center_vertical"
+                android:text="trip duration"
+                android:paddingStart="4dp"
+                android:paddingTop="4dp"
+                android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                />
+
+            <TextView
+                android:id="@+id/price"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/duration"
+                android:layout_gravity="center_vertical"
+                android:text="price"
+                android:paddingStart="4dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                />
+
+        </RelativeLayout>
 
         <Button
             android:id="@+id/edit"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:background="@drawable/ic_baseline_edit"
             android:layout_gravity="end|center"
-            android:layout_margin="4dp"
+            android:layout_marginEnd="16dp"
             />
 
     </androidx.cardview.widget.CardView>
