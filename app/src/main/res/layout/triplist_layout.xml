@@ -57,7 +57,7 @@
         </RelativeLayout>
 
         <Button
-            android:id="@+id/edit"
+            android:id="@+id/trip_edit"
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:background="@drawable/ic_baseline_edit"
