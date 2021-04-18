@@ -30,7 +30,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
         val tripAdapter = TripAdapter(triplist)
         rv.adapter = tripAdapter
 
-        val fab = view.findViewById<FloatingActionButton>(R.id.add)
+        val fab = view.findViewById<FloatingActionButton>(R.id.trip_add)
         fab.setOnClickListener {
             findNavController().navigate(R.id.action_nav_trip_list_to_nav_trip_edit) //a new one from scratch
         }
@@ -45,11 +45,11 @@ class TripAdapter(val triplist: List<Trip>): RecyclerView.Adapter<TripAdapter.Tr
 
     class TripViewHolder(v: View): RecyclerView.ViewHolder(v){
 
-        val tripLayout = v.findViewById<RelativeLayout>(R.id.trip)
-        val location = v.findViewById<TextView>(R.id.from_to)
-        val duration = v.findViewById<TextView>(R.id.duration)
-        val price = v.findViewById<TextView>(R.id.price)
-        val button = v.findViewById<Button>(R.id.edit)
+        val tripLayout = v.findViewById<RelativeLayout>(R.id.trip_info)
+        val location = v.findViewById<TextView>(R.id.trip_from_to)
+        val duration = v.findViewById<TextView>(R.id.trip_duration)
+        val price = v.findViewById<TextView>(R.id.trip_price)
+        val button = v.findViewById<Button>(R.id.trip_edit)
         var navController: NavController? = null
 
         fun bind(trip: Trip){

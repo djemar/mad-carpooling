@@ -12,11 +12,11 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/trip"
+            android:id="@+id/trip_info"
             android:clickable="true">
 
             <TextView
-                android:id="@+id/from_to"
+                android:id="@+id/trip_from_to"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
@@ -28,10 +28,10 @@
                 />
 
             <TextView
-                android:id="@+id/duration"
+                android:id="@+id/trip_duration"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/from_to"
+                android:layout_below="@id/trip_from_to"
                 android:layout_gravity="center_vertical"
                 android:text="trip duration"
                 android:paddingStart="4dp"
@@ -41,10 +41,10 @@
                 />
 
             <TextView
-                android:id="@+id/price"
+                android:id="@+id/trip_price"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/duration"
+                android:layout_below="@id/trip_duration"
                 android:layout_gravity="center_vertical"
                 android:text="price"
                 android:paddingStart="4dp"
