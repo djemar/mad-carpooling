@@ -22,10 +22,6 @@ class TripEditFragment : Fragment() {
         tripEditViewModel =
                 ViewModelProvider(this).get(TripEditViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_trip_details, container, false)
-        val textView: TextView = root.findViewById(R.id.text_slideshow)
-        tripEditViewModel.text.observe(viewLifecycleOwner, Observer {
-            textView.text = it
-        })
         return root
     }
 }
