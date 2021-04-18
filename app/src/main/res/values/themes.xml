@@ -34,4 +34,8 @@
 
     <style name="Theme.Carpooling.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="Theme.CarpoolingDayNight.Background" parent="ThemeOverlay.AppCompat.DayNight">
+    <item name="android:background">@color/cardview_light_background</item>
+    </style>
+
 </resources>

@@ -21,5 +21,7 @@
 
     <style name="MyToolbarTheme" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar">
     </style>
-
+    <style name="Theme.CarpoolingDayNight.Background" parent="ThemeOverlay.AppCompat.DayNight">
+        <item name="android:background">@color/cardview_dark_background</item>
+    </style>
 </resources>  
