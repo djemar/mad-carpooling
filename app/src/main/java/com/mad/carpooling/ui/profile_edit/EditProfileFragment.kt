@@ -231,14 +231,17 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
     private fun saveProfileImg() {
         val imgPath = activity?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         val filename = FILENAME_IMG
-        val tmpFile = File(imgPath, TMP_FILENAME_IMG)
-        val fileOutputStream = activity?.openFileOutput(filename, Context.MODE_PRIVATE)
+        val myFile = File(imgPath, filename)
+        val fileOutputStream = FileOutputStream(myFile)
 
         (ivEditProfilePic.drawable).toBitmap()
             .compress(Bitmap.CompressFormat.JPEG, 90, fileOutputStream)
         fileOutputStream?.close()
 
+        val tmpFile = File(imgPath, TMP_FILENAME_IMG)
         tmpFile.delete()
+
+        currentPhotoPath = (File(imgPath, filename)).absolutePath
     }
 
     private fun saveToSharedPref() {
