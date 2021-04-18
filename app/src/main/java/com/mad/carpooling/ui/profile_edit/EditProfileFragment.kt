@@ -87,34 +87,26 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
             etNickname.setText(args.nickname)
             etEmail.setText(args.email)
             etLocation.setText(args.location)
+        } else {
+            currentPhotoPath = savedInstanceState.getString("state_currentPhoto")
+        }
+        if (currentPhotoPath != null) {
+            BitmapFactory.decodeFile(currentPhotoPath)?.also { bitmap ->
+                ivEditProfilePic.setImageBitmap(bitmap)
+            }
+        } else {
             val sharedPref =
                 context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
                     ?: return
             val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
             if (jsonString != null) {
                 val jsonObject = JSONObject(jsonString)
-                currentPhotoPath = jsonObject.getString("json_profilePic.group05.lab1")
-            }
-        } else {
-            currentPhotoPath = savedInstanceState.getString("state_currentPhoto")
-            if (currentPhotoPath != null) {
-                BitmapFactory.decodeFile(currentPhotoPath)?.also { bitmap ->
+                BitmapFactory.decodeFile(
+                    jsonObject.getString(
+                        "json_profilePic.group05.lab1"
+                    )
+                )?.also { bitmap ->
                     ivEditProfilePic.setImageBitmap(bitmap)
-                }
-            } else {
-                val sharedPref =
-                    context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
-                        ?: return
-                val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
-                if (jsonString != null) {
-                    val jsonObject = JSONObject(jsonString)
-                    BitmapFactory.decodeFile(
-                        jsonObject.getString(
-                            "json_profilePic.group05.lab1"
-                        )
-                    )?.also { bitmap ->
-                        ivEditProfilePic.setImageBitmap(bitmap)
-                    }
                 }
             }
         }
@@ -357,31 +349,5 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
     override fun onSaveInstanceState(outState: Bundle) {
         if (currentPhotoPath != null) outState.putString("state_currentPhoto", currentPhotoPath)
     }
-//    override fun onSaveInstanceState(outState: Bundle) {
-//        super.onSaveInstanceState(outState)
-//        outState.putString("state_fullName.group05.lab1", etFullName.text.trim().toString())
-//        outState.putString("state_nickname.group05.lab1", etNickname.text.trim().toString())
-//        outState.putString("state_email.group05.lab1", etEmail.text.trim().toString())
-//        outState.putString("state_location.group05.lab1", etLocation.text.trim().toString())
-//        if (currentPhotoPath != null) {
-//            outState.putString("state_profilePic.group05.lab1", currentPhotoPath)
-//        }
-//
-//    }
-
-//    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-//        super.onRestoreInstanceState(savedInstanceState)
-//        etFullName.setText(savedInstanceState.getString("state_fullName.group05.lab1"))
-//        etNickname.setText(savedInstanceState.getString("state_nickname.group05.lab1"))
-//        etEmail.setText(savedInstanceState.getString("state_email.group05.lab1"))
-//        etLocation.setText(savedInstanceState.getString("state_location.group05.lab1"))
-//        currentPhotoPath = savedInstanceState.getString("state_profilePic.group05.lab1")
-//        if (currentPhotoPath != null) {
-//            BitmapFactory.decodeFile(currentPhotoPath)?.also { bitmap ->
-//                ivEditProfilePic.setImageBitmap(bitmap)
-//            }
-//        }
-//
-//    }
 
 }
