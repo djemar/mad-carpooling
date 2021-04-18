@@ -34,6 +34,16 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
         fab.setOnClickListener {
             findNavController().navigate(R.id.action_nav_trip_list_to_nav_trip_edit) //a new one from scratch
         }
+        rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                if (dy > 0 && fab.getVisibility() === View.VISIBLE) {
+                    fab.hide()
+                } else if (dy < 0 && fab.getVisibility() !== View.VISIBLE) {
+                   fab.show()
+                }
+            }
+        })
     }
 }
 
