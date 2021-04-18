@@ -73,10 +73,9 @@
                         </androidx.cardview.widget.CardView>
 
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_weight="1"
                         android:orientation="vertical"
                         android:paddingStart="8dp"
                         android:paddingEnd="8dp">
@@ -86,7 +85,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/full_name"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+                            android:textStyle="bold"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
                         <RatingBar
                             android:id="@+id/ratingBar"
@@ -96,16 +96,14 @@
                             android:isIndicator="true"
                             android:numStars="5"
                             android:rating="4.5" />
-
                     </LinearLayout>
 
                     <Button
                         android:id="@+id/btn_tripDetails_showProfile"
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_margin="8dp"
-                        android:layout_weight="1"
                         android:text="Show Profile" />
 
                 </LinearLayout>
@@ -223,6 +221,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
                         android:text="Departure"
+                        android:textStyle="bold"
                         android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
                     <TextView
@@ -232,7 +231,8 @@
                         android:layout_gravity="center"
                         android:layout_weight="1"
                         android:text="Turin"
-                        android:textAlignment="center" />
+                        android:textAlignment="center"
+                        android:textSize="18sp"/>
 
                     <TextView
                         android:id="@+id/tv_tripDetails_departureDate"
@@ -241,7 +241,8 @@
                         android:layout_gravity="center"
                         android:layout_weight="1"
                         android:text="18/04/21"
-                        android:textAlignment="center" />
+                        android:textAlignment="center"
+                        android:textSize="18sp"/>
 
                     <TextView
                         android:id="@+id/tv_tripDetails_departureTime"
@@ -250,7 +251,8 @@
                         android:layout_gravity="center"
                         android:layout_weight="1"
                         android:text="13:00"
-                        android:textAlignment="center" />
+                        android:textAlignment="center"
+                        android:textSize="18sp"/>
 
                 </LinearLayout>
 
@@ -275,18 +277,22 @@
                         android:padding="16dp">
 
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight="3"
                             android:text="Arrival"
+                            android:textStyle="bold"
                             android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
                         <TextView
                             android:id="@+id/tv_tripDetails_arrivalLocation"
-                            android:layout_width="match_parent"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:layout_gravity="center"
                             android:text="Rome"
-                            android:textAlignment="center"/>
+                            android:textAlignment="center"
+                            android:textSize="18sp"/>
 
                     </LinearLayout>
 
@@ -305,18 +311,22 @@
                         android:padding="16dp">
 
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight="3"
                             android:text="Estimated time"
+                            android:textStyle="bold"
                             android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
                         <TextView
                             android:id="@+id/tv_tripDetails_estimatedTime"
-                            android:layout_width="match_parent"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:layout_gravity="center"
                             android:text="6h 30m"
-                            android:textAlignment="center" />
+                            android:textAlignment="center"
+                            android:textSize="18sp"/>
 
                     </LinearLayout>
 
@@ -359,7 +369,7 @@
                             android:layout_gravity="center"
                             android:padding="8dp"
                             android:text="2"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+                            android:textSize="18sp"/>
 
                     </LinearLayout>
 
@@ -394,7 +404,7 @@
                             android:layout_gravity="center"
                             android:padding="8dp"
                             android:text="55"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+                            android:textSize="18sp" />
 
                     </LinearLayout>
 
@@ -416,6 +426,7 @@
                     android:layout_gravity="center"
                     android:paddingBottom="8dp"
                     android:text="Description"
+                    android:textStyle="bold"
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
                 <com.google.android.material.card.MaterialCardView
@@ -447,6 +458,7 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="16dp"
                     android:text="Intermediate stops"
+                    android:textStyle="bold"
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
                 <androidx.recyclerview.widget.RecyclerView

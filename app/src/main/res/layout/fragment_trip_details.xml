@@ -75,7 +75,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/full_name"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+                        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                        android:textStyle="bold" />
 
                     <RatingBar
                         android:id="@+id/ratingBar"
@@ -120,11 +121,11 @@
                     android:padding="16dp">
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="2"
                         android:text="Departure"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+                        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tv_tripDetails_departureLocation"
@@ -133,7 +134,8 @@
                         android:layout_gravity="center"
                         android:layout_weight="1"
                         android:text="Turin"
-                        android:textAlignment="center" />
+                        android:textAlignment="center"
+                        android:textSize="18sp" />
 
                     <TextView
                         android:id="@+id/tv_tripDetails_departureDate"
@@ -142,7 +144,8 @@
                         android:layout_gravity="center"
                         android:layout_weight="1"
                         android:text="18/04/21"
-                        android:textAlignment="center" />
+                        android:textAlignment="center"
+                        android:textSize="18sp" />
 
                     <TextView
                         android:id="@+id/tv_tripDetails_departureTime"
@@ -151,7 +154,8 @@
                         android:layout_gravity="center"
                         android:layout_weight="1"
                         android:text="13:00"
-                        android:textAlignment="center" />
+                        android:textAlignment="center"
+                        android:textSize="18sp" />
 
                 </LinearLayout>
 
@@ -173,18 +177,20 @@
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="2"
+                        android:layout_weight="3"
                         android:text="Arrival"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+                        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tv_tripDetails_arrivalLocation"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_weight="3"
+                        android:layout_weight="1"
                         android:text="Rome"
-                        android:textAlignment="center" />
+                        android:textAlignment="center"
+                        android:textSize="18sp" />
 
                 </LinearLayout>
 
@@ -206,18 +212,20 @@
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="2"
+                        android:layout_weight="3"
                         android:text="Estimated time"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+                        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tv_tripDetails_estimatedTime"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_weight="3"
+                        android:layout_weight="1"
                         android:text="6h 30m"
-                        android:textAlignment="center" />
+                        android:textAlignment="center"
+                        android:textSize="18sp" />
 
                 </LinearLayout>
 
@@ -258,7 +266,7 @@
                             android:layout_gravity="center"
                             android:padding="8dp"
                             android:text="2"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+                            android:textSize="18sp" />
 
                     </LinearLayout>
 
@@ -293,7 +301,7 @@
                             android:layout_gravity="center"
                             android:padding="8dp"
                             android:text="55"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+                            android:textSize="18sp" />
 
                     </LinearLayout>
 
@@ -401,7 +409,8 @@
                     android:layout_gravity="center"
                     android:paddingBottom="8dp"
                     android:text="Description"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textStyle="bold" />
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
@@ -432,7 +441,8 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="16dp"
                     android:text="Intermediate stops"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textStyle="bold" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_tripDetails_stops"
