@@ -35,12 +35,20 @@
         android:id="@+id/nav_trip_details"
         android:name="com.mad.carpooling.ui.trip_details.TripDetailsFragment"
         android:label="@string/menu_trip_details"
-        tools:layout="@layout/fragment_trip_details" />
+        tools:layout="@layout/fragment_trip_details" >
+        <action
+            android:id="@+id/action_nav_trip_details_to_nav_trip_edit"
+            app:destination="@id/nav_trip_edit" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_trip_edit"
         android:name="com.mad.carpooling.ui.trip_edit.TripEditFragment"
         android:label="@string/menu_trip_edit"
-        tools:layout="@layout/fragment_trip_edit" />
+        tools:layout="@layout/fragment_trip_edit" >
+        <action
+            android:id="@+id/action_nav_trip_edit_to_nav_trip_details"
+            app:destination="@id/nav_trip_details" />
+    </fragment>
 
 </navigation>
