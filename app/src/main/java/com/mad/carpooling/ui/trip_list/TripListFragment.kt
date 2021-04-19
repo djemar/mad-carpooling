@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -27,8 +28,14 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
         rv.layoutManager = LinearLayoutManager(context)
         //just an example, real trips needed
         val triplist = (1..20).map { Trip("From_to $it", "duration $it", "price $it") }.toMutableList()
+        //val triplist = listOf<Trip>() //to check emptyView
         val tripAdapter = TripAdapter(triplist)
         rv.adapter = tripAdapter
+
+        val emptyView = view.findViewById<TextView>(R.id.no_trips_available)
+
+        if (tripAdapter.itemCount == 0) //from getItemCount
+            emptyView.isVisible = true
 
         val fab = view.findViewById<FloatingActionButton>(R.id.trip_add)
         fab.setOnClickListener {
@@ -60,6 +67,7 @@ class TripAdapter(val triplist: List<Trip>): RecyclerView.Adapter<TripAdapter.Tr
         val duration = v.findViewById<TextView>(R.id.trip_duration)
         val price = v.findViewById<TextView>(R.id.trip_price)
         val button = v.findViewById<Button>(R.id.trip_edit)
+
         var navController: NavController? = null
 
         fun bind(trip: Trip){
@@ -89,7 +97,6 @@ class TripAdapter(val triplist: List<Trip>): RecyclerView.Adapter<TripAdapter.Tr
         holder.bind(triplist[position])
     }
 
-    //could be used for task 5c (?)
     override fun getItemCount(): Int {
         return triplist.size;
     }
