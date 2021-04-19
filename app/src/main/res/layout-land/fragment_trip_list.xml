@@ -14,6 +14,15 @@
         android:layout_height="wrap_content"
         />
 
+    <TextView
+        android:id="@+id/no_trips_available"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:visibility="gone"
+        android:text="No trips in your list"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"/>
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/trip_add"
         android:layout_width="wrap_content"
