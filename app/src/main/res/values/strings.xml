@@ -33,4 +33,5 @@
     <string name="duration">Duration</string>
     <string name="price">Price</string>
     <string name="seats">Seats</string>
+    <string name="description">Description</string>
 </resources>
