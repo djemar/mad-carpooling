@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
@@ -10,60 +11,71 @@
         >
 
         <RelativeLayout
+            android:id="@+id/trip_rl"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/trip_info"
+            android:layout_height="match_parent"
             android:clickable="true">
 
-            <TextView
-                android:id="@+id/trip_from_to"
-                android:layout_width="match_parent"
+            <ImageView
+                android:id="@+id/trip_car"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:text="Departure and arrival location"
-                android:paddingStart="4dp"
-                android:paddingTop="4dp"
-                android:maxLines="1"
-                android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                />
+                android:padding="2dp"
+                android:src="@drawable/ic_baseline_car"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                 />
 
-            <TextView
-                android:id="@+id/trip_duration"
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:id="@+id/trip_info"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/trip_from_to"
-                android:layout_gravity="center_vertical"
-                android:text="trip duration"
-                android:paddingStart="4dp"
-                android:paddingTop="4dp"
-                android:maxLines="1"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
-                />
+                android:orientation="vertical"
+                android:layout_toRightOf="@id/trip_car"
+                android:layout_toLeftOf="@id/trip_edit"
+                android:padding="4dp"
+                >
 
-            <TextView
-                android:id="@+id/trip_price"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/trip_duration"
-                android:layout_gravity="center_vertical"
-                android:text="price"
-                android:paddingStart="4dp"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp"
-                android:maxLines="1"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
-                />
+                <TextView
+                    android:id="@+id/trip_from_to"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="2"
+                    android:text="Departure and arrival location"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+
+                <TextView
+                    android:id="@+id/trip_duration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:text="trip duration"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
+
+                <TextView
+                    android:id="@+id/trip_price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:text="price"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
+
+            </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/trip_edit"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/shape_round"
+                android:backgroundTint="@color/design_default_color_primary"
+                android:clickable="true"
+                android:src="@drawable/ic_baseline_edit"
+                android:tint="@color/design_default_color_on_primary"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="10dp"/>
 
         </RelativeLayout>
-
-        <Button
-            android:id="@+id/trip_edit"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:background="@drawable/ic_baseline_edit"
-            android:layout_gravity="end|center"
-            android:layout_marginEnd="16dp"
-            />
 
     </androidx.cardview.widget.CardView>
 
