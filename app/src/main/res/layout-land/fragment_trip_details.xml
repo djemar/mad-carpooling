@@ -128,7 +128,7 @@
                         app:layout_constraintEnd_toStartOf="@+id/mcv_tripDetails_smoking"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:strokeColor="@color/pref_enabled"
+                        app:strokeColor="?attr/colorPrimary"
                         app:strokeWidth="4dp">
 
                         <ImageView
@@ -137,7 +137,7 @@
                             android:layout_height="32dp"
                             android:layout_gravity="center"
                             android:src="@drawable/ic_speaking"
-                            app:tint="@color/pref_enabled"/>
+                            app:tint="?attr/colorPrimary" />
 
                     </com.google.android.material.card.MaterialCardView>
 
@@ -150,7 +150,7 @@
                         app:layout_constraintEnd_toStartOf="@+id/mcv_tripDetails_pets"
                         app:layout_constraintStart_toEndOf="@+id/mcv_tripDetails_speaking"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:strokeColor="@color/pref_enabled"
+                        app:strokeColor="?attr/colorPrimary"
                         app:strokeWidth="4dp">
 
                         <ImageView
@@ -159,7 +159,7 @@
                             android:layout_height="32dp"
                             android:layout_gravity="center"
                             android:src="@drawable/ic_smoking"
-                            app:tint="@color/pref_enabled"/>
+                            app:tint="?attr/colorPrimary" />
 
                     </com.google.android.material.card.MaterialCardView>
 
@@ -181,7 +181,7 @@
                             android:layout_height="32dp"
                             android:layout_gravity="center"
                             android:src="@drawable/ic_pets"
-                            app:tint="@color/pref_disabled"/>
+                            app:tint="@color/pref_disabled" />
 
                     </com.google.android.material.card.MaterialCardView>
 
@@ -203,7 +203,7 @@
                             android:layout_height="32dp"
                             android:layout_gravity="center"
                             android:src="@drawable/ic_music"
-                            app:tint="@color/pref_disabled"/>
+                            app:tint="@color/pref_disabled" />
 
                     </com.google.android.material.card.MaterialCardView>
 
