@@ -332,10 +332,12 @@
                     app:strokeWidth="4dp">
 
                     <ImageView
+                        android:id="@+id/iv_tripDetails_speaking"
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:layout_gravity="center"
-                        android:src="@drawable/ic_speaking" />
+                        android:src="@drawable/ic_speaking"
+                        app:tint="@color/pref_enabled" />
 
                 </com.google.android.material.card.MaterialCardView>
 
@@ -352,10 +354,12 @@
                     app:strokeWidth="4dp">
 
                     <ImageView
+                        android:id="@+id/iv_tripDetails_smoking"
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:layout_gravity="center"
-                        android:src="@drawable/ic_smoking" />
+                        android:src="@drawable/ic_smoking"
+                        app:tint="@color/pref_enabled"/>
 
                 </com.google.android.material.card.MaterialCardView>
 
@@ -372,10 +376,12 @@
                     app:strokeWidth="4dp">
 
                     <ImageView
+                        android:id="@+id/iv_tripDetails_pets"
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:layout_gravity="center"
-                        android:src="@drawable/ic_pets" />
+                        android:src="@drawable/ic_pets"
+                        app:tint="@color/pref_disabled"/>
 
                 </com.google.android.material.card.MaterialCardView>
 
@@ -392,10 +398,12 @@
                     app:strokeWidth="4dp">
 
                     <ImageView
+                        android:id="@+id/iv_tripDetails_music"
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:layout_gravity="center"
-                        android:src="@drawable/ic_music" />
+                        android:src="@drawable/ic_music"
+                        app:tint="@color/pref_disabled"/>
 
                 </com.google.android.material.card.MaterialCardView>
 
