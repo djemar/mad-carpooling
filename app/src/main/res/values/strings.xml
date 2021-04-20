@@ -26,4 +26,11 @@
     <string name="menu_trip_details">Trip Details</string>
     <string name="menu_trip_edit">Edit Trip</string>
     <string name="menu_edit_profile">Edit Profile</string>
+    <string name="departure">Departure</string>
+    <string name="date">Date</string>
+    <string name="time">Time</string>
+    <string name="arrival">Arrival</string>
+    <string name="duration">Duration</string>
+    <string name="price">Price</string>
+    <string name="seats">Seats</string>
 </resources>
