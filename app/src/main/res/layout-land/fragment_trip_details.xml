@@ -372,7 +372,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:padding="8dp"
-                            android:text="2"
+                            android:text="2 seats"
                             android:textSize="18sp"/>
 
                     </LinearLayout>
@@ -408,7 +408,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:padding="8dp"
-                            android:text="55"
+                            android:text="55 euros"
                             android:textSize="18sp" />
 
                     </LinearLayout>
@@ -439,7 +439,7 @@
                     android:layout_height="wrap_content"
                     app:cardCornerRadius="12dp"
                     app:strokeColor="?attr/colorPrimary"
-                    app:strokeWidth="4dp">
+                    app:strokeWidth="1dp">
 
                     <TextView
                         android:id="@+id/tv_tripDetails_description"
