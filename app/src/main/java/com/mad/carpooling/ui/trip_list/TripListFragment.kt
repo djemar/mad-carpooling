@@ -5,8 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -27,7 +29,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
         val rv = view.findViewById<RecyclerView>(R.id.triplist_rv)
         rv.layoutManager = LinearLayoutManager(context)
         //just an example, real trips needed
-        val triplist = (1..20).map { Trip("From_to $it", "duration $it", "price $it") }.toMutableList()
+        val triplist = (1..10).map { Trip("From_to $it", "duration $it", "price $it") }.toMutableList()
         //val triplist = listOf<Trip>() //to check emptyView
         val tripAdapter = TripAdapter(triplist)
         rv.adapter = tripAdapter
@@ -62,11 +64,11 @@ class TripAdapter(val triplist: List<Trip>): RecyclerView.Adapter<TripAdapter.Tr
 
     class TripViewHolder(v: View): RecyclerView.ViewHolder(v){
 
-        val tripLayout = v.findViewById<RelativeLayout>(R.id.trip_info)
+        val tripRL = v.findViewById<RelativeLayout>(R.id.trip_rl)
         val location = v.findViewById<TextView>(R.id.trip_from_to)
         val duration = v.findViewById<TextView>(R.id.trip_duration)
         val price = v.findViewById<TextView>(R.id.trip_price)
-        val button = v.findViewById<Button>(R.id.trip_edit)
+        val button = v.findViewById<ImageButton>(R.id.trip_edit)
 
         var navController: NavController? = null
 
@@ -76,8 +78,8 @@ class TripAdapter(val triplist: List<Trip>): RecyclerView.Adapter<TripAdapter.Tr
             duration.text = trip.duration
             price.text = trip.price
 
-            tripLayout.setOnClickListener{
-                navController = Navigation.findNavController(tripLayout)
+            tripRL.setOnClickListener{
+                navController = Navigation.findNavController(tripRL)
                 navController!!.navigate(R.id.action_nav_trip_list_to_nav_trip_details)
             }
             button.setOnClickListener {
