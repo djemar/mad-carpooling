@@ -16,4 +16,6 @@
     <color name="night_surface">#121212</color>
     <color name="pref_enabled">#4CAF50</color>
     <color name="pref_disabled">#9E9E9E</color>
+    <color name="gray_500">#9E9E9E</color>
+    <color name="gray_light">#CFCFCF</color>
 </resources>
