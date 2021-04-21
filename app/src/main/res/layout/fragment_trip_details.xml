@@ -125,7 +125,6 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/cl_tripDetails_main"
             android:layout_width="match_parent"
@@ -152,7 +151,7 @@
                     android:padding="16dp">
 
                     <TextView
-                        android:id="@+id/tv_tripDetails_departure"
+                        android:id="@+id/tv_tripDetails_departure_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
@@ -177,7 +176,7 @@
                         app:layout_constraintBottom_toTopOf="@id/tv_tripDetails_departureDate"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintHorizontal_weight="1"
-                        app:layout_constraintStart_toEndOf="@id/tv_tripDetails_departure"
+                        app:layout_constraintStart_toEndOf="@id/tv_tripDetails_departure_title"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
@@ -192,7 +191,7 @@
                         app:layout_constraintEnd_toStartOf="@id/tv_tripDetails_departureDate"
                         app:layout_constraintHorizontal_weight="1"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/tv_tripDetails_departure" />
+                        app:layout_constraintTop_toBottomOf="@id/tv_tripDetails_departure_title" />
 
                     <TextView
                         android:id="@+id/tv_tripDetails_departureDate"
@@ -208,7 +207,7 @@
                         app:layout_constraintEnd_toStartOf="@id/tv_tripDetails_departureTime_title"
                         app:layout_constraintHorizontal_weight="1"
                         app:layout_constraintStart_toEndOf="@id/tv_tripDetails_departureDate_title"
-                        app:layout_constraintTop_toBottomOf="@id/tv_tripDetails_departure" />
+                        app:layout_constraintTop_toBottomOf="@id/tv_tripDetails_departure_title" />
 
                     <TextView
                         android:id="@+id/tv_tripDetails_departureTime_title"
@@ -255,18 +254,23 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/cv_tripDetails_departure">
 
-                <LinearLayout
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="16dp">
 
                     <TextView
+                        android:id="@+id/tv_tripDetails_arrival_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Arrival"
                         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/tv_tripDetails_arrivalLocation"/>
 
                     <TextView
                         android:id="@+id/tv_tripDetails_arrivalLocation"
@@ -276,9 +280,13 @@
                         android:layout_weight="1"
                         android:text="Rome"
                         android:textAlignment="center"
-                        android:textSize="18sp" />
+                        android:textSize="18sp"
+                        app:layout_constraintStart_toEndOf="@+id/tv_tripDetails_arrival_title"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"/>
 
-                </LinearLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.cardview.widget.CardView>
 
@@ -293,30 +301,39 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/cv_tripDetails_arrival">
 
-                <LinearLayout
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="16dp">
 
                     <TextView
+                        android:id="@+id/tv_tripDetails_duration_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Estimated time"
+                        android:text="Duration"
                         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/tv_tripDetails_duration"/>
 
                     <TextView
-                        android:id="@+id/tv_tripDetails_estimatedTime"
+                        android:id="@+id/tv_tripDetails_duration"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_weight="1"
                         android:text="6h 30m"
                         android:textAlignment="center"
-                        android:textSize="18sp" />
+                        android:textSize="18sp"
+                        app:layout_constraintStart_toEndOf="@+id/tv_tripDetails_duration_title"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"/>
 
-                </LinearLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.cardview.widget.CardView>
 
@@ -332,63 +349,105 @@
                 app:layout_constraintTop_toBottomOf="@id/cv_tripDetails_est_duration">
 
                 <androidx.cardview.widget.CardView
-                    android:id="@+id/cv_passenger"
+                    android:id="@+id/cv_tripDetails_seats"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="4dp"
                     app:cardCornerRadius="12dp"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/cv_price"
+                    app:layout_constraintEnd_toStartOf="@+id/cv_tripDetails_price"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent">
 
-                    <LinearLayout
+                    <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:padding="8dp">
 
                         <ImageView
+                            android:id="@+id/iv_tripDetails_seats"
                             android:layout_width="40dp"
                             android:layout_height="40dp"
                             android:layout_gravity="center"
-                            android:src="@drawable/ic_passenger" />
+                            android:src="@drawable/ic_seats"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@id/tv_tripDetails_seats_title"/>
 
                         <TextView
-                            android:id="@+id/tv_tripDetails_passengers"
+                            android:id="@+id/tv_tripDetails_seats_title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:padding="8dp"
-                            android:text="2 seats"
-                            android:textSize="18sp" />
+                            android:text="Seats"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            app:layout_constraintStart_toEndOf="@id/iv_tripDetails_seats"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@id/tv_tripDetails_seats"/>
 
-                    </LinearLayout>
+                        <TextView
+                            android:id="@+id/tv_tripDetails_seats"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:padding="8dp"
+                            android:text="2"
+                            android:textSize="18sp"
+                            app:layout_constraintStart_toEndOf="@id/tv_tripDetails_seats_title"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"/>
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
 
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
-                    android:id="@+id/cv_price"
+                    android:id="@+id/cv_tripDetails_price"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="4dp"
                     app:cardCornerRadius="12dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/cv_passenger"
+                    app:layout_constraintStart_toEndOf="@+id/cv_tripDetails_seats"
                     app:layout_constraintTop_toTopOf="parent">
 
-                    <LinearLayout
+                    <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:padding="8dp">
 
                         <ImageView
+                            android:id="@+id/iv_tripDetails_price"
                             android:layout_width="40dp"
                             android:layout_height="40dp"
                             android:layout_gravity="center"
-                            android:src="@drawable/ic_euro" />
+                            android:src="@drawable/ic_price"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@id/tv_tripDetails_price_title"/>
+
+                        <TextView
+                            android:id="@+id/tv_tripDetails_price_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:padding="8dp"
+                            android:text="Euros"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            app:layout_constraintStart_toEndOf="@id/iv_tripDetails_price"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@id/tv_tripDetails_price"/>
 
                         <TextView
                             android:id="@+id/tv_tripDetails_price"
@@ -396,10 +455,14 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:padding="8dp"
-                            android:text="55 euros"
-                            android:textSize="18sp" />
+                            android:text="55"
+                            android:textSize="18sp"
+                            app:layout_constraintStart_toEndOf="@id/tv_tripDetails_price_title"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"/>
 
-                    </LinearLayout>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
 
                 </androidx.cardview.widget.CardView>
 
@@ -417,7 +480,7 @@
                 app:layout_constraintTop_toBottomOf="@id/cl_tripDetails_seats_price">
 
                 <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/mcv_tripDetails_speaking"
+                    android:id="@+id/mcv_tripDetails_chattiness"
                     android:layout_width="52dp"
                     android:layout_height="52dp"
                     app:cardCornerRadius="50dp"
@@ -429,11 +492,11 @@
                     app:strokeWidth="4dp">
 
                     <ImageView
-                        android:id="@+id/iv_tripDetails_speaking"
+                        android:id="@+id/iv_tripDetails_chattiness"
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:layout_gravity="center"
-                        android:src="@drawable/ic_speaking"
+                        android:src="@drawable/ic_chattiness"
                         app:tint="?attr/colorPrimary" />
 
                 </com.google.android.material.card.MaterialCardView>
@@ -445,7 +508,7 @@
                     app:cardCornerRadius="50dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/mcv_tripDetails_pets"
-                    app:layout_constraintStart_toEndOf="@+id/mcv_tripDetails_speaking"
+                    app:layout_constraintStart_toEndOf="@+id/mcv_tripDetails_chattiness"
                     app:layout_constraintTop_toTopOf="parent"
                     app:strokeColor="?attr/colorPrimary"
                     app:strokeWidth="4dp">
