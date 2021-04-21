@@ -9,7 +9,14 @@
         android:id="@+id/nav_trip_list"
         android:name="com.mad.carpooling.ui.trip_list.TripListFragment"
         android:label="@string/menu_trip_list"
-        tools:layout="@layout/fragment_trip_list" />
+        tools:layout="@layout/fragment_trip_list" >
+        <action
+            android:id="@+id/action_nav_trip_list_to_nav_trip_details"
+            app:destination="@id/nav_trip_details" />
+        <action
+            android:id="@+id/action_nav_trip_list_to_nav_trip_edit"
+            app:destination="@id/nav_trip_edit" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_show_profile"
@@ -39,6 +46,9 @@
         <action
             android:id="@+id/action_nav_trip_details_to_nav_trip_edit"
             app:destination="@id/nav_trip_edit" />
+        <action
+            android:id="@+id/action_nav_trip_details_to_nav_show_profile"
+            app:destination="@id/nav_show_profile" />
     </fragment>
 
     <fragment
