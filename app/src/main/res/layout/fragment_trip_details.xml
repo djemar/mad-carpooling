@@ -612,7 +612,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:padding="12dp"
-                        android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Augue eget arcu dictum varius duis at. Mattis pellentesque id nibh tortor id aliquet." />
+                        android:text="@string/lorem_ipsum"/>
 
                 </com.google.android.material.card.MaterialCardView>
 
