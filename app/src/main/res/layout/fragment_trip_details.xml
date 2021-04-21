@@ -249,7 +249,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 app:cardCornerRadius="12dp"
-                app:layout_constraintBottom_toTopOf="@id/cv_tripDetails_est_duration"
+                app:layout_constraintBottom_toTopOf="@id/cv_tripDetails_duration"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/cv_tripDetails_departure">
@@ -291,7 +291,7 @@
             </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
-                android:id="@+id/cv_tripDetails_est_duration"
+                android:id="@+id/cv_tripDetails_duration"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
@@ -325,7 +325,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_weight="1"
-                        android:text="6h 30m"
+                        android:text="6:30"
                         android:textAlignment="center"
                         android:textSize="18sp"
                         app:layout_constraintStart_toEndOf="@+id/tv_tripDetails_duration_title"
@@ -346,7 +346,7 @@
                 app:layout_constraintBottom_toTopOf="@id/cl_tripDetails_preferences"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cv_tripDetails_est_duration">
+                app:layout_constraintTop_toBottomOf="@id/cv_tripDetails_duration">
 
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cv_tripDetails_seats"
