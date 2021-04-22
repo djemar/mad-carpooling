@@ -19,7 +19,9 @@
                 android:id="@+id/trip_car"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="2dp"
+                android:padding="4dp"
+                android:layout_margin="4dp"
+                android:scaleType="centerCrop"
                 android:src="@drawable/ic_baseline_car"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
@@ -32,7 +34,8 @@
                 android:orientation="vertical"
                 android:layout_toRightOf="@id/trip_car"
                 android:layout_toLeftOf="@id/trip_edit"
-                android:padding="4dp"
+                android:padding="8dp"
+                android:layout_centerVertical="true"
                 >
 
                 <TextView
@@ -56,6 +59,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:maxLines="1"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
                     android:text="price"
                     android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
 
