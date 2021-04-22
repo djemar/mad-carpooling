@@ -1,6 +1,5 @@
 package com.mad.carpooling.ui.profile_edit
 
-import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -21,7 +20,6 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Toast
-import androidx.activity.addCallback
 import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
@@ -255,14 +253,16 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
         }
     }
 
-    private fun checkFullName() {
+    private fun validateProfileForm() {
         val textWatcher = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 optionsMenu.findItem(R.id.nav_show_profile).isEnabled =
-                    etFullName.text.trim().length > 0
+                    etFullName.text.trim().isNotEmpty() && etNickname.text.trim()
+                        .isNotEmpty() && etEmail.text.trim()
+                        .isNotEmpty() && etLocation.text.trim().isNotEmpty()
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -271,6 +271,9 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
         }
 
         etFullName.addTextChangedListener(textWatcher)
+        etNickname.addTextChangedListener(textWatcher)
+        etEmail.addTextChangedListener(textWatcher)
+        etLocation.addTextChangedListener(textWatcher)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -281,7 +284,7 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
-        checkFullName()
+        validateProfileForm()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
