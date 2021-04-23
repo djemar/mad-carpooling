@@ -4,7 +4,10 @@
     <item>
         <shape
             android:shape="oval">
-            <solid android:color="#55000000" />
+            <stroke
+                android:width="4dp"
+                android:color="@color/pref_disabled" />
+            <solid></solid>
         </shape>
     </item>
 </ripple>

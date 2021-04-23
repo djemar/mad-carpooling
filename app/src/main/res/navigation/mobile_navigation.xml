@@ -17,6 +17,9 @@
             app:exitAnim="@anim/fragment_close_exit"
             app:popEnterAnim="@anim/fragment_open_enter"
             app:popExitAnim="@anim/fragment_close_exit"/>
+        <action
+            android:id="@+id/action_nav_trip_list_to_nav_trip_edit"
+            app:destination="@id/nav_trip_edit" />
     </fragment>
 
     <fragment
@@ -103,6 +106,9 @@
             app:exitAnim="@anim/fragment_close_exit"
             app:popEnterAnim="@anim/fragment_open_enter"
             app:popExitAnim="@anim/fragment_close_exit"/>
+        <action
+            android:id="@+id/action_nav_trip_details_to_nav_show_profile"
+            app:destination="@id/nav_show_profile" />
     </fragment>
 
     <fragment
