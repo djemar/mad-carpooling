@@ -1,29 +1,31 @@
 package com.mad.carpooling.ui.trip_details
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
-import android.graphics.BitmapFactory
-import android.media.Image
 import android.os.Bundle
-import android.util.Log
-import android.view.*
+import android.util.TypedValue
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
 import android.widget.Button
-import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.google.android.material.card.MaterialCardView
 import com.mad.carpooling.R
-import org.json.JSONObject
+import com.mad.carpooling.TripUtil
+import com.mad.carpooling.ui.trip_list.TripListFragmentDirections
+
 
 class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
     private lateinit var tripDetailsViewModel: TripDetailsViewModel
+    private lateinit var trip: TripUtil.Trip
 
     private lateinit var tvDepartureLocation: TextView
     private lateinit var tvDepartureDate: TextView
@@ -68,6 +70,8 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         ivPets = view.findViewById(R.id.iv_tripDetails_pets)
         ivMusic = view.findViewById(R.id.iv_tripDetails_music)
 
+        initTripDetails()
+
         val btn_profile = view.findViewById<Button>(R.id.btn_tripDetails_showProfile)
         btn_profile.setOnClickListener {
             // TODO: pass correct information about profile
@@ -75,33 +79,72 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         }
     }
 
+    private fun initTripDetails() {
+        val args: TripDetailsFragmentArgs by navArgs()
+        val tripId = args.id
+        val bundle = args.stops
+        val stops =
+            bundle?.getSerializable("stops") as HashMap<Int, String>
+
+        trip = TripUtil.Trip(
+            args.id,
+            "args.nickname",
+            args.departure,
+            args.arrival,
+            args.duration,
+            args.depDate,
+            args.depTime,
+            args.seats,
+            args.price,
+            false, false, false, false,
+            args.description,
+            stops
+        )
+
+        tvDepartureLocation.text = trip.departure
+        tvArrivalLocation.text = trip.arrival
+        tvDepartureDate.text = trip.depDate
+        tvDepartureTime.text = trip.depTime
+        tvDuration.text = trip.duration
+        tvSeats.text = trip.seats.toString()
+        tvPrice.text = trip.price.toString()
+        tvDescription.text = trip.description
+        /*changeStatePreference(chattiness, mcvChattiness, ivChattiness)
+    changeStatePreference(smoking, mcvSmoking, ivSmoking)
+    changeStatePreference(pets, mcvPets, ivPets)
+    changeStatePreference(music, mcvMusic, ivMusic)*/
+    }
+
     private fun editTrip() {
 
         // TODO: enable button only if matching profile
-
         val bundle = Bundle()
+        bundle.putSerializable("stops", trip.stops)
+        val action = TripDetailsFragmentDirections.actionNavTripDetailsToNavTripEdit(
+            trip.id,
+            trip.departure,
+            trip.arrival,
+            trip.duration,
+            trip.price,
+            trip.seats,
+            trip.depDate,
+            trip.depTime,
+            trip.chattiness,
+            trip.smoking,
+            trip.pets,
+            trip.music,
+            trip.description,
+            bundle
+        )
 
-        bundle.putString("departureLocation.group05.lab2", tvDepartureLocation.text.toString())
-        bundle.putString("departureDate.group05.lab2", tvDepartureDate.text.toString())
-        bundle.putString("departureTime.group05.lab2", tvDepartureTime.text.toString())
-        bundle.putString("arrivalLocation.group05.lab2", tvArrivalLocation.text.toString())
-        bundle.putString("duration.group05.lab2", tvDuration.text.toString())
-        bundle.putString("seats.group05.lab2", tvSeats.text.toString())
-        bundle.putString("price.group05.lab2", tvPrice.text.toString())
-        bundle.putString("description.group05.lab2", tvDescription.text.toString())
-
-        // TODO: use ColorStateList and substitute R.color.blue_700 with ?attr/colorPrimary
+/*        // TODO: use ColorStateList and substitute R.color.blue_700 with ?attr/colorPrimary
         if (mcvChattiness.strokeColor == R.color.blue_700) chattiness = true
         if (mcvSmoking.strokeColor == R.color.blue_700) smoking = true
         if (mcvPets.strokeColor == R.color.blue_700) pets = true
-        if (mcvMusic.strokeColor == R.color.blue_700) music = true
+        if (mcvMusic.strokeColor == R.color.blue_700) music = true*/
 
-        bundle.putBoolean("chattiness.group05.lab2", chattiness)
-        bundle.putBoolean("smoking.group05.lab2", smoking)
-        bundle.putBoolean("pets.group05.lab2", pets)
-        bundle.putBoolean("music.group05.lab2", music)
 
-        findNavController().navigate(R.id.action_nav_trip_details_to_nav_trip_edit, bundle)
+        findNavController().navigate(action)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -150,13 +193,22 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         }*/
     }
 
-    private fun changeStatePreference(state: Boolean, mcv: MaterialCardView, iv: ImageView): Boolean {
+    private fun changeStatePreference(
+        state: Boolean,
+        mcv: MaterialCardView,
+        iv: ImageView
+    ): Boolean {
 
         // TODO: substitute R.color.blue_700 with ?attr/colorPrimary
 
         if (state) {
-            mcv.strokeColor = ContextCompat.getColor(requireContext(), R.color.blue_700)
-            iv.setColorFilter(ContextCompat.getColor(requireContext(), R.color.blue_700))
+            val typedValue = TypedValue()
+            val theme = requireContext().theme
+            theme.resolveAttribute(R.attr.colorControlActivated, typedValue, true)
+            @ColorInt val color = typedValue.data
+            mcv.strokeColor = color
+            iv.setColorFilter(color)
+
         } else {
             mcv.strokeColor = ContextCompat.getColor(requireContext(), R.color.pref_disabled)
             iv.setColorFilter(ContextCompat.getColor(requireContext(), R.color.pref_disabled))

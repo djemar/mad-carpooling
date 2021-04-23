@@ -16,12 +16,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mad.carpooling.R
+import com.mad.carpooling.TripUtil
 
 class TripListFragment : Fragment(R.layout.fragment_trip_list) {
 
-    companion object {
-        var idN: Int = 0
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -29,10 +27,10 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
         val rv = view.findViewById<RecyclerView>(R.id.triplist_rv)
         rv.layoutManager = LinearLayoutManager(context)
         //just an example, real trips needed
-        val triplist =
-            (1..10).map { Trip(idN++) }.toMutableList()
+        val tripUtil = TripUtil()
+        val triplist = tripUtil.getTripList()
         //val triplist = listOf<Trip>() //to check emptyView
-        val tripAdapter = TripAdapter(triplist)
+        val tripAdapter = TripAdapter(triplist.toList())
         rv.adapter = tripAdapter
 
         val emptyView = view.findViewById<TextView>(R.id.no_trips_available)
@@ -57,27 +55,8 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
     }
 }
 
-class Trip(
-    val id: Int = 1,
-    val nickname: String = "Babayaga",
-    val locationFrom: String = "From x",
-    val locationTo: String = "To y",
-    val duration: String = "hh:mm",
-    val date: String = "dd-mm-yyyy",
-    val time: String = "hh:mm",
-    val seats: Int = 1,
-    val price: Float = 1f,
-    val chattiness: Boolean = false,
-    val smoking: Boolean = false,
-    val pets: Boolean = false,
-    val music: Boolean = false,
-    val description: String = "Description",
-    val stops: HashMap<Int, String>? = null
-) {
 
-}
-
-class TripAdapter(val triplist: List<Trip>) : RecyclerView.Adapter<TripAdapter.TripViewHolder>() {
+class TripAdapter(val triplist: List<TripUtil.Trip>) : RecyclerView.Adapter<TripAdapter.TripViewHolder>() {
 
     class TripViewHolder(v: View) : RecyclerView.ViewHolder(v) {
 
@@ -89,15 +68,34 @@ class TripAdapter(val triplist: List<Trip>) : RecyclerView.Adapter<TripAdapter.T
 
         var navController: NavController? = null
 
-        fun bind(trip: Trip) {
+        fun bind(trip: TripUtil.Trip) {
 
-            location.text = "${trip.locationFrom} ${trip.locationTo}"
+            location.text = "${trip.departure} ${trip.arrival}"
             duration.text = trip.duration
             price.text = trip.price.toString()
 
+            val bundle = Bundle()
+            bundle.putSerializable("stops", trip.stops)
+
             tripRL.setOnClickListener {
+                val action = TripListFragmentDirections.actionNavTripListToNavTripDetails(
+                    trip.id,
+                    trip.departure,
+                    trip.arrival,
+                    trip.duration,
+                    trip.price,
+                    trip.seats,
+                    trip.depDate,
+                    trip.depTime,
+                    trip.chattiness,
+                    trip.smoking,
+                    trip.pets,
+                    trip.music,
+                    trip.description,
+                    bundle
+                )
                 navController = Navigation.findNavController(tripRL)
-                navController!!.navigate(R.id.action_nav_trip_list_to_nav_trip_details)
+                navController!!.navigate(action)
             }
             button.setOnClickListener {
                 navController = Navigation.findNavController(button)

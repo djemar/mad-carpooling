@@ -12,17 +12,22 @@ import android.icu.util.Calendar
 import android.os.Bundle
 import android.text.format.DateFormat
 import android.util.Log
+import android.util.TypedValue
 import android.view.*
 import android.widget.*
 import androidx.activity.addCallback
+import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.google.android.material.button.MaterialButton
 import com.mad.carpooling.R
+import com.mad.carpooling.TripUtil
+import com.mad.carpooling.ui.trip_details.TripDetailsFragmentArgs
 import com.mad.carpooling.ui.trip_details.TripDetailsViewModel
 import org.json.JSONObject
 import kotlin.concurrent.timer
@@ -30,6 +35,7 @@ import kotlin.concurrent.timer
 class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
     private lateinit var tripEditViewModel: TripEditViewModel
+    private lateinit var trip: TripUtil.Trip
 
     private lateinit var optionsMenu: Menu
 
@@ -82,9 +88,9 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
         initTrip()
 
-        ibtn_chattiness.setOnClickListener {
+    /*    ibtn_chattiness.setOnClickListener {
             chattiness = changeStatePreference(chattiness, ibtn_chattiness)
-        }
+        }*/
         ibtn_smoking.setOnClickListener {
             smoking = changeStatePreference(smoking, ibtn_smoking)
         }
@@ -104,19 +110,40 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     }
 
     private fun initTrip() {
-        tvDate.text = arguments?.getString("departureDate.group05.lab2")
-        tvTime.text = arguments?.getString("departureTime.group05.lab2")
-        etDepartureLocation.setText(arguments?.getString("departureLocation.group05.lab2"))
-        etArrivalLocation.setText(arguments?.getString("arrivalLocation.group05.lab2"))
-        etDuration.setText(arguments?.getString("duration.group05.lab2"))
-        etSeats.setText(arguments?.getString("seats.group05.lab2"))
-        etPrice.setText(arguments?.getString("price.group05.lab2"))
-        etDescription.setText(arguments?.getString("description.group05.lab2"))
+        val args: TripEditFragmentArgs by navArgs()
+        val tripId = args.id
+        val bundle = args.stops
+        val stops =
+            bundle?.getSerializable("stops") as HashMap<Int, String>
 
-        chattiness = arguments?.getBoolean("chattiness.group05.lab2")!!
-        smoking = arguments?.getBoolean("smoking.group05.lab2")!!
-        pets = arguments?.getBoolean("pets.group05.lab2")!!
-        music = arguments?.getBoolean("music.group05.lab2")!!
+        trip = TripUtil.Trip(
+            args.id,
+            "args.nickname",
+            args.departure,
+            args.arrival,
+            args.duration,
+            args.depDate,
+            args.depTime,
+            args.seats,
+            args.price,
+            false, false, false, false,
+            args.description,
+            stops
+        )
+
+        tvDate.text = trip.depDate
+        tvTime.text = trip.depTime
+        etDepartureLocation.setText(trip.departure)
+        etArrivalLocation.setText(trip.arrival)
+        etDuration.setText(trip.duration)
+        etSeats.setText(trip.seats.toString())
+        etPrice.setText(trip.price.toString())
+        etDescription.setText(trip.description)
+
+        chattiness = trip.chattiness
+        smoking = trip.smoking
+        pets = trip.pets
+        music = trip.music
 
         initPreferences()
     }
@@ -133,8 +160,13 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         // TODO: substitute R.color.blue_700 with ?attr/colorPrimary
 
         if(state){
+            val typedValue = TypedValue()
+            val theme = requireContext().theme
+            theme.resolveAttribute(R.attr.colorControlActivated, typedValue, true)
+            @ColorInt val color = typedValue.data
+
             btn.setBackgroundResource(R.drawable.shape_preference_enabled)
-            btn.setColorFilter(ContextCompat.getColor(requireContext(), R.color.blue_700))
+            btn.setColorFilter(color)
         }
         else{
             btn.setBackgroundResource(R.drawable.shape_preference_disabled)
