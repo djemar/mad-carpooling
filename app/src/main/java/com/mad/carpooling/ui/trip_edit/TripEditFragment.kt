@@ -4,10 +4,6 @@ import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.Dialog
 import android.app.TimePickerDialog
-import android.content.Context
-import android.content.res.ColorStateList
-import android.graphics.BitmapFactory
-import android.graphics.drawable.Drawable
 import android.icu.util.Calendar
 import android.os.Bundle
 import android.text.format.DateFormat
@@ -20,17 +16,11 @@ import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.button.MaterialButton
 import com.mad.carpooling.R
 import com.mad.carpooling.TripUtil
-import com.mad.carpooling.ui.trip_details.TripDetailsFragmentArgs
-import com.mad.carpooling.ui.trip_details.TripDetailsViewModel
-import org.json.JSONObject
-import kotlin.concurrent.timer
 
 class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
@@ -215,10 +205,9 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
     }
 
-    class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener {
+    class DatePickerFragment(tvDate: TextView) : DialogFragment(), DatePickerDialog.OnDateSetListener {
 
-        var date = ""
-
+        val tvDate = tvDate;
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
             // Use the current date as the default date in the picker
             val c = Calendar.getInstance()
@@ -234,16 +223,16 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             var day = day.toString()
             var month = month.toString()
             var year = year.toString()
-            date = "$day/$month/$year"
+            tvDate.text = "$day/$month/$year"
         }
 
     }
 
     private fun showDatePickerDialog(v: View) {
-        val dateFragment = DatePickerFragment()
+        val dateFragment = DatePickerFragment(tvDate)
         dateFragment.show(requireActivity().supportFragmentManager, "datePicker")
         // should wait for fragment to close and then update the textView?
-        tvDate.text = dateFragment.date //TODO: too fast
+        //tvDate.text = dateFragment.date //TODO: too fast
     }
 
     class TimePickerFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener {
