@@ -4,10 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="8dp"
-    android:layout_marginTop="8dp"
-    android:layout_marginEnd="8dp"
-    tools:context=".ui.trip_details.TripDetailsFragment">
+    tools:context=".ui.trip_edit.TripEditFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -76,9 +73,9 @@
                     android:layout_height="52dp"
                     android:layout_gravity="center"
                     android:layout_margin="8dp"
-                    android:background="@drawable/shape_preference_disabled"
+                    android:background="@drawable/selector_preferences"
                     android:src="@drawable/ic_chattiness"
-                    android:tint="@color/pref_disabled" />
+                    android:tint="?attr/colorControlNormal" />
 
                 <TextView
                     android:id="@+id/tv_tripEdit_chattiness"
@@ -107,9 +104,9 @@
                     android:layout_height="52dp"
                     android:layout_gravity="center"
                     android:layout_margin="8dp"
-                    android:background="@drawable/shape_preference_enabled"
+                    android:background="@drawable/selector_preferences"
                     android:src="@drawable/ic_smoking"
-                    android:tint="?attr/colorPrimary" />
+                    android:tint="?attr/colorControlNormal" />
 
                 <TextView
                     android:id="@+id/tv_tripEdit_smoking"
@@ -138,9 +135,9 @@
                     android:layout_height="52dp"
                     android:layout_gravity="center"
                     android:layout_margin="8dp"
-                    android:background="@drawable/shape_preference_disabled"
+                    android:background="@drawable/selector_preferences"
                     android:src="@drawable/ic_pets"
-                    android:tint="@color/pref_disabled" />
+                    android:tint="?attr/colorControlNormal" />
 
                 <TextView
                     android:id="@+id/tv_tripEdit_pets"
@@ -169,9 +166,9 @@
                     android:layout_height="52dp"
                     android:layout_gravity="center"
                     android:layout_margin="8dp"
-                    android:background="@drawable/shape_preference_disabled"
+                    android:background="@drawable/selector_preferences"
                     android:src="@drawable/ic_music"
-                    android:tint="@color/pref_disabled" />
+                    android:tint="?attr/colorControlNormal" />
 
                 <TextView
                     android:id="@+id/tv_tripEdit_music"
