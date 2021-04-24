@@ -13,7 +13,6 @@ import android.view.*
 import android.widget.*
 import androidx.activity.addCallback
 import androidx.annotation.ColorInt
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -37,10 +36,10 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     private lateinit var etSeats : EditText
     private lateinit var etPrice : EditText
     private lateinit var etDescription : EditText
-    private lateinit var ibtn_chattiness : ImageButton
-    private lateinit var ibtn_smoking : ImageButton
-    private lateinit var ibtn_pets : ImageButton
-    private lateinit var ibtn_music : ImageButton
+    private lateinit var ibtnChattiness : ImageButton
+    private lateinit var ibtnSmoking : ImageButton
+    private lateinit var ibtnPets : ImageButton
+    private lateinit var ibtnMusic : ImageButton
     var chattiness = false
     var smoking = false
     var pets = false
@@ -71,10 +70,10 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         etSeats = view.findViewById(R.id.et_seats)
         etPrice = view.findViewById(R.id.et_price)
         etDescription = view.findViewById(R.id.et_description)
-        ibtn_chattiness = view.findViewById(R.id.btn_edit_chattiness)
-        ibtn_smoking = view.findViewById(R.id.btn_edit_smoking)
-        ibtn_pets = view.findViewById(R.id.btn_edit_pets)
-        ibtn_music = view.findViewById(R.id.btn_edit_music)
+        ibtnChattiness = view.findViewById(R.id.btn_edit_chattiness)
+        ibtnSmoking = view.findViewById(R.id.btn_edit_smoking)
+        ibtnPets = view.findViewById(R.id.btn_edit_pets)
+        ibtnMusic = view.findViewById(R.id.btn_edit_music)
 
         initTrip()
 
@@ -91,11 +90,11 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             music = changeStatePreference(music, ibtnMusic)
         }
 
-        val btn_date = view.findViewById<MaterialButton>(R.id.edit_date)
-        btn_date.setOnClickListener { showDatePickerDialog(view) }
+        val btnDate = view.findViewById<MaterialButton>(R.id.edit_date)
+        btnDate.setOnClickListener { showDatePickerDialog(view) }
 
-        val btn_time = view.findViewById<MaterialButton>(R.id.edit_time)
-        btn_time.setOnClickListener { showTimePickerDialog(view) }
+        val btnTime = view.findViewById<MaterialButton>(R.id.edit_time)
+        btnTime.setOnClickListener { showTimePickerDialog(view) }
 
     }
 
@@ -139,10 +138,10 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     }
 
     private fun initPreferences(){
-        chattiness = changeStatePreference(chattiness, ibtn_chattiness)
-        smoking = changeStatePreference(smoking, ibtn_smoking)
-        pets = changeStatePreference(pets, ibtn_pets)
-        music = changeStatePreference(music, ibtn_music)
+        chattiness = changeStatePreference(chattiness, ibtnChattiness)
+        smoking = changeStatePreference(smoking, ibtnSmoking)
+        pets = changeStatePreference(pets, ibtnPets)
+        music = changeStatePreference(music, ibtnMusic)
     }
 
     private fun changeStatePreference(state : Boolean, btn : ImageButton) : Boolean{

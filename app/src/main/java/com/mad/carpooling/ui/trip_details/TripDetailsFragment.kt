@@ -56,8 +56,8 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
         initTripDetails()
 
-        val btn_profile = view.findViewById<Button>(R.id.btn_tripDetails_showProfile)
-        btn_profile.setOnClickListener {
+        val btnProfile = view.findViewById<Button>(R.id.btn_tripDetails_showProfile)
+        btnProfile.setOnClickListener {
             // TODO: pass correct information about profile
             findNavController().navigate(R.id.action_nav_trip_details_to_nav_show_profile)
         }
