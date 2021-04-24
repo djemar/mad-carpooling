@@ -206,7 +206,8 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
     class DatePickerFragment(tvDate: TextView) : DialogFragment(), DatePickerDialog.OnDateSetListener {
 
-        val tvDate = tvDate;
+        val tvDate = tvDate
+
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
             // Use the current date as the default date in the picker
             val c = Calendar.getInstance()
@@ -219,10 +220,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         }
 
         override fun onDateSet(view: DatePicker, year: Int, month: Int, day: Int) {
-            var day = day.toString()
-            var month = month.toString()
-            var year = year.toString()
-            tvDate.text = "$day/$month/$year"
+            tvDate.text = "${day.toString()}/${month.toString()}/${year.toString()}"
         }
 
     }
@@ -234,9 +232,9 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         //tvDate.text = dateFragment.date //TODO: too fast
     }
 
-    class TimePickerFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener {
+    class TimePickerFragment(tvTime: TextView) : DialogFragment(), TimePickerDialog.OnTimeSetListener {
 
-        var time = ""
+        val tvTime = tvTime
 
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
             // Use the current time as the default values for the picker
@@ -249,19 +247,13 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         }
 
         override fun onTimeSet(view: TimePicker, hourOfDay: Int, minute: Int) {
-            var hour = hourOfDay.toString()
-            var minute = minute.toString()
-            time = "$hour:$minute"
+            tvTime.text = "${hourOfDay.toString()} : ${minute.toString()}"
         }
     }
 
     private fun showTimePickerDialog(v: View) {
-        val timeFragment = TimePickerFragment()
+        val timeFragment = TimePickerFragment(tvTime)
         timeFragment.show(requireActivity().supportFragmentManager, "timePicker")
-        // should wait for fragment to close and then update the textView?
-        tvTime.text = timeFragment.time //TODO: too fast
     }
-
-
 
 }
