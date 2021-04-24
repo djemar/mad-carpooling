@@ -9,17 +9,13 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.Button
-import android.widget.ImageView
+import android.widget.ImageButton
 import android.widget.TextView
-import androidx.annotation.ColorInt
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.google.android.material.card.MaterialCardView
 import com.mad.carpooling.R
 import com.mad.carpooling.TripUtil
-import com.mad.carpooling.ui.trip_list.TripListFragmentDirections
 
 
 class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
@@ -35,18 +31,10 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private lateinit var tvSeats: TextView
     private lateinit var tvPrice: TextView
     private lateinit var tvDescription: TextView
-    private lateinit var mcvChattiness: MaterialCardView
-    private lateinit var mcvSmoking: MaterialCardView
-    private lateinit var mcvPets: MaterialCardView
-    private lateinit var mcvMusic: MaterialCardView
-    private lateinit var ivChattiness: ImageView
-    private lateinit var ivSmoking: ImageView
-    private lateinit var ivPets: ImageView
-    private lateinit var ivMusic: ImageView
-    var chattiness = false
-    var smoking = false
-    var pets = false
-    var music = false
+    private lateinit var ibtnChattiness: ImageButton
+    private lateinit var ibtnSmoking: ImageButton
+    private lateinit var ibtnPets: ImageButton
+    private lateinit var ibtnMusic: ImageButton
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -61,14 +49,10 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         tvSeats = view.findViewById(R.id.tv_tripDetails_seats)
         tvPrice = view.findViewById(R.id.tv_tripDetails_price)
         tvDescription = view.findViewById(R.id.tv_tripDetails_description_text)
-        mcvChattiness = view.findViewById(R.id.mcv_tripDetails_chattiness)
-        mcvSmoking = view.findViewById(R.id.mcv_tripDetails_smoking)
-        mcvPets = view.findViewById(R.id.mcv_tripDetails_pets)
-        mcvMusic = view.findViewById(R.id.mcv_tripDetails_music)
-        ivChattiness = view.findViewById(R.id.iv_tripDetails_chattiness)
-        ivSmoking = view.findViewById(R.id.iv_tripDetails_smoking)
-        ivPets = view.findViewById(R.id.iv_tripDetails_pets)
-        ivMusic = view.findViewById(R.id.iv_tripDetails_music)
+        ibtnChattiness = view.findViewById(R.id.btn_tripDetails_chattiness)
+        ibtnSmoking = view.findViewById(R.id.btn_tripDetails_smoking)
+        ibtnPets = view.findViewById(R.id.btn_tripDetails_pets)
+        ibtnMusic = view.findViewById(R.id.btn_tripDetails_music)
 
         initTripDetails()
 
@@ -109,10 +93,10 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         tvSeats.text = trip.seats.toString()
         tvPrice.text = trip.price.toString()
         tvDescription.text = trip.description
-        /*changeStatePreference(chattiness, mcvChattiness, ivChattiness)
-    changeStatePreference(smoking, mcvSmoking, ivSmoking)
-    changeStatePreference(pets, mcvPets, ivPets)
-    changeStatePreference(music, mcvMusic, ivMusic)*/
+        changeStatePreference(trip.chattiness, ibtnChattiness)
+        changeStatePreference(trip.smoking, ibtnSmoking)
+        changeStatePreference(trip.pets, ibtnPets)
+        changeStatePreference(trip.music, ibtnMusic)
     }
 
     private fun editTrip() {
@@ -137,13 +121,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             bundle
         )
 
-/*        // TODO: use ColorStateList and substitute R.color.blue_700 with ?attr/colorPrimary
-        if (mcvChattiness.strokeColor == R.color.blue_700) chattiness = true
-        if (mcvSmoking.strokeColor == R.color.blue_700) smoking = true
-        if (mcvPets.strokeColor == R.color.blue_700) pets = true
-        if (mcvMusic.strokeColor == R.color.blue_700) music = true*/
-
-
         findNavController().navigate(action)
     }
 
@@ -165,18 +142,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             tvPrice.text = (data?.getStringExtra("save_price.group05.lab2"))
             tvDescription.text = (data?.getStringExtra("save_description.group05.lab2"))
 
-            chattiness = (data!!.getBooleanExtra("save_chattiness.group05.lab2", false))
-            changeStatePreference(chattiness, mcvChattiness, ivChattiness)
-
-            smoking = (data!!.getBooleanExtra("save_smoking.group05.lab2", false))
-            changeStatePreference(smoking, mcvSmoking, ivSmoking)
-
-            pets = (data!!.getBooleanExtra("save_pets.group05.lab2", false))
-            changeStatePreference(pets, mcvPets, ivPets)
-
-            music = (data!!.getBooleanExtra("save_music.group05.lab2", false))
-            changeStatePreference(music, mcvMusic, ivMusic)
-
 //                ivProfilePic.setImageBitmap(
 //                    BitmapFactory.decodeStream(
 //                        activity?.openFileInput(
@@ -193,27 +158,21 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         }*/
     }
 
-    private fun changeStatePreference(
-        state: Boolean,
-        mcv: MaterialCardView,
-        iv: ImageView
-    ): Boolean {
+    private fun changeStatePreference(state: Boolean, ibtn: ImageButton){
+        val typedValue = TypedValue()
+        val theme = requireContext().theme
+        var color = 0
 
-        // TODO: substitute R.color.blue_700 with ?attr/colorPrimary
-
-        if (state) {
-            val typedValue = TypedValue()
-            val theme = requireContext().theme
+        if(state){
             theme.resolveAttribute(R.attr.colorControlActivated, typedValue, true)
-            @ColorInt val color = typedValue.data
-            mcv.strokeColor = color
-            iv.setColorFilter(color)
-
-        } else {
-            mcv.strokeColor = ContextCompat.getColor(requireContext(), R.color.pref_disabled)
-            iv.setColorFilter(ContextCompat.getColor(requireContext(), R.color.pref_disabled))
+            color = typedValue.data
         }
-        return !state
+        else{
+            theme.resolveAttribute(R.attr.colorControlNormal, typedValue, true)
+            color = typedValue.data //2298478592.toInt()
+        }
+        ibtn.isSelected = state
+        ibtn.setColorFilter(color)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

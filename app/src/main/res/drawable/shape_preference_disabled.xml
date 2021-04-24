@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    android:color="?attr/colorPrimary">
+    android:color="?attr/colorControlActivated">
     <item>
         <shape
             android:shape="oval">
             <stroke
                 android:width="4dp"
-                android:color="@color/pref_disabled" />
+                android:color="?attr/colorControlNormal" />
             <solid></solid>
         </shape>
     </item>

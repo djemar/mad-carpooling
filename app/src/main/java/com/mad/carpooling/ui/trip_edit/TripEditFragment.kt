@@ -78,17 +78,17 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
         initTrip()
 
-    /*    ibtn_chattiness.setOnClickListener {
-            chattiness = changeStatePreference(chattiness, ibtn_chattiness)
-        }*/
-        ibtn_smoking.setOnClickListener {
-            smoking = changeStatePreference(smoking, ibtn_smoking)
+        ibtnChattiness.setOnClickListener {
+            chattiness = changeStatePreference(chattiness, ibtnChattiness)
         }
-        ibtn_pets.setOnClickListener {
-            pets = changeStatePreference(pets, ibtn_pets)
+        ibtnSmoking.setOnClickListener {
+            smoking = changeStatePreference(smoking, ibtnSmoking)
         }
-        ibtn_music.setOnClickListener {
-            music = changeStatePreference(music, ibtn_music)
+        ibtnPets.setOnClickListener {
+            pets = changeStatePreference(pets, ibtnPets)
+        }
+        ibtnMusic.setOnClickListener {
+            music = changeStatePreference(music, ibtnMusic)
         }
 
         val btn_date = view.findViewById<MaterialButton>(R.id.edit_date)
@@ -146,22 +146,22 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     }
 
     private fun changeStatePreference(state : Boolean, btn : ImageButton) : Boolean{
-
-        // TODO: substitute R.color.blue_700 with ?attr/colorPrimary
+        val typedValue = TypedValue()
+        val theme = requireContext().theme
+        var color = 0
 
         if(state){
-            val typedValue = TypedValue()
-            val theme = requireContext().theme
             theme.resolveAttribute(R.attr.colorControlActivated, typedValue, true)
-            @ColorInt val color = typedValue.data
-
-            btn.setBackgroundResource(R.drawable.shape_preference_enabled)
-            btn.setColorFilter(color)
+            color = typedValue.data
+            Log.d("COLOR", "ACTIVATED")
         }
         else{
-            btn.setBackgroundResource(R.drawable.shape_preference_disabled)
-            btn.setColorFilter(ContextCompat.getColor(requireContext(), R.color.pref_disabled))
+            theme.resolveAttribute(R.attr.colorControlNormal, typedValue, true)
+            color = typedValue.data //2298478592.toInt()
+            Log.d("COLOR", "DEACTIVATED")
         }
+        btn.isSelected = state
+        btn.setColorFilter(color)
         return !state
     }
 
