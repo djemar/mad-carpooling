@@ -103,9 +103,25 @@ class TripAdapter(val triplist: List<TripUtil.Trip>) : RecyclerView.Adapter<Trip
                 navController!!.navigate(action)
             }
             button.setOnClickListener {
+                val action = TripListFragmentDirections.actionNavTripListToNavTripEdit(
+                    trip.id,
+                    trip.departure,
+                    trip.arrival,
+                    trip.duration,
+                    trip.price,
+                    trip.seats,
+                    trip.depDate,
+                    trip.depTime,
+                    trip.chattiness,
+                    trip.smoking,
+                    trip.pets,
+                    trip.music,
+                    trip.description,
+                    bundle,
+                    false
+                )
                 navController = Navigation.findNavController(button)
-                //val bundle : Bundle
-                navController!!.navigate(R.id.action_nav_trip_list_to_nav_trip_edit/*, bundle */) //modify an existing one
+                navController!!.navigate(action) //modify an existing one
             }
         }
     }
