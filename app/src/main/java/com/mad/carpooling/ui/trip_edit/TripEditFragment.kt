@@ -45,22 +45,24 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
     private lateinit var optionsMenu: Menu
     private lateinit var ivCarPic: ImageView
-    private lateinit var tvDate : TextView
-    private lateinit var tvTime : TextView
-    private lateinit var etDepartureLocation : EditText
-    private lateinit var etArrivalLocation : EditText
-    private lateinit var etDuration : EditText
-    private lateinit var etSeats : EditText
-    private lateinit var etPrice : EditText
-    private lateinit var etDescription : EditText
-    private lateinit var ibtnChattiness : ImageButton
-    private lateinit var ibtnSmoking : ImageButton
-    private lateinit var ibtnPets : ImageButton
-    private lateinit var ibtnMusic : ImageButton
-    var chattiness = false
-    var smoking = false
-    var pets = false
-    var music = false
+    private lateinit var tvDate: TextView
+    private lateinit var tvTime: TextView
+    private lateinit var etDepartureLocation: EditText
+    private lateinit var etArrivalLocation: EditText
+    private lateinit var etDuration: EditText
+    private lateinit var etSeats: EditText
+    private lateinit var etPrice: EditText
+    private lateinit var etDescription: EditText
+    private lateinit var ibtnChattiness: ImageButton
+    private lateinit var ibtnSmoking: ImageButton
+    private lateinit var ibtnPets: ImageButton
+    private lateinit var ibtnMusic: ImageButton
+    private lateinit var bundleStops: Bundle
+    private lateinit var stops: HashMap<Int,String>
+    private var chattiness = false
+    private var smoking = false
+    private var pets = false
+    private var music = false
     private var currentPhotoPath: String? = null
     private var REQUEST_IMAGE_CAPTURE = 1
     private var TMP_FILENAME_IMG = "temp_car_pic_img.jpg"
@@ -112,6 +114,20 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             music = changeStatePreference(music, ibtnMusic)
         }
 
+        if(savedInstanceState != null) {
+            chattiness = savedInstanceState!!.getBoolean("chattiness", false)
+            smoking = savedInstanceState!!.getBoolean("smoking", false)
+            pets = savedInstanceState!!.getBoolean("pets", false)
+            music = savedInstanceState!!.getBoolean("music", false)
+            chattiness = changeStatePreference(!chattiness, ibtnChattiness)
+            smoking = changeStatePreference(!smoking, ibtnSmoking)
+            pets = changeStatePreference(!pets, ibtnPets)
+            music = changeStatePreference(!music, ibtnMusic)
+        }
+        else{
+            initPreferences()
+        }
+
         val btnDate = view.findViewById<MaterialButton>(R.id.edit_date)
         btnDate.setOnClickListener { showDatePickerDialog(view) }
 
@@ -141,7 +157,10 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             args.depTime,
             args.seats,
             args.price,
-            false, false, false, false,
+            args.chattiness,
+            args.smoking,
+            args.pets,
+            args.music,
             args.description,
             stops
         )
@@ -164,26 +183,23 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     }
 
     private fun initPreferences(){
-        chattiness = changeStatePreference(chattiness, ibtnChattiness)
-        smoking = changeStatePreference(smoking, ibtnSmoking)
-        pets = changeStatePreference(pets, ibtnPets)
-        music = changeStatePreference(music, ibtnMusic)
+        chattiness = changeStatePreference(trip.chattiness, ibtnChattiness)
+        smoking = changeStatePreference(trip.smoking, ibtnSmoking)
+        pets = changeStatePreference(trip.pets, ibtnPets)
+        music = changeStatePreference(trip.music, ibtnMusic)
     }
 
-    private fun changeStatePreference(state : Boolean, btn : ImageButton) : Boolean{
+    private fun changeStatePreference(state: Boolean, btn: ImageButton) : Boolean{
         val typedValue = TypedValue()
         val theme = requireContext().theme
         var color = 0
 
-        if(state){
+        if (state) {
             theme.resolveAttribute(R.attr.colorControlActivated, typedValue, true)
             color = typedValue.data
-            Log.d("COLOR", "ACTIVATED")
-        }
-        else{
+        } else {
             theme.resolveAttribute(R.attr.colorControlNormal, typedValue, true)
             color = typedValue.data //2298478592.toInt()
-            Log.d("COLOR", "DEACTIVATED")
         }
         btn.isSelected = state
         btn.setColorFilter(color)
@@ -444,4 +460,11 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean("chattiness", chattiness)
+        outState.putBoolean("smoking", smoking)
+        outState.putBoolean("pets", pets)
+        outState.putBoolean("music", music)
+    }
 }
