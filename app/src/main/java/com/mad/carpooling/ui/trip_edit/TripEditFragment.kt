@@ -21,22 +21,23 @@ import android.util.TypedValue
 import android.view.*
 import android.widget.*
 import androidx.activity.addCallback
-import androidx.annotation.ColorInt
 import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.navigation.ui.onNavDestinationSelected
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.snackbar.Snackbar
 import com.mad.carpooling.R
 import com.mad.carpooling.TripUtil
+import com.mad.carpooling.ui.profile_edit.EditProfileFragmentDirections
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.HashMap
 
 class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
@@ -79,7 +80,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                 R.id.action_nav_trip_edit_to_nav_trip_details
             )
         }
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -143,9 +143,8 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     private fun initTrip() {
         val args: TripEditFragmentArgs by navArgs()
         val tripId = args.id
-        val bundle = args.stops
-        val stops =
-            bundle?.getSerializable("stops") as HashMap<Int, String>
+        bundleStops = args.stops!!
+        stops = bundleStops.getSerializable("stops") as HashMap<Int, String>
 
         trip = TripUtil.Trip(
             args.id,
@@ -173,13 +172,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         etSeats.setText(trip.seats.toString())
         etPrice.setText(trip.price.toString())
         etDescription.setText(trip.description)
-
-        chattiness = trip.chattiness
-        smoking = trip.smoking
-        pets = trip.pets
-        music = trip.music
-
-        initPreferences()
     }
 
     private fun initPreferences(){
@@ -215,38 +207,35 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.save_trip -> {
-                Log.d("CONDITION", "inside SAVE")
-                val bundle = Bundle()
-                bundle.putString("save_departureLocation.group05.lab2", etDepartureLocation.text.trim().toString())
-                bundle.putString("save_departureDate.group05.lab2", tvDate.text.trim().toString())
-                bundle.putString("save_departureTime.group05.lab2", tvTime.text.trim().toString())
-                bundle.putString("save_arrivalLocation.group05.lab2", etArrivalLocation.text.trim().toString())
-                bundle.putString("save_duration.group05.lab2", etDuration.text.trim().toString())
-                bundle.putString("save_seats.group05.lab2", etSeats.text.trim().toString())
-                bundle.putString("save_price.group05.lab2", etPrice.text.trim().toString())
-                bundle.putString("save_description.group05.lab2", etDescription.text.trim().toString())
-                bundle.putBoolean("save_chattiness.group05.lab2", chattiness)
-                bundle.putBoolean("save_smoking.group05.lab2", smoking)
-                bundle.putBoolean("save_pets.group05.lab2", pets)
-                bundle.putBoolean("save_music.group05.lab2", music)
-
-//                if (currentPhotoPath != null) { //TODO is this necessary?
-//                    bundle.putString("save_profilePic.group05.lab1", currentPhotoPath)
-//                }
-//
-//                saveToSharedPref()
-                findNavController().navigate(
-                    R.id.action_nav_trip_edit_to_nav_trip_details,
-                    bundle
+                val action = TripEditFragmentDirections.actionNavTripEditToNavTripDetails(
+                    trip.id,
+                    etDepartureLocation.text.trim().toString(),
+                    etArrivalLocation.text.trim().toString(),
+                    etDuration.text.trim().toString(),
+                    etPrice.text.trim().toString().toFloat(),
+                    etSeats.text.trim().toString().toInt(),
+                    tvDate.text.trim().toString(),
+                    tvTime.text.trim().toString(),
+                    chattiness,
+                    smoking,
+                    pets,
+                    music,
+                    etDescription.text.trim().toString(),
+                    bundleStops
                 )
+                findNavController().navigate(action)
+
+                Snackbar.make(requireView(), "Trip saved", Snackbar.LENGTH_SHORT).show()
                 true
             }
-            else -> super.onOptionsItemSelected(item)
+            else -> item.onNavDestinationSelected(findNavController()) || super.onOptionsItemSelected(
+                item
+            )
         }
-
     }
 
-    class DatePickerFragment(tvDate: TextView) : DialogFragment(), DatePickerDialog.OnDateSetListener {
+    class DatePickerFragment(tvDate: TextView) : DialogFragment(),
+        DatePickerDialog.OnDateSetListener {
 
         val tvDate = tvDate
 
@@ -274,7 +263,8 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         //tvDate.text = dateFragment.date //TODO: too fast
     }
 
-    class TimePickerFragment(tvTime: TextView) : DialogFragment(), TimePickerDialog.OnTimeSetListener {
+    class TimePickerFragment(tvTime: TextView) : DialogFragment(),
+        TimePickerDialog.OnTimeSetListener {
 
         val tvTime = tvTime
 
@@ -285,7 +275,13 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             val minute = c.get(Calendar.MINUTE)
 
             // Create a new instance of TimePickerDialog and return it
-            return TimePickerDialog(activity, this, hour, minute, DateFormat.is24HourFormat(activity))
+            return TimePickerDialog(
+                activity,
+                this,
+                hour,
+                minute,
+                DateFormat.is24HourFormat(activity)
+            )
         }
 
         override fun onTimeSet(view: TimePicker, hourOfDay: Int, minute: Int) {
@@ -467,4 +463,5 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         outState.putBoolean("pets", pets)
         outState.putBoolean("music", music)
     }
+
 }

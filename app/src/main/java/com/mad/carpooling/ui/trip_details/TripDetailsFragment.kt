@@ -35,6 +35,10 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private lateinit var ibtnSmoking: ImageButton
     private lateinit var ibtnPets: ImageButton
     private lateinit var ibtnMusic: ImageButton
+    private var chattiness = false
+    private var smoking = false
+    private var pets = false
+    private var music = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -80,7 +84,10 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             args.depTime,
             args.seats,
             args.price,
-            false, false, false, false,
+            args.chattiness,
+            args.smoking,
+            args.pets,
+            args.music,
             args.description,
             stops
         )
@@ -93,10 +100,10 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         tvSeats.text = trip.seats.toString()
         tvPrice.text = trip.price.toString()
         tvDescription.text = trip.description
-        changeStatePreference(trip.chattiness, ibtnChattiness)
-        changeStatePreference(trip.smoking, ibtnSmoking)
-        changeStatePreference(trip.pets, ibtnPets)
-        changeStatePreference(trip.music, ibtnMusic)
+        chattiness = changeStatePreference(trip.chattiness, ibtnChattiness)
+        smoking = changeStatePreference(trip.smoking, ibtnSmoking)
+        pets = changeStatePreference(trip.pets, ibtnPets)
+        music = changeStatePreference(trip.music, ibtnMusic)
     }
 
     private fun editTrip() {
@@ -118,47 +125,14 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             trip.pets,
             trip.music,
             trip.description,
-            bundle
+            bundle,
+            false
         )
 
         findNavController().navigate(action)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
-//            val sharedPref =
-//                context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE) ?: return
-//            val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
-//            if (jsonString != null) {
-//                val jsonObject = JSONObject(jsonString)
-
-            tvDepartureLocation.text = (data?.getStringExtra("save_departureLocation.group05.lab2"))
-            tvDepartureDate.text = (data?.getStringExtra("save_departureDate.group05.lab2"))
-            tvDepartureTime.text = (data?.getStringExtra("save_departureTime.group05.lab2"))
-            tvArrivalLocation.text = (data?.getStringExtra("save_arrivalLocation.group05.lab2"))
-            tvDuration.text = (data?.getStringExtra("save_duration.group05.lab2"))
-            tvSeats.text = (data?.getStringExtra("save_seats.group05.lab2"))
-            tvPrice.text = (data?.getStringExtra("save_price.group05.lab2"))
-            tvDescription.text = (data?.getStringExtra("save_description.group05.lab2"))
-
-//                ivProfilePic.setImageBitmap(
-//                    BitmapFactory.decodeStream(
-//                        activity?.openFileInput(
-//                            jsonObject.getString(
-//                                "json_profilePic.group05.lab1"
-//                            )
-//                        )
-//                    )
-//                )
-//            }
-
-        } /*else if (requestCode == 1 && resultCode == Activity.RESULT_CANCELED) { //debug
-            Toast.makeText(this, "RESULT_CANCELED", Toast.LENGTH_SHORT).show()
-        }*/
-    }
-
-    private fun changeStatePreference(state: Boolean, ibtn: ImageButton){
+    private fun changeStatePreference(state: Boolean, ibtn: ImageButton) : Boolean{
         val typedValue = TypedValue()
         val theme = requireContext().theme
         var color = 0
@@ -173,6 +147,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         }
         ibtn.isSelected = state
         ibtn.setColorFilter(color)
+        return state
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
