@@ -4,8 +4,17 @@ import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.Dialog
 import android.app.TimePickerDialog
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.icu.util.Calendar
+import android.media.ExifInterface
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
 import android.text.format.DateFormat
 import android.util.Log
 import android.util.TypedValue
@@ -13,6 +22,8 @@ import android.view.*
 import android.widget.*
 import androidx.activity.addCallback
 import androidx.annotation.ColorInt
+import androidx.core.content.FileProvider
+import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -20,6 +31,12 @@ import androidx.navigation.fragment.navArgs
 import com.google.android.material.button.MaterialButton
 import com.mad.carpooling.R
 import com.mad.carpooling.TripUtil
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.HashMap
 
 class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
@@ -27,7 +44,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     private lateinit var trip: TripUtil.Trip
 
     private lateinit var optionsMenu: Menu
-
+    private lateinit var ivCarPic: ImageView
     private lateinit var tvDate : TextView
     private lateinit var tvTime : TextView
     private lateinit var etDepartureLocation : EditText
@@ -44,6 +61,10 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     var smoking = false
     var pets = false
     var music = false
+    private var currentPhotoPath: String? = null
+    private var REQUEST_IMAGE_CAPTURE = 1
+    private var TMP_FILENAME_IMG = "temp_car_pic_img.jpg"
+    private var FILENAME_IMG = "car_pic_img.jpg"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,6 +83,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        ivCarPic = view.findViewById(R.id.iv_tripEdit_car_pic)
         tvDate = view.findViewById(R.id.tv_tripEdit_date)
         tvTime = view.findViewById(R.id.tv_tripEdit_time)
         etDepartureLocation = view.findViewById(R.id.et_departure)
@@ -95,6 +117,10 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
         val btnTime = view.findViewById<MaterialButton>(R.id.edit_time)
         btnTime.setOnClickListener { showTimePickerDialog(view) }
+
+        var btnCamera = view.findViewById<ImageButton>(R.id.btn_tripEdit_camera)
+        registerForContextMenu(btnCamera)
+        btnCamera.setOnClickListener { activity?.openContextMenu(btnCamera) }
 
     }
 
@@ -254,6 +280,168 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     private fun showTimePickerDialog(v: View) {
         val timeFragment = TimePickerFragment(tvTime)
         timeFragment.show(requireActivity().supportFragmentManager, "timePicker")
+    }
+
+    private fun dispatchTakePictureIntent() {
+        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        try {
+            takePictureIntent.also {
+                // Create the File where the photo should go
+                val photoFile: File? = try {
+                    createImageFile()
+                } catch (ex: IOException) {
+                    // Error occurred while creating the File
+                    Log.e("photoFile", "Error creating file")
+                    null
+                }
+                // Continue only if the File was successfully created
+                photoFile?.also {
+                    val photoURI: Uri = FileProvider.getUriForFile(
+                        requireContext(),
+                        "com.mad.group05.fileprovider",
+                        it
+                    )
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
+                }
+            }
+        } catch (e: ActivityNotFoundException) {
+            // display error state to the user
+        }
+    }
+
+    @Throws(IOException::class)
+    private fun createImageFile(): File {
+        // Create an image file name
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ITALY).format(Date())
+        val storageDir: File? = activity?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile(
+            "JPEG_${timeStamp}_", /* prefix */
+            ".jpg", /* suffix */
+            storageDir /* directory */
+        ).apply {
+            // Save a file: path for use with ACTION_VIEW intents
+            currentPhotoPath = absolutePath
+        }
+    }
+
+    private fun setPic() {
+        // Get the dimensions of the View
+        val targetW: Int = 512
+        val targetH: Int = 512
+
+        val bmOptions = BitmapFactory.Options().apply {
+            // Get the dimensions of the bitmap
+            inJustDecodeBounds = true
+
+
+            BitmapFactory.decodeFile(currentPhotoPath, this)
+
+            val photoW: Int = outWidth
+            val photoH: Int = outHeight
+
+            // Determine how much to scale down the image
+            val scaleFactor: Int = Math.max(1, Math.min(photoW / targetW, photoH / targetH))
+
+            // Decode the image file into a Bitmap sized to fill the View
+            inJustDecodeBounds = false
+            inSampleSize = scaleFactor
+            inPurgeable = true
+        }
+        BitmapFactory.decodeFile(currentPhotoPath, bmOptions)?.also { bitmap ->
+
+            ivCarPic.setImageBitmap(validateBitmapOrientation(bitmap))
+        }
+    }
+
+    private fun validateBitmapOrientation(bitmap: Bitmap): Bitmap? {
+        val ei = currentPhotoPath?.let { ExifInterface(it) }
+        val orientation: Int? = ei?.getAttributeInt(
+            ExifInterface.TAG_ORIENTATION,
+            ExifInterface.ORIENTATION_UNDEFINED
+        )
+
+        var rotatedBitmap: Bitmap? = null
+        when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> rotatedBitmap = rotateImage(bitmap, 90f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> rotatedBitmap = rotateImage(bitmap, 180f)
+            ExifInterface.ORIENTATION_ROTATE_270 -> rotatedBitmap = rotateImage(bitmap, 270f)
+            ExifInterface.ORIENTATION_NORMAL -> rotatedBitmap = bitmap
+            else -> rotatedBitmap = bitmap
+        }
+
+        saveRotatedBitmap(rotatedBitmap)
+        return rotatedBitmap
+    }
+
+    private fun rotateImage(source: Bitmap, angle: Float): Bitmap? {
+        val matrix = Matrix()
+
+        matrix.postRotate(angle)
+        return Bitmap.createBitmap(
+            source, 0, 0, source.width, source.height,
+            matrix, true
+        )
+    }
+
+    private fun saveRotatedBitmap(rotatedBitmap: Bitmap?) {
+        val oldFile = File(currentPhotoPath!!)
+        val filename = TMP_FILENAME_IMG
+        val imgPath = activity?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val myFile = File(imgPath, filename)
+        val fileOutputStream = FileOutputStream(myFile)
+
+        rotatedBitmap?.compress(Bitmap.CompressFormat.JPEG, 90, fileOutputStream)
+        fileOutputStream.close()
+        oldFile.delete()    // delete old img with wrong orientation, maybe is better to add a check if successful?
+        currentPhotoPath = myFile.absolutePath  // update the path to point to the new fixed img
+    }
+
+    private fun saveProfileImg() {
+        val imgPath = activity?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val filename = FILENAME_IMG
+        val myFile = File(imgPath, filename)
+        val fileOutputStream = FileOutputStream(myFile)
+
+        (ivCarPic.drawable).toBitmap()
+            .compress(Bitmap.CompressFormat.JPEG, 90, fileOutputStream)
+        fileOutputStream?.close()
+
+        val tmpFile = File(imgPath, TMP_FILENAME_IMG)
+        tmpFile.delete()
+
+        currentPhotoPath = (File(imgPath, filename)).absolutePath
+    }
+
+    override fun onCreateContextMenu(
+        menu: ContextMenu,
+        v: View,
+        menuInfo: ContextMenu.ContextMenuInfo?
+    ) {
+        super.onCreateContextMenu(menu, v, menuInfo)
+        val inflater: MenuInflater? = activity?.menuInflater
+        inflater?.inflate(R.menu.ctx_menu_camera, menu)
+    }
+
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.ctx_gallery -> {
+                Toast.makeText(context, "Open Gallery", Toast.LENGTH_SHORT).show()
+                true
+            }
+            R.id.ctx_camera -> {
+                dispatchTakePictureIntent()
+                true
+            }
+            else -> super.onContextItemSelected(item)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
+            setPic()
+        }
     }
 
 }
