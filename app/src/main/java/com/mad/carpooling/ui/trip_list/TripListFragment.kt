@@ -39,8 +39,13 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
             emptyView.isVisible = true
 
         val fab = view.findViewById<FloatingActionButton>(R.id.trip_add)
+        var navController: NavController? = null
         fab.setOnClickListener {
-            findNavController().navigate(R.id.action_nav_trip_list_to_nav_trip_edit) //a new one from scratch
+            val action = TripListFragmentDirections.actionNavTripListToNavTripEdit(
+                isNew = true
+            )
+            navController = Navigation.findNavController(fab)
+            navController!!.navigate(action) //a new one from scratch
         }
         rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {

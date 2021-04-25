@@ -151,7 +151,7 @@
             app:argType="boolean" />
         <argument
             android:name="pets"
-            android:defaultValue="true"
+            android:defaultValue="false"
             app:argType="boolean" />
         <argument
             android:name="music"
@@ -222,7 +222,7 @@
             app:argType="boolean" />
         <argument
             android:name="pets"
-            android:defaultValue="true"
+            android:defaultValue="false"
             app:argType="boolean" />
         <argument
             android:name="music"
@@ -237,6 +237,10 @@
             android:defaultValue="@null"
             app:argType="android.os.Bundle"
             app:nullable="true" />
+        <argument
+            android:name="isNew"
+            app:argType="boolean"
+            android:defaultValue="false" />
     </fragment>
 
 </navigation>
