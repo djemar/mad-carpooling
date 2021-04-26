@@ -22,7 +22,7 @@ class TripUtil(
         val pets: Boolean = false,
         val music: Boolean = false,
         val description: String = "Description",
-        val stops: HashMap<Int, String>? = hashMapOf(1 to "x", 2 to "y", 3 to "zz")
+        val stops: HashMap<Int, String>? = hashMapOf(0 to "Florence, 18/04/21, 3h", 1 to "Siena, 18/04/21, 1h", 2 to "Pisa, 18/04/21, 1h")
     ) {}
 
     private val triplist =

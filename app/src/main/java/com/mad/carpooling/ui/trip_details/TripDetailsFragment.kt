@@ -6,10 +6,7 @@ import android.graphics.PorterDuff
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.view.View
+import android.view.*
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
@@ -17,6 +14,8 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.mad.carpooling.R
 import com.mad.carpooling.TripUtil
 
@@ -65,7 +64,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         ibtnPets = view.findViewById(R.id.btn_tripDetails_pets)
         ibtnMusic = view.findViewById(R.id.btn_tripDetails_music)
 
-        initTripDetails()
+        initTripDetails(view)
 
         val btnProfile = view.findViewById<Button>(R.id.btn_tripDetails_showProfile)
         btnProfile.setOnClickListener {
@@ -74,12 +73,14 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         }
     }
 
-    private fun initTripDetails() {
+    private fun initTripDetails(view: View) {
         val args: TripDetailsFragmentArgs by navArgs()
         val tripId = args.id
         val bundle = args.stops
         val stops =
             bundle?.getSerializable("stops") as HashMap<Int, String>
+
+
 
         trip = TripUtil.Trip(
             args.id,
@@ -109,6 +110,16 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         tvDescription.text = trip.description
 
         initPreferences()
+
+        val rv = view.findViewById<RecyclerView>(R.id.rv_tripDetails_stops)
+        rv.layoutManager = LinearLayoutManager(context);
+        val stopAdapter = StopAdapter(trip.stops!!)
+        rv.adapter = stopAdapter
+        if(stopAdapter.itemCount == 0) {
+            val tripStopsTitle = view.findViewById<TextView>(R.id.tv_tripDetails_stops)
+            tripStopsTitle.visibility = View.GONE
+        }
+
     }
 
     private fun editTrip() {
@@ -184,4 +195,38 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         outState.putBoolean("pets", pets)
         outState.putBoolean("music", music)
     }
+}
+
+class StopAdapter(val stops: HashMap<Int, String>): RecyclerView.Adapter<StopAdapter.StopViewHolder>(){
+
+    class StopViewHolder(v: View) : RecyclerView.ViewHolder(v) {
+
+        var stopId = v.findViewById<TextView>(R.id.stopId)
+        var stopName = v.findViewById<TextView>(R.id.stopName)
+        var stopDate = v.findViewById<TextView>(R.id.stopDate)
+        var stopTime = v.findViewById<TextView>(R.id.stopTime)
+
+        fun bind(stop: String?, key: Int){
+            stopId.text = (key+1).toString()
+            val stringArray = stop?.split(",")
+            stopName.text = stringArray?.get(0)!!.trim()
+            stopTime.text = stringArray?.get(1)!!.trim()
+            stopDate.text = stringArray?.get(2)!!.trim()
+        }
+
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StopViewHolder {
+        val layout = LayoutInflater.from(parent.context).inflate(R.layout.stop_layout, parent, false)
+        return StopViewHolder(layout)
+    }
+
+    override fun onBindViewHolder(holder: StopViewHolder, key: Int) {
+        holder.bind(stops[key], key)
+    }
+
+    override fun getItemCount(): Int {
+        return stops.size
+    }
+
 }
