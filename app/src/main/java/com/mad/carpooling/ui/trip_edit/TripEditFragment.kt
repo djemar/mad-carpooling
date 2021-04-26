@@ -523,12 +523,12 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
 }
 
-class StopAdapter(val stops: HashMap<Int, String>) :
-    RecyclerView.Adapter<StopAdapter.StopViewHolder>() {
+class StopEditAdapter(val stops: HashMap<Int, String>) :
+    RecyclerView.Adapter<StopEditAdapter.StopEditViewHolder>() {
 
-    class StopViewHolder(v: View) : RecyclerView.ViewHolder(v) {
+    class StopEditViewHolder(v: View) : RecyclerView.ViewHolder(v) {
 
-        var stopName: EditText = v.findViewById(R.id.et_stop_location)
+       var stopName: EditText = v.findViewById(R.id.et_stop_location)
         var stopDate: EditText = v.findViewById(R.id.et_stop_date)
         var stopTime: EditText = v.findViewById(R.id.et_stop_time)
 
@@ -542,13 +542,13 @@ class StopAdapter(val stops: HashMap<Int, String>) :
 
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StopViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StopEditViewHolder {
         val layout =
             LayoutInflater.from(parent.context).inflate(R.layout.stop_edit_layout, parent, false)
-        return StopViewHolder(layout)
+        return StopEditViewHolder(layout)
     }
 
-    override fun onBindViewHolder(holder: StopViewHolder, key: Int) {
+    override fun onBindViewHolder(holder: StopEditViewHolder, key: Int) {
         holder.bind(stops[key])
     }
 
