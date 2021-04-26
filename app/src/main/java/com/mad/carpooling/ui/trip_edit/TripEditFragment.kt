@@ -15,6 +15,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.text.format.DateFormat
 import android.util.Log
 import android.util.TypedValue
@@ -66,6 +67,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     private var music = false
     private var currentPhotoPath: String? = null
     private var REQUEST_IMAGE_CAPTURE = 1
+    private var REQUEST_IMAGE_FROM_GALLERY = 2
     private var TMP_FILENAME_IMG = "temp_car_pic_img.jpg"
     private var FILENAME_IMG = "car_pic_img.jpg"
 
@@ -294,6 +296,35 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         timeFragment.show(requireActivity().supportFragmentManager, "timePicker")
     }
 
+    private fun dispatchGalleryPickerIntent() {
+        val galleryPickerIntent = Intent(
+            Intent.ACTION_PICK,
+            MediaStore.Images.Media.INTERNAL_CONTENT_URI
+        )
+        startActivityForResult(galleryPickerIntent, REQUEST_IMAGE_FROM_GALLERY)
+
+    }
+
+    private fun updatePathFromGallery(imageUri: Uri?) {
+        val inputStream = requireContext().contentResolver.openInputStream(imageUri!!)
+        val cursor = requireContext().contentResolver.query(imageUri, null, null, null, null)
+        cursor?.use { c ->
+            val nameIndex = c.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            if (c.moveToFirst()) {
+                val name = c.getString(nameIndex)
+                inputStream?.let { inputStream ->
+                    // create same file with same name
+                    val file = File(requireContext().cacheDir, name)
+                    val os = file.outputStream()
+                    os.use {
+                        inputStream.copyTo(it)
+                    }
+                    currentPhotoPath = file.absolutePath
+                }
+            }
+        }
+    }
+
     private fun dispatchTakePictureIntent() {
         val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         try {
@@ -339,8 +370,9 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
     private fun setPic() {
         // Get the dimensions of the View
-        val targetW: Int = 512
-        val targetH: Int = 512
+        //16:9 ratio
+        val targetW: Int = 720
+        val targetH: Int = 405
 
         val bmOptions = BitmapFactory.Options().apply {
             // Get the dimensions of the bitmap
@@ -438,7 +470,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     override fun onContextItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.ctx_gallery -> {
-                Toast.makeText(context, "Open Gallery", Toast.LENGTH_SHORT).show()
+                dispatchGalleryPickerIntent()
                 true
             }
             R.id.ctx_camera -> {
@@ -452,6 +484,10 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
+            setPic()
+        }else if (requestCode == REQUEST_IMAGE_FROM_GALLERY && resultCode == Activity.RESULT_OK) {
+            val imageUri = data?.data
+            updatePathFromGallery(imageUri)
             setPic()
         }
     }
