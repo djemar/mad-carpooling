@@ -229,6 +229,9 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         return when (item.itemId) {
             R.id.save_trip -> {
                 saveToSharedPref()
+                //TODO update stops with items from RecyclerView
+                bundleStops = Bundle()
+                bundleStops.putSerializable("stops", stops)
                 val action = TripEditFragmentDirections.actionNavTripEditToNavTripDetails(
                     trip.id,
                     etDepartureLocation.text.trim().toString(),
@@ -243,7 +246,8 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                     pets,
                     music,
                     etDescription.text.trim().toString(),
-                    bundleStops
+                    bundleStops,
+                    currentPhotoPath
                 )
                 findNavController().navigate(action)
 
