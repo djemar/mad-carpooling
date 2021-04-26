@@ -9,6 +9,7 @@ import android.util.TypedValue
 import android.view.*
 import android.widget.Button
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -24,6 +25,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
     private lateinit var tripDetailsViewModel: TripDetailsViewModel
     private lateinit var trip: TripUtil.Trip
+    private lateinit var ivCarPic: ImageView
 
     private lateinit var tvDepartureLocation: TextView
     private lateinit var tvDepartureDate: TextView
@@ -51,6 +53,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        ivCarPic = view.findViewById(R.id.iv_tripDetails_car_pic)
         tvDepartureLocation = view.findViewById(R.id.tv_tripDetails_departureLocation)
         tvDepartureDate = view.findViewById(R.id.tv_tripDetails_departureDate)
         tvDepartureTime = view.findViewById(R.id.tv_tripDetails_departureTime)
@@ -80,8 +83,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         val stops =
             bundle?.getSerializable("stops") as HashMap<Int, String>
 
-
-
         trip = TripUtil.Trip(
             args.id,
             "args.nickname",
@@ -100,6 +101,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             stops
         )
 
+        // ivCarPic to be init from remote resource
         tvDepartureLocation.text = trip.departure
         tvArrivalLocation.text = trip.arrival
         tvDepartureDate.text = trip.depDate
