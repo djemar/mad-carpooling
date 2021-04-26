@@ -102,27 +102,27 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         initTrip()
 
         ibtnChattiness.setOnClickListener {
-            chattiness = changeStatePreference(chattiness, ibtnChattiness)
+            chattiness = onPreferenceClick(chattiness, ibtnChattiness)
         }
         ibtnSmoking.setOnClickListener {
-            smoking = changeStatePreference(smoking, ibtnSmoking)
+            smoking = onPreferenceClick(smoking, ibtnSmoking)
         }
         ibtnPets.setOnClickListener {
-            pets = changeStatePreference(pets, ibtnPets)
+            pets = onPreferenceClick(pets, ibtnPets)
         }
         ibtnMusic.setOnClickListener {
-            music = changeStatePreference(music, ibtnMusic)
+            music = onPreferenceClick(music, ibtnMusic)
         }
 
         if(savedInstanceState != null) {
-            chattiness = savedInstanceState!!.getBoolean("chattiness", false)
-            smoking = savedInstanceState!!.getBoolean("smoking", false)
-            pets = savedInstanceState!!.getBoolean("pets", false)
-            music = savedInstanceState!!.getBoolean("music", false)
-            chattiness = changeStatePreference(!chattiness, ibtnChattiness)
-            smoking = changeStatePreference(!smoking, ibtnSmoking)
-            pets = changeStatePreference(!pets, ibtnPets)
-            music = changeStatePreference(!music, ibtnMusic)
+            chattiness = savedInstanceState.getBoolean("chattiness")
+            smoking = savedInstanceState.getBoolean("smoking")
+            pets = savedInstanceState.getBoolean("pets")
+            music = savedInstanceState.getBoolean("music")
+            chattiness = changeStatePreference(chattiness, ibtnChattiness)
+            smoking = changeStatePreference(smoking, ibtnSmoking)
+            pets = changeStatePreference(pets, ibtnPets)
+            music = changeStatePreference(music, ibtnMusic)
         }
         else{
             initPreferences()
@@ -181,6 +181,23 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         music = changeStatePreference(trip.music, ibtnMusic)
     }
 
+    private fun onPreferenceClick(oldState: Boolean, btn: ImageButton) : Boolean{
+        val typedValue = TypedValue()
+        val theme = requireContext().theme
+        var color = 0
+
+        if (!oldState) {
+            theme.resolveAttribute(R.attr.colorControlActivated, typedValue, true)
+            color = typedValue.data
+        } else {
+            theme.resolveAttribute(R.attr.colorControlNormal, typedValue, true)
+            color = typedValue.data //2298478592.toInt()
+        }
+        btn.isSelected = !oldState
+        btn.setColorFilter(color)
+        return !oldState
+    }
+
     private fun changeStatePreference(state: Boolean, btn: ImageButton) : Boolean{
         val typedValue = TypedValue()
         val theme = requireContext().theme
@@ -195,7 +212,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         }
         btn.isSelected = state
         btn.setColorFilter(color)
-        return !state
+        return state
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

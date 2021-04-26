@@ -2,7 +2,9 @@ package com.mad.carpooling.ui.trip_details
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.PorterDuff
 import android.os.Bundle
+import android.util.Log
 import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuInflater
@@ -11,6 +13,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -40,10 +43,14 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private var pets = false
     private var music = false
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
         setHasOptionsMenu(true)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         tvDepartureLocation = view.findViewById(R.id.tv_tripDetails_departureLocation)
         tvDepartureDate = view.findViewById(R.id.tv_tripDetails_departureDate)
@@ -100,10 +107,8 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         tvSeats.text = trip.seats.toString()
         tvPrice.text = trip.price.toString()
         tvDescription.text = trip.description
-        chattiness = changeStatePreference(trip.chattiness, ibtnChattiness)
-        smoking = changeStatePreference(trip.smoking, ibtnSmoking)
-        pets = changeStatePreference(trip.pets, ibtnPets)
-        music = changeStatePreference(trip.music, ibtnMusic)
+
+        initPreferences()
     }
 
     private fun editTrip() {
@@ -132,6 +137,13 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         findNavController().navigate(action)
     }
 
+    private fun initPreferences(){
+        chattiness = changeStatePreference(trip.chattiness, ibtnChattiness)
+        smoking = changeStatePreference(trip.smoking, ibtnSmoking)
+        pets = changeStatePreference(trip.pets, ibtnPets)
+        music = changeStatePreference(trip.music, ibtnMusic)
+    }
+
     private fun changeStatePreference(state: Boolean, ibtn: ImageButton) : Boolean{
         val typedValue = TypedValue()
         val theme = requireContext().theme
@@ -139,11 +151,11 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
         if(state){
             theme.resolveAttribute(R.attr.colorControlActivated, typedValue, true)
-            color = typedValue.data
+            color = typedValue.data //2298478592.toInt()
         }
         else{
             theme.resolveAttribute(R.attr.colorControlNormal, typedValue, true)
-            color = typedValue.data //2298478592.toInt()
+            color = typedValue.data
         }
         ibtn.isSelected = state
         ibtn.setColorFilter(color)
@@ -163,5 +175,13 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_trip_details, menu)
         super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean("chattiness", chattiness)
+        outState.putBoolean("smoking", smoking)
+        outState.putBoolean("pets", pets)
+        outState.putBoolean("music", music)
     }
 }
