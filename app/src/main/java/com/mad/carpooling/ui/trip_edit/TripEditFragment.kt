@@ -29,8 +29,11 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.onNavDestinationSelected
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.textfield.TextInputEditText
 import com.mad.carpooling.R
 import com.mad.carpooling.TripUtil
 import com.mad.carpooling.ui.profile_edit.EditProfileFragmentDirections
@@ -101,7 +104,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         ibtnPets = view.findViewById(R.id.btn_edit_pets)
         ibtnMusic = view.findViewById(R.id.btn_edit_music)
 
-        initTrip()
+        initTrip(view)
 
         ibtnChattiness.setOnClickListener {
             chattiness = changeStatePreference(!chattiness, ibtnChattiness)
@@ -142,10 +145,10 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
     }
 
-    private fun initTrip() {
+    private fun initTrip(view: View) {
         val args: TripEditFragmentArgs by navArgs()
         val tripId = args.id
-        bundleStops = args.stops!!
+        val bundleStops = args.stops!!
         stops = bundleStops.getSerializable("stops") as HashMap<Int, String>
 
         trip = TripUtil.Trip(
@@ -174,6 +177,12 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         etSeats.setText(trip.seats.toString())
         etPrice.setText(trip.price.toString())
         etDescription.setText(trip.description)
+
+        val rv = view.findViewById<RecyclerView>(R.id.rv_tripEdit_stops)
+        rv.layoutManager = LinearLayoutManager(context);
+        val stopAdapter = StopAdapter(trip.stops!!)
+        rv.adapter = stopAdapter
+
     }
 
     private fun initPreferences(){
@@ -498,6 +507,41 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         outState.putBoolean("smoking", smoking)
         outState.putBoolean("pets", pets)
         outState.putBoolean("music", music)
+    }
+
+}
+
+class StopAdapter(val stops: HashMap<Int, String>) :
+    RecyclerView.Adapter<StopAdapter.StopViewHolder>() {
+
+    class StopViewHolder(v: View) : RecyclerView.ViewHolder(v) {
+
+        var stopName: EditText = v.findViewById(R.id.et_stop_location)
+        var stopDate: EditText = v.findViewById(R.id.et_stop_date)
+        var stopTime: EditText = v.findViewById(R.id.et_stop_time)
+
+        fun bind(stop: String?) {
+            Log.d("bind:", stop!!)
+            val stringArray = stop!!.split(",")
+            stopName.setText(stringArray[0].trim())
+            stopDate.setText(stringArray[1].trim())
+            stopTime.setText(stringArray[2].trim())
+        }
+
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StopViewHolder {
+        val layout =
+            LayoutInflater.from(parent.context).inflate(R.layout.stop_edit_layout, parent, false)
+        return StopViewHolder(layout)
+    }
+
+    override fun onBindViewHolder(holder: StopViewHolder, key: Int) {
+        holder.bind(stops[key])
+    }
+
+    override fun getItemCount(): Int {
+        return stops.size
     }
 
 }

@@ -491,15 +491,30 @@
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_tripEdit_stops"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:padding="4dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintBottom_toTopOf="@id/ib_add_stop"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/tv_tripEdit_stops">
 
                 </androidx.recyclerview.widget.RecyclerView>
+
+                <ImageButton
+                    android:id="@+id/ib_add_stop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:src="@android:drawable/ic_input_add"
+                    android:background="@drawable/shape_round_edit"
+                    android:backgroundTint="?attr/colorPrimary"
+                    android:tint="?attr/colorOnPrimary"
+                    android:layout_gravity="bottom|end"
+                    android:layout_marginBottom="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/rv_tripEdit_stops"/>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
