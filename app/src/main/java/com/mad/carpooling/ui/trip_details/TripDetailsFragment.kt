@@ -115,7 +115,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         rv.layoutManager = LinearLayoutManager(context);
         val stopAdapter = StopAdapter(trip.stops!!)
         rv.adapter = stopAdapter
-        if(stopAdapter.itemCount == 0) {
+        if (stopAdapter.itemCount == 0) {
             val tripStopsTitle = view.findViewById<TextView>(R.id.tv_tripDetails_stops)
             tripStopsTitle.visibility = View.GONE
         }
@@ -148,23 +148,22 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         findNavController().navigate(action)
     }
 
-    private fun initPreferences(){
+    private fun initPreferences() {
         chattiness = changeStatePreference(trip.chattiness, ibtnChattiness)
         smoking = changeStatePreference(trip.smoking, ibtnSmoking)
         pets = changeStatePreference(trip.pets, ibtnPets)
         music = changeStatePreference(trip.music, ibtnMusic)
     }
 
-    private fun changeStatePreference(state: Boolean, ibtn: ImageButton) : Boolean{
+    private fun changeStatePreference(state: Boolean, ibtn: ImageButton): Boolean {
         val typedValue = TypedValue()
         val theme = requireContext().theme
         var color = 0
 
-        if(state){
+        if (state) {
             theme.resolveAttribute(R.attr.colorControlActivated, typedValue, true)
             color = typedValue.data //2298478592.toInt()
-        }
-        else{
+        } else {
             theme.resolveAttribute(R.attr.colorControlNormal, typedValue, true)
             color = typedValue.data
         }
@@ -197,27 +196,29 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     }
 }
 
-class StopAdapter(val stops: HashMap<Int, String>): RecyclerView.Adapter<StopAdapter.StopViewHolder>(){
+class StopAdapter(val stops: HashMap<Int, String>) :
+    RecyclerView.Adapter<StopAdapter.StopViewHolder>() {
 
     class StopViewHolder(v: View) : RecyclerView.ViewHolder(v) {
 
-        var stopId = v.findViewById<TextView>(R.id.stopId)
-        var stopName = v.findViewById<TextView>(R.id.stopName)
-        var stopDate = v.findViewById<TextView>(R.id.stopDate)
-        var stopTime = v.findViewById<TextView>(R.id.stopTime)
+        var stopId: TextView = v.findViewById<TextView>(R.id.stopId)
+        var stopName: TextView = v.findViewById<TextView>(R.id.stopName)
+        var stopDate: TextView = v.findViewById<TextView>(R.id.stopDate)
+        var stopTime: TextView = v.findViewById<TextView>(R.id.stopTime)
 
-        fun bind(stop: String?, key: Int){
-            stopId.text = (key+1).toString()
-            val stringArray = stop?.split(",")
-            stopName.text = stringArray?.get(0)!!.trim()
-            stopTime.text = stringArray?.get(1)!!.trim()
-            stopDate.text = stringArray?.get(2)!!.trim()
+        fun bind(stop: String?, key: Int) {
+            stopId.text = (key + 1).toString()
+            val stringArray = stop!!.split(",")
+            stopName.text = stringArray[0].trim()
+            stopDate.text = stringArray[1].trim()
+            stopTime.text = stringArray[2].trim()
         }
 
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StopViewHolder {
-        val layout = LayoutInflater.from(parent.context).inflate(R.layout.stop_layout, parent, false)
+        val layout =
+            LayoutInflater.from(parent.context).inflate(R.layout.stop_layout, parent, false)
         return StopViewHolder(layout)
     }
 
