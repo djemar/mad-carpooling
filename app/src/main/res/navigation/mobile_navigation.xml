@@ -166,6 +166,11 @@
             android:defaultValue="@null"
             app:argType="android.os.Bundle"
             app:nullable="true" />
+        <argument
+            android:name="currentPhotoPath"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
     </fragment>
 
     <fragment
