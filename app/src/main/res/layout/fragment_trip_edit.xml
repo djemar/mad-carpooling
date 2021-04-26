@@ -491,7 +491,7 @@
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_tripEdit_stops"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="4dp"
                     app:layout_constraintBottom_toTopOf="@id/ib_add_stop"
