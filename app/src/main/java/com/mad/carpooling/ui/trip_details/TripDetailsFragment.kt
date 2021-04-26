@@ -2,6 +2,7 @@ package com.mad.carpooling.ui.trip_details
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.graphics.PorterDuff
 import android.os.Bundle
 import android.util.Log
@@ -102,6 +103,11 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         )
 
         // ivCarPic to be init from remote resource
+        if(args.currentPhotoPath != null) {
+            BitmapFactory.decodeFile(args.currentPhotoPath)?.also { bitmap ->
+                ivCarPic.setImageBitmap(bitmap)
+            }
+        }
         tvDepartureLocation.text = trip.departure
         tvArrivalLocation.text = trip.arrival
         tvDepartureDate.text = trip.depDate
