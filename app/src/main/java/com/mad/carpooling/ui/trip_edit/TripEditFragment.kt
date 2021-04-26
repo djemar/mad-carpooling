@@ -102,16 +102,16 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         initTrip()
 
         ibtnChattiness.setOnClickListener {
-            chattiness = onPreferenceClick(chattiness, ibtnChattiness)
+            chattiness = changeStatePreference(!chattiness, ibtnChattiness)
         }
         ibtnSmoking.setOnClickListener {
-            smoking = onPreferenceClick(smoking, ibtnSmoking)
+            smoking = changeStatePreference(!smoking, ibtnSmoking)
         }
         ibtnPets.setOnClickListener {
-            pets = onPreferenceClick(pets, ibtnPets)
+            pets = changeStatePreference(!pets, ibtnPets)
         }
         ibtnMusic.setOnClickListener {
-            music = onPreferenceClick(music, ibtnMusic)
+            music = changeStatePreference(!music, ibtnMusic)
         }
 
         if(savedInstanceState != null) {
@@ -179,23 +179,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         smoking = changeStatePreference(trip.smoking, ibtnSmoking)
         pets = changeStatePreference(trip.pets, ibtnPets)
         music = changeStatePreference(trip.music, ibtnMusic)
-    }
-
-    private fun onPreferenceClick(oldState: Boolean, btn: ImageButton) : Boolean{
-        val typedValue = TypedValue()
-        val theme = requireContext().theme
-        var color = 0
-
-        if (!oldState) {
-            theme.resolveAttribute(R.attr.colorControlActivated, typedValue, true)
-            color = typedValue.data
-        } else {
-            theme.resolveAttribute(R.attr.colorControlNormal, typedValue, true)
-            color = typedValue.data //2298478592.toInt()
-        }
-        btn.isSelected = !oldState
-        btn.setColorFilter(color)
-        return !oldState
     }
 
     private fun changeStatePreference(state: Boolean, btn: ImageButton) : Boolean{
