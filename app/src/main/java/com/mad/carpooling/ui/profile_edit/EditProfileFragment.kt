@@ -12,6 +12,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -45,6 +46,7 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
     private lateinit var optionsMenu: Menu
     private var currentPhotoPath: String? = null
     private var REQUEST_IMAGE_CAPTURE = 1
+    private var REQUEST_IMAGE_FROM_GALLERY = 2
     private var TMP_FILENAME_IMG = "temp_profile_pic_img.jpg"
     private var FILENAME_IMG = "profile_pic_img.jpg"
 
@@ -98,6 +100,35 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
                     )
                 )?.also { bitmap ->
                     ivEditProfilePic.setImageBitmap(bitmap)
+                }
+            }
+        }
+    }
+
+    private fun dispatchGalleryPickerIntent() {
+        val galleryPickerIntent = Intent(
+            Intent.ACTION_PICK,
+            MediaStore.Images.Media.INTERNAL_CONTENT_URI
+        )
+        startActivityForResult(galleryPickerIntent, REQUEST_IMAGE_FROM_GALLERY)
+
+    }
+
+    private fun updatePathFromGallery(imageUri: Uri?) {
+        val inputStream = requireContext().contentResolver.openInputStream(imageUri!!)
+        val cursor = requireContext().contentResolver.query(imageUri, null, null, null, null)
+        cursor?.use { c ->
+            val nameIndex = c.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            if (c.moveToFirst()) {
+                val name = c.getString(nameIndex)
+                inputStream?.let { inputStream ->
+                    // create same file with same name
+                    val file = File(requireContext().cacheDir, name)
+                    val os = file.outputStream()
+                    os.use {
+                        inputStream.copyTo(it)
+                    }
+                    currentPhotoPath = file.absolutePath
                 }
             }
         }
@@ -325,6 +356,7 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
         return when (item.itemId) {
             R.id.ctx_gallery -> {
                 Toast.makeText(context, "Open Gallery", Toast.LENGTH_SHORT).show()
+                dispatchGalleryPickerIntent()
                 true
             }
             R.id.ctx_camera -> {
@@ -339,8 +371,13 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             setPic()
+        } else if (requestCode == REQUEST_IMAGE_FROM_GALLERY && resultCode == RESULT_OK) {
+            val imageUri = data?.data
+            updatePathFromGallery(imageUri)
+            setPic()
         }
     }
+
 
     override fun onSaveInstanceState(outState: Bundle) {
         if (currentPhotoPath != null) outState.putString("state_currentPhoto", currentPhotoPath)
