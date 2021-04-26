@@ -47,7 +47,7 @@
             android:layout_height="64dp"
             android:layout_gravity="center|bottom"
             android:layout_margin="4dp"
-            android:background="@drawable/shape_round_camera"
+            android:background="@drawable/shape_round_camera_profile"
             android:elevation="4dp"
             android:src="@drawable/ic_baseline_camera"
             app:layout_constraintBottom_toBottomOf="parent"
