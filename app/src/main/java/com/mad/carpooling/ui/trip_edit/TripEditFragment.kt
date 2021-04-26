@@ -42,6 +42,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.HashMap
 
 class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
@@ -104,33 +105,43 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         ibtnPets = view.findViewById(R.id.btn_edit_pets)
         ibtnMusic = view.findViewById(R.id.btn_edit_music)
 
-        initTrip(view)
+        val args: TripEditFragmentArgs by navArgs()
 
-        ibtnChattiness.setOnClickListener {
-            chattiness = changeStatePreference(!chattiness, ibtnChattiness)
-        }
-        ibtnSmoking.setOnClickListener {
-            smoking = changeStatePreference(!smoking, ibtnSmoking)
-        }
-        ibtnPets.setOnClickListener {
-            pets = changeStatePreference(!pets, ibtnPets)
-        }
-        ibtnMusic.setOnClickListener {
-            music = changeStatePreference(!music, ibtnMusic)
-        }
+        if(!args.isNew) {
 
-        if(savedInstanceState != null) {
-            chattiness = savedInstanceState.getBoolean("chattiness")
-            smoking = savedInstanceState.getBoolean("smoking")
-            pets = savedInstanceState.getBoolean("pets")
-            music = savedInstanceState.getBoolean("music")
-            chattiness = changeStatePreference(chattiness, ibtnChattiness)
-            smoking = changeStatePreference(smoking, ibtnSmoking)
-            pets = changeStatePreference(pets, ibtnPets)
-            music = changeStatePreference(music, ibtnMusic)
+            initTrip(view)
+
+            ibtnChattiness.setOnClickListener {
+                chattiness = changeStatePreference(!chattiness, ibtnChattiness)
+            }
+            ibtnSmoking.setOnClickListener {
+                smoking = changeStatePreference(!smoking, ibtnSmoking)
+            }
+            ibtnPets.setOnClickListener {
+                pets = changeStatePreference(!pets, ibtnPets)
+            }
+            ibtnMusic.setOnClickListener {
+                music = changeStatePreference(!music, ibtnMusic)
+            }
+
+            if (savedInstanceState != null) {
+                chattiness = savedInstanceState.getBoolean("chattiness")
+                smoking = savedInstanceState.getBoolean("smoking")
+                pets = savedInstanceState.getBoolean("pets")
+                music = savedInstanceState.getBoolean("music")
+                chattiness = changeStatePreference(chattiness, ibtnChattiness)
+                smoking = changeStatePreference(smoking, ibtnSmoking)
+                pets = changeStatePreference(pets, ibtnPets)
+                music = changeStatePreference(music, ibtnMusic)
+            } else {
+                initPreferences()
+            }
         }
         else{
-            initPreferences()
+            val rv = view.findViewById<RecyclerView>(R.id.rv_tripEdit_stops)
+            rv.layoutManager = LinearLayoutManager(context);
+            val stopAdapter = StopAdapter(HashMap<Int,String>())
+            rv.adapter = stopAdapter
         }
 
         val btnDate = view.findViewById<MaterialButton>(R.id.edit_date)
@@ -147,6 +158,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
     private fun initTrip(view: View) {
         val args: TripEditFragmentArgs by navArgs()
+
         val tripId = args.id
         val bundleStops = args.stops!!
         stops = bundleStops.getSerializable("stops") as HashMap<Int, String>
