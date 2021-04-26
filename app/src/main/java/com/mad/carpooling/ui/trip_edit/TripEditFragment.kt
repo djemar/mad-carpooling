@@ -5,6 +5,7 @@ import android.app.DatePickerDialog
 import android.app.Dialog
 import android.app.TimePickerDialog
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -33,16 +34,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.textfield.TextInputEditText
 import com.mad.carpooling.R
 import com.mad.carpooling.TripUtil
-import com.mad.carpooling.ui.profile_edit.EditProfileFragmentDirections
+import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.HashMap
 
 class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
@@ -64,7 +63,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     private lateinit var ibtnPets: ImageButton
     private lateinit var ibtnMusic: ImageButton
     private lateinit var bundleStops: Bundle
-    private lateinit var stops: HashMap<Int,String>
+    private lateinit var stops: HashMap<Int, String>
     private var chattiness = false
     private var smoking = false
     private var pets = false
@@ -107,42 +106,20 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
         val args: TripEditFragmentArgs by navArgs()
 
-        if(!args.isNew) {
-
-            initTrip(view)
-
-            ibtnChattiness.setOnClickListener {
-                chattiness = changeStatePreference(!chattiness, ibtnChattiness)
-            }
-            ibtnSmoking.setOnClickListener {
-                smoking = changeStatePreference(!smoking, ibtnSmoking)
-            }
-            ibtnPets.setOnClickListener {
-                pets = changeStatePreference(!pets, ibtnPets)
-            }
-            ibtnMusic.setOnClickListener {
-                music = changeStatePreference(!music, ibtnMusic)
-            }
-
-            if (savedInstanceState != null) {
-                chattiness = savedInstanceState.getBoolean("chattiness")
-                smoking = savedInstanceState.getBoolean("smoking")
-                pets = savedInstanceState.getBoolean("pets")
-                music = savedInstanceState.getBoolean("music")
-                chattiness = changeStatePreference(chattiness, ibtnChattiness)
-                smoking = changeStatePreference(smoking, ibtnSmoking)
-                pets = changeStatePreference(pets, ibtnPets)
-                music = changeStatePreference(music, ibtnMusic)
-            } else {
-                initPreferences()
-            }
+        ibtnChattiness.setOnClickListener {
+            chattiness = changeStatePreference(!chattiness, ibtnChattiness)
         }
-        else{
-            val rv = view.findViewById<RecyclerView>(R.id.rv_tripEdit_stops)
-            rv.layoutManager = LinearLayoutManager(context);
-            val stopAdapter = StopAdapter(HashMap<Int,String>())
-            rv.adapter = stopAdapter
+        ibtnSmoking.setOnClickListener {
+            smoking = changeStatePreference(!smoking, ibtnSmoking)
         }
+        ibtnPets.setOnClickListener {
+            pets = changeStatePreference(!pets, ibtnPets)
+        }
+        ibtnMusic.setOnClickListener {
+            music = changeStatePreference(!music, ibtnMusic)
+        }
+
+        initTrip(view, savedInstanceState)
 
         val btnDate = view.findViewById<MaterialButton>(R.id.edit_date)
         btnDate.setOnClickListener { showDatePickerDialog(view) }
@@ -156,55 +133,76 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
     }
 
-    private fun initTrip(view: View) {
-        val args: TripEditFragmentArgs by navArgs()
+    private fun initTrip(view: View, savedInstanceState: Bundle?) {
+        if (savedInstanceState == null) {// view created navigating from tripList or tripDetails
+            val args: TripEditFragmentArgs by navArgs()
+            if (!args.isNew) {  // navigating from any edit btn
+                val tripId = args.id
+                val bundleStops = args.stops!!
+                stops = bundleStops.getSerializable("stops") as HashMap<Int, String>
 
-        val tripId = args.id
-        val bundleStops = args.stops!!
-        stops = bundleStops.getSerializable("stops") as HashMap<Int, String>
+                trip = TripUtil.Trip(
+                    args.id,
+                    "args.nickname",
+                    args.departure,
+                    args.arrival,
+                    args.duration,
+                    args.depDate,
+                    args.depTime,
+                    args.seats,
+                    args.price,
+                    args.chattiness,
+                    args.smoking,
+                    args.pets,
+                    args.music,
+                    args.description,
+                    stops
+                )
+               // currentPhotoPath = args.currentPhotoPath or from remote resource
+            } else { // navigating from tripList FAB
+                trip = TripUtil.Trip(TripUtil().getTripList().size + 1)
+            }
+            tvDate.text = trip.depDate
+            tvTime.text = trip.depTime
+            etDepartureLocation.setText(trip.departure)
+            etArrivalLocation.setText(trip.arrival)
+            etDuration.setText(trip.duration)
+            etSeats.setText(trip.seats.toString())
+            etPrice.setText(trip.price.toString())
+            etDescription.setText(trip.description)
 
-        trip = TripUtil.Trip(
-            args.id,
-            "args.nickname",
-            args.departure,
-            args.arrival,
-            args.duration,
-            args.depDate,
-            args.depTime,
-            args.seats,
-            args.price,
-            args.chattiness,
-            args.smoking,
-            args.pets,
-            args.music,
-            args.description,
-            stops
-        )
-
-        tvDate.text = trip.depDate
-        tvTime.text = trip.depTime
-        etDepartureLocation.setText(trip.departure)
-        etArrivalLocation.setText(trip.arrival)
-        etDuration.setText(trip.duration)
-        etSeats.setText(trip.seats.toString())
-        etPrice.setText(trip.price.toString())
-        etDescription.setText(trip.description)
-
-        val rv = view.findViewById<RecyclerView>(R.id.rv_tripEdit_stops)
-        rv.layoutManager = LinearLayoutManager(context);
-        val stopAdapter = StopAdapter(trip.stops!!)
-        rv.adapter = stopAdapter
+            val rv = view.findViewById<RecyclerView>(R.id.rv_tripEdit_stops)
+            rv.layoutManager = LinearLayoutManager(context);
+            val stopAdapter = StopEditAdapter(trip.stops!!)
+            rv.adapter = stopAdapter
+            initPreferences()
+        } else {
+            chattiness = savedInstanceState.getBoolean("chattiness")
+            smoking = savedInstanceState.getBoolean("smoking")
+            pets = savedInstanceState.getBoolean("pets")
+            music = savedInstanceState.getBoolean("music")
+            chattiness = changeStatePreference(chattiness, ibtnChattiness)
+            smoking = changeStatePreference(smoking, ibtnSmoking)
+            pets = changeStatePreference(pets, ibtnPets)
+            music = changeStatePreference(music, ibtnMusic)
+            currentPhotoPath = savedInstanceState.getString("state_currentPhoto")
+        }
+        if (currentPhotoPath != null) {
+            BitmapFactory.decodeFile(currentPhotoPath)?.also { bitmap ->
+                ivCarPic.setImageBitmap(bitmap)
+            }
+        }
 
     }
 
-    private fun initPreferences(){
+    private fun initPreferences() {
         chattiness = changeStatePreference(trip.chattiness, ibtnChattiness)
         smoking = changeStatePreference(trip.smoking, ibtnSmoking)
         pets = changeStatePreference(trip.pets, ibtnPets)
         music = changeStatePreference(trip.music, ibtnMusic)
     }
 
-    private fun changeStatePreference(state: Boolean, btn: ImageButton) : Boolean{
+    private fun changeStatePreference(state: Boolean, btn: ImageButton): Boolean {
         val typedValue = TypedValue()
         val theme = requireContext().theme
         var color = 0
@@ -230,6 +228,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.save_trip -> {
+                saveToSharedPref()
                 val action = TripEditFragmentDirections.actionNavTripEditToNavTripDetails(
                     trip.id,
                     etDepartureLocation.text.trim().toString(),
@@ -462,7 +461,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         currentPhotoPath = myFile.absolutePath  // update the path to point to the new fixed img
     }
 
-    private fun saveProfileImg() {
+    private fun saveCarImage() {
         val imgPath = activity?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         val filename = FILENAME_IMG
         val myFile = File(imgPath, filename)
@@ -476,6 +475,21 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         tmpFile.delete()
 
         currentPhotoPath = (File(imgPath, filename)).absolutePath
+    }
+
+    private fun saveToSharedPref() {
+        saveCarImage()
+
+        val jsonObj = JSONObject()
+        jsonObj.put("json_carPic.group05.lab2", currentPhotoPath)
+
+        val sharedPref =
+            context?.getSharedPreferences("tripEdit_pref.group05.lab2", Context.MODE_PRIVATE)
+                ?: return
+        with(sharedPref.edit()) {
+            putString(getString(R.string.saved_profile_data), jsonObj.toString())
+            apply()
+        }
     }
 
     override fun onCreateContextMenu(
@@ -506,7 +520,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
             setPic()
-        }else if (requestCode == REQUEST_IMAGE_FROM_GALLERY && resultCode == Activity.RESULT_OK) {
+        } else if (requestCode == REQUEST_IMAGE_FROM_GALLERY && resultCode == Activity.RESULT_OK) {
             val imageUri = data?.data
             updatePathFromGallery(imageUri)
             setPic()
@@ -519,6 +533,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         outState.putBoolean("smoking", smoking)
         outState.putBoolean("pets", pets)
         outState.putBoolean("music", music)
+        if (currentPhotoPath != null) outState.putString("state_currentPhoto", currentPhotoPath)
     }
 
 }
