@@ -1,5 +1,11 @@
 package com.mad.carpooling
 
+import android.content.Context
+import com.google.gson.Gson
+
+
+
+
 class TripUtil(
 
 ) {
@@ -25,7 +31,7 @@ class TripUtil(
         val stops: ArrayList<String>? = null
     ) {}
 
-    private val tripList = mutableListOf<Trip>(
+    private val tripList = arrayListOf<Trip>(
         Trip(
             0,
             "Babayaga",
@@ -75,7 +81,7 @@ class TripUtil(
         return tripList[id]
     }
 
-    fun getTripList(): MutableList<Trip> {
+    fun getTripList(): ArrayList<Trip> {
         return tripList
     }
 
@@ -85,5 +91,10 @@ class TripUtil(
 
     fun addTrip(trip: Trip) {
         tripList.add(trip)
+    }
+
+    fun getJsonTripList(){
+        val gson = Gson()
+        val jsonTripList = gson.toJson(tripList)
     }
 }
