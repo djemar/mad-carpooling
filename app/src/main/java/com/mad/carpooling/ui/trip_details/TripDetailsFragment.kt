@@ -86,10 +86,10 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         val args: TripDetailsFragmentArgs by navArgs()
         val tripId = args.id
         val bundle = args.stops
-        var stops: HashMap<Int, String>? = null
+        var stops: ArrayList<String>? = null
         if (bundle != null)
             stops =
-                bundle?.getSerializable("stops") as HashMap<Int, String>
+                bundle.getSerializable("stops") as ArrayList<String>
 
         trip = TripUtil().getTrip(args.id)
 
