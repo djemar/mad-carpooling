@@ -182,6 +182,8 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             } else { // navigating from tripList FAB
                 trip = TripUtil.Trip(TripUtil().getTripList().size + 1)
                 stops = ArrayList<String>()
+                bundleStops = Bundle()
+                bundleStops?.putSerializable("stops", stops)
                 stopEditAdapter = StopEditAdapter(stops)
             }
             tvDate.text = trip.depDate
@@ -199,13 +201,15 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             rv.adapter = stopEditAdapter
             initPreferences()
 
-
         } else {
             tripId = savedInstanceState.getInt("id")
+
+            // Manage bundle for stops
             bundleStops = savedInstanceState.getBundle("stops")!!
             stops = bundleStops?.getSerializable("stops") as ArrayList<String>
-            stopEditAdapter = StopEditAdapter(stops!!)
+            stopEditAdapter = StopEditAdapter(stops)
             rv.adapter = stopEditAdapter
+            
             chattiness = savedInstanceState.getBoolean("chattiness")
             smoking = savedInstanceState.getBoolean("smoking")
             pets = savedInstanceState.getBoolean("pets")
