@@ -25,7 +25,6 @@ import android.util.TypedValue
 import android.view.*
 import android.widget.*
 import androidx.activity.addCallback
-import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.DialogFragment
@@ -37,10 +36,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.TripUtil
 import org.json.JSONObject
-import org.w3c.dom.Text
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -66,6 +67,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     private lateinit var ibtnSmoking: ImageButton
     private lateinit var ibtnPets: ImageButton
     private lateinit var ibtnMusic: ImageButton
+    private var tripList: ArrayList<TripUtil.Trip>? = null
     private var bundleStops: Bundle? = null
     private lateinit var stops: ArrayList<String>
     private var tripId = -1
@@ -107,6 +109,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         super.onViewCreated(view, savedInstanceState)
 
         ivCarPic = view.findViewById(R.id.iv_tripEdit_car_pic)
+//        Toast.makeText(context, trip.nickname, Toast.LENGTH_SHORT).show()
         tvDate = view.findViewById(R.id.tv_tripEdit_date)
         tvTime = view.findViewById(R.id.tv_tripEdit_time)
         etDepartureLocation = view.findViewById(R.id.et_departure)
@@ -152,6 +155,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         val rv = view.findViewById<RecyclerView>(R.id.rv_tripEdit_stops)
         rv.layoutManager = LinearLayoutManager(context);
         val stopEditAdapter: StopEditAdapter
+        tripList = getSavedTripList()
 
         if (savedInstanceState == null) {// view created navigating from tripList or tripDetails
             val args: TripEditFragmentArgs by navArgs()
@@ -160,27 +164,31 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                 bundleStops = args.stops
                 stops = bundleStops?.getSerializable("stops") as ArrayList<String>
 
-                trip = TripUtil.Trip(
-                    args.id,
-                    "args.nickname",
-                    args.departure,
-                    args.arrival,
-                    args.duration,
-                    args.depDate,
-                    args.depTime,
-                    args.seats,
-                    args.price,
-                    args.chattiness,
-                    args.smoking,
-                    args.pets,
-                    args.music,
-                    args.description,
-                    stops
-                )
+                trip = tripList!![args.id]
+
+                /* trip = TripUtil.Trip(
+                     args.id,
+                     "args.nickname",
+                     args.departure,
+                     args.arrival,
+                     args.duration,
+                     args.depDate,
+                     args.depTime,
+                     args.seats,
+                     args.price,
+                     args.chattiness,
+                     args.smoking,
+                     args.pets,
+                     args.music,
+                     args.description,
+                     stops
+                 )*/
                 stopEditAdapter = StopEditAdapter(stops!!)
                 // currentPhotoPath = args.currentPhotoPath or from remote resource
             } else { // navigating from tripList FAB
-                trip = TripUtil.Trip(TripUtil().getTripList().size + 1)
+                (activity as MainActivity).supportActionBar?.title = "Create New Trip"
+                if (tripList == null) tripId=0 else tripId=tripList!!.size
+                trip = TripUtil.Trip(tripId)
                 stops = ArrayList<String>()
                 bundleStops = Bundle()
                 bundleStops?.putSerializable("stops", stops)
@@ -209,7 +217,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             stops = bundleStops?.getSerializable("stops") as ArrayList<String>
             stopEditAdapter = StopEditAdapter(stops)
             rv.adapter = stopEditAdapter
-            
+
             chattiness = savedInstanceState.getBoolean("chattiness")
             smoking = savedInstanceState.getBoolean("smoking")
             pets = savedInstanceState.getBoolean("pets")
@@ -234,6 +242,22 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
     }
 
+    private fun getSavedTripList(): ArrayList<TripUtil.Trip>? {
+        var gson = Gson()
+        val sharedPref =
+            context?.getSharedPreferences("trip_pref.group05.lab2", Context.MODE_PRIVATE)
+                ?: return null
+        val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
+        if (jsonString != null) {
+            val jsonObject = JSONObject(jsonString)
+            var jsonTripList = jsonObject.getString(
+                "json_tripList.group05.lab2"
+            )
+            val myType = object : TypeToken<ArrayList<TripUtil.Trip>>() {}.type
+            return gson.fromJson(jsonTripList, myType)
+        } else return null
+    }
+
     private fun initPreferences() {
         chattiness = changeStatePreference(trip.chattiness, ibtnChattiness)
         smoking = changeStatePreference(trip.smoking, ibtnSmoking)
@@ -251,7 +275,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             color = typedValue.data
         } else {
             theme.resolveAttribute(R.attr.colorControlNormal, typedValue, true)
-            color = typedValue.data //2298478592.toInt()
+            color = typedValue.data
         }
         btn.isSelected = state
         btn.setColorFilter(color)
@@ -264,9 +288,49 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
+    private fun getCurrentUser(): String? {
+        val sharedPref =
+            context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
+                ?: return null
+        val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
+        if (jsonString != null) {
+            val jsonObject = JSONObject(jsonString)
+            return jsonObject.getString(
+                "json_nickname.group05.lab1"
+            )
+        } else return "Babayaga"; //just for testing purposes
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.save_trip -> {
+                val newTrip = TripUtil.Trip(
+                    tripId,
+                    getCurrentUser()!!,
+                    etDepartureLocation.text.trim().toString(),
+                    etArrivalLocation.text.trim().toString(),
+                    etDuration.text.trim().toString(),
+                    tvDate.text.trim().toString(),
+                    tvTime.text.trim().toString(),
+                    etSeats.text.trim().toString().toInt(),
+                    etPrice.text.trim().toString().toFloat(),
+                    chattiness,
+                    smoking,
+                    pets,
+                    music,
+                    etDescription.text.trim().toString(),
+                    stops
+                )
+                val args: TripEditFragmentArgs by navArgs()
+                if (args.isNew) {
+                    tripList?.add(
+                        newTrip
+                    )
+                } else {
+                    tripList?.set(
+                        tripId, newTrip
+                    )
+                }
                 saveToSharedPref()
                 //TODO update stops with items from RecyclerView
                 bundleStops = Bundle()
@@ -316,7 +380,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         }
 
         override fun onDateSet(view: DatePicker, year: Int, month: Int, day: Int) {
-            tvDate.text = "${day.toString()}/${month.toString()}/${year.toString()}"
+            tvDate.text = "${day.toString()}/${(month+1).toString()}/${year.toString()}"
         }
 
     }
@@ -524,8 +588,12 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         val jsonObj = JSONObject()
         jsonObj.put("json_carPic.group05.lab2", currentPhotoPath)
 
+        val gson = Gson()
+        val jsonTripList = gson.toJson(tripList)
+        jsonObj.put("json_tripList.group05.lab2", jsonTripList)
+
         val sharedPref =
-            context?.getSharedPreferences("tripEdit_pref.group05.lab2", Context.MODE_PRIVATE)
+            context?.getSharedPreferences("trip_pref.group05.lab2", Context.MODE_PRIVATE)
                 ?: return
         with(sharedPref.edit()) {
             putString(getString(R.string.saved_profile_data), jsonObj.toString())

@@ -15,6 +15,8 @@ import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.mad.carpooling.R
 import com.mad.carpooling.TripUtil
 import org.json.JSONObject
@@ -22,19 +24,18 @@ import org.json.JSONObject
 private var currentUser: String? = null
 
 class TripListFragment : Fragment(R.layout.fragment_trip_list) {
+    private var tripList: ArrayList<TripUtil.Trip>? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        currentUser = getCurrentUser()
+        initTripList()
 
         val rv = view.findViewById<RecyclerView>(R.id.triplist_rv)
         rv.layoutManager = LinearLayoutManager(context)
         //just an example, real trips needed
-        val tripUtil = TripUtil()
-        val triplist = tripUtil.getTripList()
-        //val triplist = listOf<Trip>() //to check emptyView
-        val tripAdapter = TripAdapter(triplist.toList())
+
+        val tripAdapter = TripAdapter(tripList!!)
         rv.adapter = tripAdapter
 
         val emptyView = view.findViewById<TextView>(R.id.no_trips_available)
@@ -63,6 +64,45 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
         })
     }
 
+    private fun initTripList() {
+        currentUser = getCurrentUser()
+        tripList = getSavedTripList()
+
+        if(tripList == null){
+            tripList = TripUtil().getTripList() // for testing purposes
+            val jsonObj = JSONObject()
+
+            val gson = Gson()
+            val jsonTripList = gson.toJson(tripList)
+            jsonObj.put("json_tripList.group05.lab2", jsonTripList)
+
+            val sharedPref =
+                context?.getSharedPreferences("trip_pref.group05.lab2", Context.MODE_PRIVATE)
+                    ?: return
+            with(sharedPref.edit()) {
+                putString(getString(R.string.saved_profile_data), jsonObj.toString())
+                apply()
+            }
+        }
+    }
+
+    private fun getSavedTripList(): ArrayList<TripUtil.Trip>? {
+        var gson = Gson()
+        val sharedPref =
+            context?.getSharedPreferences("trip_pref.group05.lab2", Context.MODE_PRIVATE)
+                ?: return null
+        val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
+        if (jsonString != null) {
+            val jsonObject = JSONObject(jsonString)
+            var jsonTripList = jsonObject.getString(
+                "json_tripList.group05.lab2"
+            )
+            val myType = object : TypeToken<ArrayList<TripUtil.Trip>>() {}.type
+            return gson.fromJson(jsonTripList, myType)
+        } else return null
+    }
+
+
     private fun getCurrentUser(): String? {
         val sharedPref =
             context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
@@ -77,7 +117,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
     }
 
 
-    class TripAdapter(val triplist: List<TripUtil.Trip>) :
+    class TripAdapter(val tripList: ArrayList<TripUtil.Trip>) :
         RecyclerView.Adapter<TripAdapter.TripViewHolder>() {
 
         class TripViewHolder(v: View) : RecyclerView.ViewHolder(v) {
@@ -152,11 +192,11 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
         }
 
         override fun onBindViewHolder(holder: TripViewHolder, position: Int) {
-            holder.bind(triplist[position])
+            holder.bind(tripList!!.get(position))
         }
 
         override fun getItemCount(): Int {
-            return triplist.size;
+            return tripList!!.size;
         }
 
     }

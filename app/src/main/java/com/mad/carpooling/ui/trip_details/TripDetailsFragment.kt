@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.widget.Button
@@ -16,6 +17,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.mad.carpooling.R
 import com.mad.carpooling.TripUtil
 import org.json.JSONObject
@@ -40,6 +43,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private lateinit var ibtnPets: ImageButton
     private lateinit var ibtnMusic: ImageButton
     private lateinit var optionsMenu: Menu
+    private var tripList: java.util.ArrayList<TripUtil.Trip>? = null
     private var chattiness = false
     private var smoking = false
     private var pets = false
@@ -84,15 +88,36 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         }
     }
 
+
+    private fun getSavedTripList(): ArrayList<TripUtil.Trip>? {
+        var gson = Gson()
+        val sharedPref =
+            context?.getSharedPreferences("trip_pref.group05.lab2", Context.MODE_PRIVATE)
+                ?: return null
+        val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
+        if (jsonString != null) {
+            val jsonObject = JSONObject(jsonString)
+            var jsonTripList = jsonObject.getString(
+                "json_tripList.group05.lab2"
+            )
+            val myType = object : TypeToken<ArrayList<TripUtil.Trip>>() {}.type
+            return gson.fromJson(jsonTripList, myType)
+        } else return null
+    }
+
     private fun initTripDetails(view: View) {
         val args: TripDetailsFragmentArgs by navArgs()
         val tripId = args.id
         val bundle = args.stops
 
+        tripList = getSavedTripList()
+
         if (bundle != null)
             stops = bundle.getSerializable("stops") as ArrayList<String>
 
-        trip = TripUtil().getTrip(args.id)
+        trip = tripList!![args.id]
+
+        Log.e("INFO", trip.nickname)
 
         // ivCarPic to be init from remote resource
         if (args.currentPhotoPath != null) {
