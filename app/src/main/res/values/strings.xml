@@ -16,8 +16,8 @@
     <string name="title_activity_main">MainActivity</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Fullname</string>
-    <string name="nav_header_subtitle">Nickname</string>
+    <string name="nav_header_title">John Wick</string>
+    <string name="nav_header_subtitle">Babayaga</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 

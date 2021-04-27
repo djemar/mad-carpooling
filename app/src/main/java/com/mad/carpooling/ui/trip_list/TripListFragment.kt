@@ -73,8 +73,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
             return jsonObject.getString(
                 "json_nickname.group05.lab1"
             )
-        }
-        return null;
+        } else return "Babayaga"; //just for testing purposes
     }
 
 
