@@ -66,8 +66,9 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     private lateinit var ibtnSmoking: ImageButton
     private lateinit var ibtnPets: ImageButton
     private lateinit var ibtnMusic: ImageButton
-    private lateinit var bundleStops: Bundle
+    private var bundleStops: Bundle? = null
     private lateinit var stops: ArrayList<String>
+    private var tripId = -1
     private var chattiness = false
     private var smoking = false
     private var pets = false
@@ -85,15 +86,17 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
         val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
             activity?.setResult(Activity.RESULT_CANCELED)
-            val previousFragment =  findNavController().previousBackStackEntry?.destination?.label
-            when (previousFragment){
+            val previousFragment = findNavController().previousBackStackEntry?.destination?.label
+            when (previousFragment) {
                 "Trip List" -> {
                     findNavController().navigate(
-                        R.id.action_nav_trip_edit_to_nav_trip_list)
+                        R.id.action_nav_trip_edit_to_nav_trip_list
+                    )
                 }
                 "Trip Details" -> {
                     findNavController().navigate(
-                        R.id.action_nav_trip_edit_to_nav_trip_details)
+                        R.id.action_nav_trip_edit_to_nav_trip_details
+                    )
                 }
             }
         }
@@ -149,12 +152,13 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         val rv = view.findViewById<RecyclerView>(R.id.rv_tripEdit_stops)
         rv.layoutManager = LinearLayoutManager(context);
         val stopEditAdapter: StopEditAdapter
+
         if (savedInstanceState == null) {// view created navigating from tripList or tripDetails
             val args: TripEditFragmentArgs by navArgs()
             if (!args.isNew) {  // navigating from any edit btn
-                val tripId = args.id
-                val bundleStops = args.stops!!
-                stops = bundleStops.getSerializable("stops") as ArrayList<String>
+                tripId = args.id
+                bundleStops = args.stops
+                stops = bundleStops?.getSerializable("stops") as ArrayList<String>
 
                 trip = TripUtil.Trip(
                     args.id,
@@ -173,11 +177,12 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                     args.description,
                     stops
                 )
-                stopEditAdapter = StopEditAdapter(trip.stops!!)
-               // currentPhotoPath = args.currentPhotoPath or from remote resource
+                stopEditAdapter = StopEditAdapter(stops!!)
+                // currentPhotoPath = args.currentPhotoPath or from remote resource
             } else { // navigating from tripList FAB
                 trip = TripUtil.Trip(TripUtil().getTripList().size + 1)
-                stopEditAdapter = StopEditAdapter(ArrayList<String>())
+                stops = ArrayList<String>()
+                stopEditAdapter = StopEditAdapter(stops)
             }
             tvDate.text = trip.depDate
             tvTime.text = trip.depTime
@@ -194,12 +199,13 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             rv.adapter = stopEditAdapter
             initPreferences()
 
-            val btnAddStop = view.findViewById<ImageButton>(R.id.ib_add_stop)
-            btnAddStop.setOnClickListener {
-                stopEditAdapter.addEmpty("Location, dd-mm-yy, hh:mm", stops.size+1)
-            }
 
         } else {
+            tripId = savedInstanceState.getInt("id")
+            bundleStops = savedInstanceState.getBundle("stops")!!
+            stops = bundleStops?.getSerializable("stops") as ArrayList<String>
+            stopEditAdapter = StopEditAdapter(stops!!)
+            rv.adapter = stopEditAdapter
             chattiness = savedInstanceState.getBoolean("chattiness")
             smoking = savedInstanceState.getBoolean("smoking")
             pets = savedInstanceState.getBoolean("pets")
@@ -210,6 +216,12 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             music = changeStatePreference(music, ibtnMusic)
             currentPhotoPath = savedInstanceState.getString("state_currentPhoto")
         }
+
+        val btnAddStop = view.findViewById<ImageButton>(R.id.ib_add_stop)
+        btnAddStop.setOnClickListener {
+            stopEditAdapter.addEmpty(",,", stops.size + 1)
+        }
+
         if (currentPhotoPath != null) {
             BitmapFactory.decodeFile(currentPhotoPath)?.also { bitmap ->
                 ivCarPic.setImageBitmap(bitmap)
@@ -254,9 +266,9 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                 saveToSharedPref()
                 //TODO update stops with items from RecyclerView
                 bundleStops = Bundle()
-                bundleStops.putSerializable("stops", stops)
+                bundleStops?.putSerializable("stops", stops)
                 val action = TripEditFragmentDirections.actionNavTripEditToNavTripDetails(
-                    trip.id,
+                    tripId,
                     etDepartureLocation.text.trim().toString(),
                     etArrivalLocation.text.trim().toString(),
                     etDuration.text.trim().toString(),
@@ -558,6 +570,8 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         outState.putBoolean("smoking", smoking)
         outState.putBoolean("pets", pets)
         outState.putBoolean("music", music)
+        outState.putBundle("stops", bundleStops)
+        outState.putInt("id", tripId)
         if (currentPhotoPath != null) outState.putString("state_currentPhoto", currentPhotoPath)
     }
 
@@ -668,9 +682,9 @@ class StopEditAdapter(val stops: ArrayList<String>) :
         return stops.size
     }
 
-    fun addEmpty (stop: String, position: Int){
+    fun addEmpty(stop: String, position: Int) {
         stops.add(stop)
-        notifyItemInserted(position-1)
+        notifyItemInserted(position - 1)
     }
 
 }
