@@ -17,12 +17,15 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.provider.OpenableColumns
+import android.text.Editable
+import android.text.TextWatcher
 import android.text.format.DateFormat
 import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.widget.*
 import androidx.activity.addCallback
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.DialogFragment
@@ -37,6 +40,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.mad.carpooling.R
 import com.mad.carpooling.TripUtil
 import org.json.JSONObject
+import org.w3c.dom.Text
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -139,7 +143,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         var btnCamera = view.findViewById<ImageButton>(R.id.btn_tripEdit_camera)
         registerForContextMenu(btnCamera)
         btnCamera.setOnClickListener { activity?.openContextMenu(btnCamera) }
-
     }
 
     private fun initTrip(view: View, savedInstanceState: Bundle?) {
@@ -305,8 +308,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     private fun showDatePickerDialog(v: View) {
         val dateFragment = DatePickerFragment(tvDate)
         dateFragment.show(requireActivity().supportFragmentManager, "datePicker")
-        // should wait for fragment to close and then update the textView?
-        //tvDate.text = dateFragment.date //TODO: too fast
     }
 
     class TimePickerFragment(tvTime: TextView) : DialogFragment(),
@@ -575,9 +576,76 @@ class StopEditAdapter(val stops: ArrayList<String>) :
         fun bind(stops: ArrayList<String>, position: Int) {
             Log.d("bind:", stops[position]!!)
             val stringArray = stops[position]!!.split(",")
-            stopName.setText(stringArray[0].trim())
-            stopDate.setText(stringArray[1].trim())
-            stopTime.setText(stringArray[2].trim())
+            var stringName = stringArray[0].trim()
+            var stringDate = stringArray[1].trim()
+            var stringTime = stringArray[2].trim()
+            stopName.setText(stringName)
+            stopDate.setText(stringDate)
+            stopTime.setText(stringTime)
+
+            var stop = "${stringName},${stringDate},${stringTime}"
+
+            stopName.addTextChangedListener(object : TextWatcher {
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    stringName = s.toString()
+                    Log.d("NAME:", s.toString())
+                    stop = "${stringName},${stringDate},${stringTime}"
+                    stops[position] = stop
+                }
+
+                override fun afterTextChanged(s: Editable?) {
+                }
+
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
+            })
+
+            stopDate.addTextChangedListener(object : TextWatcher {
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    stringDate = s.toString()
+                    Log.d("DATE:", s.toString())
+                    stop = "${stringName},${stringDate},${stringTime}"
+                    stops[position] = stop
+                }
+
+                override fun afterTextChanged(s: Editable?) {
+
+                }
+
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
+            })
+
+            stopTime.addTextChangedListener(object : TextWatcher {
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    stringTime = s.toString()
+                    Log.d("TIME:", s.toString())
+                    stop = "${stringName},${stringDate},${stringTime}"
+                    stops[position] = stop
+                }
+
+                override fun afterTextChanged(s: Editable?) {
+
+                }
+
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
+            })
         }
 
     }
