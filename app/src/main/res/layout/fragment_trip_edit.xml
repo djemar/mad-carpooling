@@ -8,7 +8,8 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:padding="16dp">
 
         <androidx.cardview.widget.CardView
             android:id="@+id/cv_tripEdit_car_pic"
@@ -140,10 +141,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:background="?attr/colorControlNormal"
                         android:padding="12dp"
                         android:text="dd-mm-yyyy"
-                        android:textColor="?attr/colorOnPrimary"
                         android:textAlignment="center"
                         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                         android:textStyle="bold"
@@ -190,10 +189,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:background="?attr/colorControlNormal"
                         android:padding="12dp"
                         android:text="hh:mm"
-                        android:textColor="?attr/colorOnPrimary"
                         android:freezesText="true"
                         android:textAlignment="center"
                         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
@@ -506,6 +503,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:clickable="true"
+                    android:layout_margin="4dp"
                     android:src="@android:drawable/ic_input_add"
                     android:background="@drawable/shape_round_edit"
                     android:backgroundTint="?attr/colorPrimary"

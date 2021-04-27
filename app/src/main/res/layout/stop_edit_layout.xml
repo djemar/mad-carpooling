@@ -76,9 +76,10 @@
 
     <ImageButton
         android:id="@+id/ib_edit_delete_stop"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:clickable="true"
+        android:padding="4dp"
         android:src="@drawable/ic_baseline_delete"
         android:background="@drawable/shape_round_edit"
         android:backgroundTint="?attr/colorPrimary"
