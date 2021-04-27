@@ -1,5 +1,6 @@
 package com.mad.carpooling.ui.trip_list
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,18 +12,21 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mad.carpooling.R
 import com.mad.carpooling.TripUtil
+import org.json.JSONObject
+
+private var currentUser: String? = null
 
 class TripListFragment : Fragment(R.layout.fragment_trip_list) {
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        currentUser = getCurrentUser()
 
         val rv = view.findViewById<RecyclerView>(R.id.triplist_rv)
         rv.layoutManager = LinearLayoutManager(context)
@@ -58,87 +62,104 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
             }
         })
     }
-}
+
+    private fun getCurrentUser(): String? {
+        val sharedPref =
+            context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
+                ?: return null
+        val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
+        if (jsonString != null) {
+            val jsonObject = JSONObject(jsonString)
+            return jsonObject.getString(
+                "json_nickname.group05.lab1"
+            )
+        }
+        return null;
+    }
 
 
-class TripAdapter(val triplist: List<TripUtil.Trip>) : RecyclerView.Adapter<TripAdapter.TripViewHolder>() {
+    class TripAdapter(val triplist: List<TripUtil.Trip>) :
+        RecyclerView.Adapter<TripAdapter.TripViewHolder>() {
 
-    class TripViewHolder(v: View) : RecyclerView.ViewHolder(v) {
+        class TripViewHolder(v: View) : RecyclerView.ViewHolder(v) {
 
-        val tripRL = v.findViewById<RelativeLayout>(R.id.trip_rl)
-        val location = v.findViewById<TextView>(R.id.trip_from_to)
-        val duration = v.findViewById<TextView>(R.id.trip_duration)
-        val price = v.findViewById<TextView>(R.id.trip_price)
-        val button = v.findViewById<ImageButton>(R.id.trip_edit)
+            val tripRL = v.findViewById<RelativeLayout>(R.id.trip_rl)
+            val location = v.findViewById<TextView>(R.id.trip_from_to)
+            val duration = v.findViewById<TextView>(R.id.trip_duration)
+            val price = v.findViewById<TextView>(R.id.trip_price)
+            val btnEdit = v.findViewById<ImageButton>(R.id.trip_edit)
 
-        var navController: NavController? = null
+            var navController: NavController? = null
 
-        fun bind(trip: TripUtil.Trip) {
+            fun bind(trip: TripUtil.Trip) {
 
-            location.text = "${trip.departure} ${trip.arrival}"
-            duration.text = trip.duration
-            price.text = trip.price.toString()
+                location.text = "${trip.departure} ${trip.arrival}"
+                duration.text = trip.duration
+                price.text = trip.price.toString()
 
-            val bundle = Bundle()
-            bundle.putSerializable("stops", trip.stops)
+                val bundle = Bundle()
+                bundle.putSerializable("stops", trip.stops)
 
-            tripRL.setOnClickListener {
-                val action = TripListFragmentDirections.actionNavTripListToNavTripDetails(
-                    trip.id,
-                    trip.departure,
-                    trip.arrival,
-                    trip.duration,
-                    trip.price,
-                    trip.seats,
-                    trip.depDate,
-                    trip.depTime,
-                    trip.chattiness,
-                    trip.smoking,
-                    trip.pets,
-                    trip.music,
-                    trip.description,
-                    bundle
-                )
-                navController = Navigation.findNavController(tripRL)
-                navController!!.navigate(action)
-            }
-            button.setOnClickListener {
-                val action = TripListFragmentDirections.actionNavTripListToNavTripEdit(
-                    trip.id,
-                    trip.departure,
-                    trip.arrival,
-                    trip.duration,
-                    trip.price,
-                    trip.seats,
-                    trip.depDate,
-                    trip.depTime,
-                    trip.chattiness,
-                    trip.smoking,
-                    trip.pets,
-                    trip.music,
-                    trip.description,
-                    bundle,
-                    false
-                )
-                navController = Navigation.findNavController(button)
-                navController!!.navigate(action) //modify an existing one
+                tripRL.setOnClickListener {
+                    val action = TripListFragmentDirections.actionNavTripListToNavTripDetails(
+                        trip.id,
+                        trip.departure,
+                        trip.arrival,
+                        trip.duration,
+                        trip.price,
+                        trip.seats,
+                        trip.depDate,
+                        trip.depTime,
+                        trip.chattiness,
+                        trip.smoking,
+                        trip.pets,
+                        trip.music,
+                        trip.description,
+                        bundle
+                    )
+                    navController = Navigation.findNavController(tripRL)
+                    navController!!.navigate(action)
+                }
+                if (trip.nickname == currentUser) {
+                    btnEdit.setOnClickListener {
+                        val action = TripListFragmentDirections.actionNavTripListToNavTripEdit(
+                            trip.id,
+                            trip.departure,
+                            trip.arrival,
+                            trip.duration,
+                            trip.price,
+                            trip.seats,
+                            trip.depDate,
+                            trip.depTime,
+                            trip.chattiness,
+                            trip.smoking,
+                            trip.pets,
+                            trip.music,
+                            trip.description,
+                            bundle,
+                            false
+                        )
+                        navController = Navigation.findNavController(btnEdit)
+                        navController!!.navigate(action) //modify an existing one
+                    }
+                } else btnEdit.visibility = View.GONE
             }
         }
-    }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TripViewHolder {
-        val layout =
-            LayoutInflater.from(parent.context).inflate(R.layout.triplist_layout, parent, false)
-        return TripViewHolder(layout)
-    }
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TripViewHolder {
+            val layout =
+                LayoutInflater.from(parent.context).inflate(R.layout.triplist_layout, parent, false)
+            return TripViewHolder(layout)
+        }
 
-    override fun onBindViewHolder(holder: TripViewHolder, position: Int) {
-        holder.bind(triplist[position])
-    }
+        override fun onBindViewHolder(holder: TripViewHolder, position: Int) {
+            holder.bind(triplist[position])
+        }
 
-    override fun getItemCount(): Int {
-        return triplist.size;
-    }
+        override fun getItemCount(): Int {
+            return triplist.size;
+        }
 
+    }
 }
 
