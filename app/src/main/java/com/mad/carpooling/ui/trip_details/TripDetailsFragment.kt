@@ -86,7 +86,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         val tripId = args.id
         val bundle = args.stops
         val stops =
-            bundle?.getSerializable("stops") as HashMap<Int, String>
+            bundle?.getSerializable("stops") as ArrayList<String>
 
         trip = TripUtil.Trip(
             args.id,
@@ -212,7 +212,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     }
 }
 
-class StopAdapter(val stops: HashMap<Int, String>) :
+class StopAdapter(val stops: ArrayList<String>) :
     RecyclerView.Adapter<StopAdapter.StopViewHolder>() {
 
     class StopViewHolder(v: View) : RecyclerView.ViewHolder(v) {
@@ -222,8 +222,8 @@ class StopAdapter(val stops: HashMap<Int, String>) :
         var stopDate: TextView = v.findViewById<TextView>(R.id.stopDate)
         var stopTime: TextView = v.findViewById<TextView>(R.id.stopTime)
 
-        fun bind(stop: String?, key: Int) {
-            stopId.text = (key + 1).toString()
+        fun bind(stop: String?, position: Int) {
+            stopId.text = (position + 1).toString()
             val stringArray = stop!!.split(",")
             stopName.text = stringArray[0].trim()
             stopDate.text = stringArray[1].trim()
@@ -238,8 +238,8 @@ class StopAdapter(val stops: HashMap<Int, String>) :
         return StopViewHolder(layout)
     }
 
-    override fun onBindViewHolder(holder: StopViewHolder, key: Int) {
-        holder.bind(stops[key], key)
+    override fun onBindViewHolder(holder: StopViewHolder, position: Int) {
+        holder.bind(stops[position], position)
     }
 
     override fun getItemCount(): Int {

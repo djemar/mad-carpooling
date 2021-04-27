@@ -63,7 +63,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     private lateinit var ibtnPets: ImageButton
     private lateinit var ibtnMusic: ImageButton
     private lateinit var bundleStops: Bundle
-    private lateinit var stops: HashMap<Int, String>
+    private lateinit var stops: ArrayList<String>
     private var chattiness = false
     private var smoking = false
     private var pets = false
@@ -151,7 +151,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             if (!args.isNew) {  // navigating from any edit btn
                 val tripId = args.id
                 val bundleStops = args.stops!!
-                stops = bundleStops.getSerializable("stops") as HashMap<Int, String>
+                stops = bundleStops.getSerializable("stops") as ArrayList<String>
 
                 trip = TripUtil.Trip(
                     args.id,
@@ -174,7 +174,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                // currentPhotoPath = args.currentPhotoPath or from remote resource
             } else { // navigating from tripList FAB
                 trip = TripUtil.Trip(TripUtil().getTripList().size + 1)
-                stopEditAdapter = StopEditAdapter(HashMap<Int, String>())
+                stopEditAdapter = StopEditAdapter(ArrayList<String>())
             }
             tvDate.text = trip.depDate
             tvTime.text = trip.depTime
@@ -556,18 +556,19 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
 }
 
-class StopEditAdapter(val stops: HashMap<Int, String>) :
+class StopEditAdapter(val stops: ArrayList<String>) :
     RecyclerView.Adapter<StopEditAdapter.StopEditViewHolder>() {
 
     class StopEditViewHolder(v: View) : RecyclerView.ViewHolder(v) {
 
-       var stopName: EditText = v.findViewById(R.id.et_stop_location)
+        var stopName: EditText = v.findViewById(R.id.et_stop_location)
         var stopDate: EditText = v.findViewById(R.id.et_stop_date)
         var stopTime: EditText = v.findViewById(R.id.et_stop_time)
+        var deleteBtn: ImageButton = v.findViewById(R.id.ib_edit_delete_stop)
 
-        fun bind(stop: String?) {
-            Log.d("bind:", stop!!)
-            val stringArray = stop!!.split(",")
+        fun bind(stops: ArrayList<String>, position: Int) {
+            Log.d("bind:", stops[position]!!)
+            val stringArray = stops[position]!!.split(",")
             stopName.setText(stringArray[0].trim())
             stopDate.setText(stringArray[1].trim())
             stopTime.setText(stringArray[2].trim())
@@ -581,12 +582,20 @@ class StopEditAdapter(val stops: HashMap<Int, String>) :
         return StopEditViewHolder(layout)
     }
 
-    override fun onBindViewHolder(holder: StopEditViewHolder, key: Int) {
-        holder.bind(stops[key])
+    override fun onBindViewHolder(holder: StopEditViewHolder, position: Int) {
+        holder.bind(stops, position)
+        holder.deleteBtn.setOnClickListener {
+            stops.removeAt(position)
+            notifyDataSetChanged()
+        }
     }
 
     override fun getItemCount(): Int {
         return stops.size
+    }
+
+    fun notifyDelete(position: Int){
+        notifyItemRemoved(position)
     }
 
 }

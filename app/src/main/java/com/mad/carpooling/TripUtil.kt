@@ -22,7 +22,7 @@ class TripUtil(
         val pets: Boolean = false,
         val music: Boolean = false,
         val description: String = "Description",
-        val stops: HashMap<Int, String>? = null
+        val stops: ArrayList<String>? = null
     ) {}
 
     private val tripList = mutableListOf<Trip>(
@@ -41,10 +41,10 @@ class TripUtil(
             true,
             false,
             "It will be a killer of a trip!",
-            hashMapOf(
-                0 to "Torino, 18/04/21, 10min",
-                1 to "Rivoli, 18/04/21, 40min",
-                2 to "Ivrea, 18/04/21, 10min"
+            arrayListOf(
+                "Torino, 18/04/21, 10min",
+                "Rivoli, 18/04/21, 40min",
+                "Ivrea, 18/04/21, 10min"
             )
         ),
         Trip(
@@ -62,11 +62,11 @@ class TripUtil(
             false,
             true,
             "Calascibetta caput mundi.",
-            hashMapOf(
-                0 to "Calascibetta, 18/04/24, 3h",
-                1 to "Messina, 18/04/24, 1h",
-                2 to "Reggio, 18/04/24, 1h",
-                3 to "Bari, 18/04/24, 1h",
+            arrayListOf(
+                "Calascibetta, 18/04/24, 3h",
+                "Messina, 18/04/24, 1h",
+                "Reggio, 18/04/24, 1h",
+                "Bari, 18/04/24, 1h",
             )
         )
     )
