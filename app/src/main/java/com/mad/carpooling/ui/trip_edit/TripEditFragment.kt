@@ -134,6 +134,9 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     }
 
     private fun initTrip(view: View, savedInstanceState: Bundle?) {
+        val rv = view.findViewById<RecyclerView>(R.id.rv_tripEdit_stops)
+        rv.layoutManager = LinearLayoutManager(context);
+        val stopEditAdapter: StopEditAdapter
         if (savedInstanceState == null) {// view created navigating from tripList or tripDetails
             val args: TripEditFragmentArgs by navArgs()
             if (!args.isNew) {  // navigating from any edit btn
@@ -158,9 +161,11 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                     args.description,
                     stops
                 )
+                stopEditAdapter = StopEditAdapter(trip.stops!!)
                // currentPhotoPath = args.currentPhotoPath or from remote resource
             } else { // navigating from tripList FAB
                 trip = TripUtil.Trip(TripUtil().getTripList().size + 1)
+                stopEditAdapter = StopEditAdapter(HashMap<Int, String>())
             }
             tvDate.text = trip.depDate
             tvTime.text = trip.depTime
@@ -171,10 +176,10 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             etPrice.setText(trip.price.toString())
             etDescription.setText(trip.description)
 
-            val rv = view.findViewById<RecyclerView>(R.id.rv_tripEdit_stops)
-            rv.layoutManager = LinearLayoutManager(context);
-            val stopAdapter = StopEditAdapter(trip.stops!!)
-            rv.adapter = stopAdapter
+            //val rv = view.findViewById<RecyclerView>(R.id.rv_tripEdit_stops)
+            //rv.layoutManager = LinearLayoutManager(context);
+            //val stopAdapter = StopEditAdapter(trip.stops!!)
+            rv.adapter = stopEditAdapter
             initPreferences()
         } else {
             chattiness = savedInstanceState.getBoolean("chattiness")
