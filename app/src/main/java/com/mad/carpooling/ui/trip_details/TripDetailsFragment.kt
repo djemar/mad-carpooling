@@ -8,16 +8,15 @@ import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
 import android.view.*
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
+import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.TripUtil
 
@@ -47,8 +46,14 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setHasOptionsMenu(true)
+        val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
+            activity?.setResult(Activity.RESULT_CANCELED)
+            findNavController().navigate(
+                R.id.action_nav_trip_details_to_nav_trip_list
+            )
+        }
+        callback.isEnabled = true
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -69,7 +74,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         ibtnMusic = view.findViewById(R.id.btn_tripDetails_music)
 
         initTripDetails(view)
-
         val btnProfile = view.findViewById<Button>(R.id.btn_tripDetails_showProfile)
         btnProfile.setOnClickListener {
             // TODO: pass correct information about profile
@@ -184,6 +188,10 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         return when (item.itemId) {
             R.id.edit_trip -> {
                 editTrip()
+                true
+            }
+            android.R.id.home -> {
+                requireActivity().onBackPressed()
                 true
             }
             else -> super.onOptionsItemSelected(item)

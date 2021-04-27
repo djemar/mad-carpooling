@@ -81,10 +81,19 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
         val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
             activity?.setResult(Activity.RESULT_CANCELED)
-            findNavController().navigate(
-                R.id.action_nav_trip_edit_to_nav_trip_details
-            )
+            val previousFragment =  findNavController().previousBackStackEntry?.destination?.label
+            when (previousFragment){
+                "Trip List" -> {
+                    findNavController().navigate(
+                        R.id.action_nav_trip_edit_to_nav_trip_list)
+                }
+                "Trip Details" -> {
+                    findNavController().navigate(
+                        R.id.action_nav_trip_edit_to_nav_trip_details)
+                }
+            }
         }
+        //callback.isEnabled = true
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
