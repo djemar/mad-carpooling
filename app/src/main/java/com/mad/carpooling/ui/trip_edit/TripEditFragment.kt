@@ -190,6 +190,12 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             //val stopAdapter = StopEditAdapter(trip.stops!!)
             rv.adapter = stopEditAdapter
             initPreferences()
+
+            val btnAddStop = view.findViewById<ImageButton>(R.id.ib_add_stop)
+            btnAddStop.setOnClickListener {
+                stopEditAdapter.addEmpty("Location, dd-mm-yy, hh:mm", stops.size+1)
+            }
+
         } else {
             chattiness = savedInstanceState.getBoolean("chattiness")
             smoking = savedInstanceState.getBoolean("smoking")
@@ -594,8 +600,9 @@ class StopEditAdapter(val stops: ArrayList<String>) :
         return stops.size
     }
 
-    fun notifyDelete(position: Int){
-        notifyItemRemoved(position)
+    fun addEmpty (stop: String, position: Int){
+        stops.add(stop)
+        notifyItemInserted(position-1)
     }
 
 }
