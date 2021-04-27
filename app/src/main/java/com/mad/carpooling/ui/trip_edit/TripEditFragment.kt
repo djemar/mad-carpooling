@@ -93,7 +93,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                 }
             }
         }
-        //callback.isEnabled = true
+        callback.isEnabled = true
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
