@@ -1,24 +1,24 @@
 package com.mad.carpooling.ui.trip_details
 
 import android.app.Activity
-import android.content.Intent
+import android.content.Context
 import android.graphics.BitmapFactory
-import android.graphics.PorterDuff
 import android.os.Bundle
-import android.util.Log
 import android.util.TypedValue
 import android.view.*
-import android.widget.*
+import android.widget.Button
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.activity.addCallback
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.TripUtil
+import org.json.JSONObject
 
 
 class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
@@ -39,6 +39,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private lateinit var ibtnSmoking: ImageButton
     private lateinit var ibtnPets: ImageButton
     private lateinit var ibtnMusic: ImageButton
+    private lateinit var optionsMenu: Menu
     private var chattiness = false
     private var smoking = false
     private var pets = false
@@ -85,29 +86,15 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         val args: TripDetailsFragmentArgs by navArgs()
         val tripId = args.id
         val bundle = args.stops
-        val stops =
-            bundle?.getSerializable("stops") as ArrayList<String>
+        var stops: HashMap<Int, String>? = null
+        if (bundle != null)
+            stops =
+                bundle?.getSerializable("stops") as HashMap<Int, String>
 
-        trip = TripUtil.Trip(
-            args.id,
-            "args.nickname",
-            args.departure,
-            args.arrival,
-            args.duration,
-            args.depDate,
-            args.depTime,
-            args.seats,
-            args.price,
-            args.chattiness,
-            args.smoking,
-            args.pets,
-            args.music,
-            args.description,
-            stops
-        )
+        trip = TripUtil().getTrip(args.id)
 
         // ivCarPic to be init from remote resource
-        if(args.currentPhotoPath != null) {
+        if (args.currentPhotoPath != null) {
             BitmapFactory.decodeFile(args.currentPhotoPath)?.also { bitmap ->
                 ivCarPic.setImageBitmap(bitmap)
             }
@@ -198,8 +185,28 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         }
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        super.onPrepareOptionsMenu(menu)
+        optionsMenu.findItem(R.id.edit_trip).isVisible = trip.nickname == getCurrentUser()
+
+    }
+
+    private fun getCurrentUser(): String? {
+        val sharedPref =
+            context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
+                ?: return null
+        val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
+        if (jsonString != null) {
+            val jsonObject = JSONObject(jsonString)
+            return jsonObject.getString(
+                "json_nickname.group05.lab1"
+            )
+        } else return "Babayaga"; //just for testing purposes
+    }
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_trip_details, menu)
+        optionsMenu = menu
         super.onCreateOptionsMenu(menu, inflater)
     }
 

@@ -27,7 +27,7 @@ class TripUtil(
 
     private val tripList = mutableListOf<Trip>(
         Trip(
-            1,
+            0,
             "Babayaga",
             "Torino",
             "Ivrea",
@@ -48,7 +48,7 @@ class TripUtil(
             )
         ),
         Trip(
-            2,
+            1,
             "MrWinston",
             "Calascibetta",
             "Bari",
