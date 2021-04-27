@@ -45,6 +45,8 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private var pets = false
     private var music = false
 
+    var stops: ArrayList<String>? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
@@ -86,10 +88,9 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         val args: TripDetailsFragmentArgs by navArgs()
         val tripId = args.id
         val bundle = args.stops
-        var stops: ArrayList<String>? = null
+
         if (bundle != null)
-            stops =
-                bundle.getSerializable("stops") as ArrayList<String>
+            stops = bundle.getSerializable("stops") as ArrayList<String>
 
         trip = TripUtil().getTrip(args.id)
 
@@ -99,20 +100,24 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                 ivCarPic.setImageBitmap(bitmap)
             }
         }
-        tvDepartureLocation.text = trip.departure
-        tvArrivalLocation.text = trip.arrival
-        tvDepartureDate.text = trip.depDate
-        tvDepartureTime.text = trip.depTime
-        tvDuration.text = trip.duration
-        tvSeats.text = trip.seats.toString()
-        tvPrice.text = trip.price.toString()
-        tvDescription.text = trip.description
+        tvDepartureLocation.text = args.departure
+        tvArrivalLocation.text = args.arrival
+        tvDepartureDate.text = args.depDate
+        tvDepartureTime.text = args.depTime
+        tvDuration.text = args.duration
+        tvSeats.text = args.seats.toString()
+        tvPrice.text = args.price.toString()
+        tvDescription.text = args.description
+        chattiness = args.chattiness
+        smoking = args.smoking
+        pets = args.pets
+        music = args.music
 
         initPreferences()
 
         val rv = view.findViewById<RecyclerView>(R.id.rv_tripDetails_stops)
         rv.layoutManager = LinearLayoutManager(context);
-        val stopAdapter = StopAdapter(trip.stops!!)
+        val stopAdapter = StopAdapter(stops!!)
         rv.adapter = stopAdapter
         if (stopAdapter.itemCount == 0) {
             val tripStopsTitle = view.findViewById<TextView>(R.id.tv_tripDetails_stops)
@@ -125,7 +130,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
         // TODO: enable button only if matching profile
         val bundle = Bundle()
-        bundle.putSerializable("stops", trip.stops)
+        bundle.putSerializable("stops", stops)
         val action = TripDetailsFragmentDirections.actionNavTripDetailsToNavTripEdit(
             trip.id,
             trip.departure,
@@ -148,10 +153,10 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     }
 
     private fun initPreferences() {
-        chattiness = changeStatePreference(trip.chattiness, ibtnChattiness)
-        smoking = changeStatePreference(trip.smoking, ibtnSmoking)
-        pets = changeStatePreference(trip.pets, ibtnPets)
-        music = changeStatePreference(trip.music, ibtnMusic)
+        chattiness = changeStatePreference(chattiness, ibtnChattiness)
+        smoking = changeStatePreference(smoking, ibtnSmoking)
+        pets = changeStatePreference(pets, ibtnPets)
+        music = changeStatePreference(music, ibtnMusic)
     }
 
     private fun changeStatePreference(state: Boolean, ibtn: ImageButton): Boolean {
