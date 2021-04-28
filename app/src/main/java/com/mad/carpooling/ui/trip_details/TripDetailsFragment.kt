@@ -42,6 +42,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private lateinit var ibtnPets: ImageButton
     private lateinit var ibtnMusic: ImageButton
     private lateinit var optionsMenu: Menu
+    private lateinit var tvNickname: TextView
     private var tripList: java.util.ArrayList<Trip>? = null
     private var chattiness = false
     private var smoking = false
@@ -78,6 +79,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         ibtnSmoking = view.findViewById(R.id.btn_tripDetails_smoking)
         ibtnPets = view.findViewById(R.id.btn_tripDetails_pets)
         ibtnMusic = view.findViewById(R.id.btn_tripDetails_music)
+        tvNickname = view.findViewById(R.id.tv_tripDetails_fullName)
 
         initTripDetails(view)
         val btnProfile = view.findViewById<Button>(R.id.btn_tripDetails_showProfile)
@@ -124,6 +126,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                 ivCarPic.setImageBitmap(bitmap)
             }
         }
+        tvNickname.text = trip.nickname
         tvDepartureLocation.text = trip.departure
         tvArrivalLocation.text = trip.arrival
         tvDepartureDate.text = trip.depDate
