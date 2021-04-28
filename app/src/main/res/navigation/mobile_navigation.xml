@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_trip_list">
+
+    <fragment
+        android:id="@+id/nav_trip_list"
+        android:name="com.mad.carpooling.ui.trip_list.TripListFragment"
+        android:label="@string/menu_trip_list"
+        tools:layout="@layout/fragment_trip_list">
+        <action
+            android:id="@+id/action_nav_trip_list_to_nav_trip_details"
+            app:destination="@id/nav_trip_details"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+        <action
+            android:id="@+id/action_nav_trip_list_to_nav_trip_edit"
+            app:destination="@id/nav_trip_edit"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_show_profile"
+        android:name="com.mad.carpooling.ui.profile.ShowProfileFragment"
+        android:label="@string/menu_show_profile"
+        tools:layout="@layout/fragment_show_profile">
+        <action
+            android:id="@+id/action_nav_show_profile_to_nav_edit_profile"
+            app:destination="@id/nav_edit_profile"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+        <argument
+            android:name="fullname"
+            android:defaultValue="Fullname"
+            app:argType="string" />
+        <argument
+            android:name="nickname"
+            android:defaultValue="Nickname"
+            app:argType="string" />
+        <argument
+            android:name="email"
+            android:defaultValue="Email"
+            app:argType="string" />
+        <argument
+            android:name="location"
+            android:defaultValue="Location"
+            app:argType="string" />
+        <argument
+            android:name="currentPhotoPath"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_edit_profile"
+        android:name="com.mad.carpooling.ui.profile_edit.EditProfileFragment"
+        android:label="@string/menu_edit_profile"
+        tools:layout="@layout/fragment_edit_profile">
+        <action
+            android:id="@+id/action_nav_edit_profile_to_nav_show_profile"
+            app:destination="@id/nav_show_profile"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@android:anim/accelerate_decelerate_interpolator"
+            app:popExitAnim="@android:anim/slide_out_right" />
+        <argument
+            android:name="fullname"
+            android:defaultValue="Fullname"
+            app:argType="string" />
+        <argument
+            android:name="nickname"
+            android:defaultValue="Nickname"
+            app:argType="string" />
+        <argument
+            android:name="email"
+            android:defaultValue="Email"
+            app:argType="string" />
+        <argument
+            android:name="location"
+            android:defaultValue="Location"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_trip_details"
+        android:name="com.mad.carpooling.ui.trip_details.TripDetailsFragment"
+        android:label="@string/menu_trip_details"
+        tools:layout="@layout/fragment_trip_details">
+        <action
+            android:id="@+id/action_nav_trip_details_to_nav_trip_edit"
+            app:destination="@id/nav_trip_edit"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+        <action
+            android:id="@+id/action_nav_trip_details_to_nav_trip_list"
+            app:destination="@id/nav_trip_list"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+        <action
+            android:id="@+id/action_nav_trip_details_to_nav_show_profile"
+            app:destination="@id/nav_show_profile"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+        <argument
+            android:name="id"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <argument
+            android:name="departure"
+            android:defaultValue="x"
+            app:argType="string" />
+        <argument
+            android:name="arrival"
+            android:defaultValue="y"
+            app:argType="string" />
+        <argument
+            android:name="duration"
+            android:defaultValue="hh:mm"
+            app:argType="string" />
+        <argument
+            android:name="price"
+            android:defaultValue="1"
+            app:argType="float" />
+        <argument
+            android:name="seats"
+            android:defaultValue="1"
+            app:argType="integer" />
+        <argument
+            android:name="depDate"
+            android:defaultValue="dd-mm-yyyy"
+            app:argType="string" />
+        <argument
+            android:name="depTime"
+            android:defaultValue="hh:mm"
+            app:argType="string" />
+        <argument
+            android:name="chattiness"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="smoking"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="pets"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="music"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="description"
+            android:defaultValue="Description"
+            app:argType="string" />
+        <argument
+            android:name="stops"
+            android:defaultValue="@null"
+            app:argType="android.os.Bundle"
+            app:nullable="true" />
+        <argument
+            android:name="currentPhotoPath"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_trip_edit"
+        android:name="com.mad.carpooling.ui.trip_edit.TripEditFragment"
+        android:label="@string/menu_trip_edit"
+        tools:layout="@layout/fragment_trip_edit">
+        <action
+            android:id="@+id/action_nav_trip_edit_to_nav_trip_details"
+            app:destination="@id/nav_trip_details"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+        <argument
+            android:name="id"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <argument
+            android:name="departure"
+            android:defaultValue="x"
+            app:argType="string" />
+        <argument
+            android:name="arrival"
+            android:defaultValue="y"
+            app:argType="string" />
+        <argument
+            android:name="duration"
+            android:defaultValue="hh:mm"
+            app:argType="string" />
+        <argument
+            android:name="price"
+            android:defaultValue="1"
+            app:argType="float" />
+        <argument
+            android:name="seats"
+            android:defaultValue="1"
+            app:argType="integer" />
+        <argument
+            android:name="depDate"
+            android:defaultValue="dd-mm-yyyy"
+            app:argType="string" />
+        <argument
+            android:name="depTime"
+            android:defaultValue="hh:mm"
+            app:argType="string" />
+        <argument
+            android:name="chattiness"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="smoking"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="pets"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="music"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="description"
+            android:defaultValue="Description"
+            app:argType="string" />
+        <argument
+            android:name="stops"
+            android:defaultValue="@null"
+            app:argType="android.os.Bundle"
+            app:nullable="true" />
+        <argument
+            android:name="isNew"
+            app:argType="boolean"
+            android:defaultValue="false" />
+        <argument
+            android:name="currentPhotoPath"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+        <action
+            android:id="@+id/action_nav_trip_edit_to_nav_trip_list"
+            app:destination="@id/nav_trip_list"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+    </fragment>
+
+</navigation>

@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools" xmlns:android="http://schemas.android.com/apk/res/android">
+<resources xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Theme.Carpooling" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
@@ -13,6 +13,7 @@
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
         <item name="toolbarStyle">@style/MyToolbarStyle</item>
+        <item name="colorControlNormal">@color/gray_dark</item>
     </style>
 
     <style name="MyToolbarStyle" parent="Widget.MaterialComponents.Toolbar.PrimarySurface">
@@ -23,6 +24,19 @@
     <style name="MyToolbarTheme" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar">
         <item name="colorControlNormal">?attr/colorOnPrimary</item>
         <item name="android:actionMenuTextColor">@color/toolbar_icon_color</item>
+    </style>
+
+    <style name="Theme.Carpooling.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.Carpooling.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="Theme.Carpooling.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="Theme.CarpoolingDayNight.Background" parent="ThemeOverlay.AppCompat.DayNight">
+    <item name="android:background">@color/cardview_light_background</item>
     </style>
 
 </resources>

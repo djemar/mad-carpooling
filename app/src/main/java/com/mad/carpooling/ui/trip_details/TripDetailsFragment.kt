@@ -1,0 +1,277 @@
+package com.mad.carpooling.ui.trip_details
+
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Context
+import android.graphics.BitmapFactory
+import android.os.Bundle
+import android.util.Log
+import android.util.TypedValue
+import android.view.*
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.activity.addCallback
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import com.mad.carpooling.R
+import com.mad.carpooling.Trip
+import org.json.JSONObject
+
+
+class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
+
+    private lateinit var tripDetailsViewModel: TripDetailsViewModel
+    private lateinit var trip: Trip
+    private lateinit var ivCarPic: ImageView
+    private lateinit var tvDepartureLocation: TextView
+    private lateinit var tvDepartureDate: TextView
+    private lateinit var tvDepartureTime: TextView
+    private lateinit var tvArrivalLocation: TextView
+    private lateinit var tvDuration: TextView
+    private lateinit var tvSeats: TextView
+    private lateinit var tvPrice: TextView
+    private lateinit var tvDescription: TextView
+    private lateinit var ibtnChattiness: ImageButton
+    private lateinit var ibtnSmoking: ImageButton
+    private lateinit var ibtnPets: ImageButton
+    private lateinit var ibtnMusic: ImageButton
+    private lateinit var optionsMenu: Menu
+    private lateinit var tvNickname: TextView
+    private var tripList: java.util.ArrayList<Trip>? = null
+    private var chattiness = false
+    private var smoking = false
+    private var pets = false
+    private var music = false
+
+    var stops: ArrayList<String>? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+        val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
+            activity?.setResult(Activity.RESULT_CANCELED)
+            findNavController().navigate(
+                R.id.action_nav_trip_details_to_nav_trip_list
+            )
+        }
+        callback.isEnabled = true
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        ivCarPic = view.findViewById(R.id.iv_tripDetails_car_pic)
+        tvDepartureLocation = view.findViewById(R.id.tv_tripDetails_departureLocation)
+        tvDepartureDate = view.findViewById(R.id.tv_tripDetails_departureDate)
+        tvDepartureTime = view.findViewById(R.id.tv_tripDetails_departureTime)
+        tvArrivalLocation = view.findViewById(R.id.tv_tripDetails_arrivalLocation)
+        tvDuration = view.findViewById(R.id.tv_tripDetails_duration)
+        tvSeats = view.findViewById(R.id.tv_tripDetails_seats)
+        tvPrice = view.findViewById(R.id.tv_tripDetails_price)
+        tvDescription = view.findViewById(R.id.tv_tripDetails_description_text)
+        ibtnChattiness = view.findViewById(R.id.btn_tripDetails_chattiness)
+        ibtnSmoking = view.findViewById(R.id.btn_tripDetails_smoking)
+        ibtnPets = view.findViewById(R.id.btn_tripDetails_pets)
+        ibtnMusic = view.findViewById(R.id.btn_tripDetails_music)
+        tvNickname = view.findViewById(R.id.tv_tripDetails_fullName)
+
+        initTripDetails(view)
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun initTripDetails(view: View) {
+        val args: TripDetailsFragmentArgs by navArgs()
+
+        tripList = getSavedTripList()
+        
+        trip = tripList!![args.id]
+
+        stops = trip.stops
+        Log.e("INFO", trip.nickname)
+
+        // ivCarPic to be init from remote resource
+        if (trip.carPhotoPath != null) {
+            BitmapFactory.decodeFile(trip.carPhotoPath)?.also { bitmap ->
+                ivCarPic.setImageBitmap(bitmap)
+            }
+        }
+        tvNickname.text = trip.nickname
+        tvDepartureLocation.text = trip.departure
+        tvArrivalLocation.text = trip.arrival
+        tvDepartureDate.text = trip.depDate
+        tvDepartureTime.text = trip.depTime
+        tvDuration.text = trip.duration
+        tvSeats.text = trip.seats.toString()
+        tvPrice.text = "%.2f".format(trip.price)
+        tvDescription.text = trip.description
+        chattiness = trip.chattiness
+        smoking = trip.smoking
+        pets = trip.pets
+        music = trip.music
+
+        initPreferences()
+
+        val rv = view.findViewById<RecyclerView>(R.id.rv_tripDetails_stops)
+        rv.layoutManager = LinearLayoutManager(context)
+        val stopAdapter = StopAdapter(stops)
+        rv.adapter = stopAdapter
+        if (stopAdapter.itemCount == 0) {
+            val tripStopsTitle = view.findViewById<TextView>(R.id.tv_tripDetails_stops)
+            tripStopsTitle.visibility = View.GONE
+        }
+
+    }
+
+    private fun editTrip() {
+
+        val bundle = Bundle()
+        bundle.putSerializable("stops", stops)
+        val action = TripDetailsFragmentDirections.actionNavTripDetailsToNavTripEdit(
+            trip.id,
+            trip.departure,
+            trip.arrival,
+            trip.duration,
+            trip.price,
+            trip.seats,
+            trip.depDate,
+            trip.depTime,
+            trip.chattiness,
+            trip.smoking,
+            trip.pets,
+            trip.music,
+            trip.description,
+            bundle,
+            false
+        )
+
+        findNavController().navigate(action)
+    }
+
+    private fun initPreferences() {
+        chattiness = changeStatePreference(chattiness, ibtnChattiness)
+        smoking = changeStatePreference(smoking, ibtnSmoking)
+        pets = changeStatePreference(pets, ibtnPets)
+        music = changeStatePreference(music, ibtnMusic)
+    }
+
+    private fun getSavedTripList(): ArrayList<Trip>? {
+        val gson = Gson()
+        val sharedPref =
+            context?.getSharedPreferences("trip_pref.group05.lab2", Context.MODE_PRIVATE)
+                ?: return null
+        val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
+        return if (jsonString != null) {
+            val jsonObject = JSONObject(jsonString)
+            val jsonTripList = jsonObject.getString(
+                "json_tripList.group05.lab2"
+            )
+            val myType = object : TypeToken<ArrayList<Trip>>() {}.type
+            gson.fromJson(jsonTripList, myType)
+        } else null
+    }
+
+    private fun getCurrentUser(): String? {
+        val sharedPref =
+            context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
+                ?: return null
+        val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
+        return if (jsonString != null) {
+            val jsonObject = JSONObject(jsonString)
+            jsonObject.getString(
+                "json_nickname.group05.lab1"
+            )
+        } else "Babayaga" //just for testing purposes
+    }
+
+    private fun changeStatePreference(state: Boolean, ibtn: ImageButton): Boolean {
+        val typedValue = TypedValue()
+        val theme = requireContext().theme
+
+        val color: Int = if (state) {
+            theme.resolveAttribute(R.attr.colorControlActivated, typedValue, true)
+            typedValue.data //2298478592.toInt()
+        } else {
+            theme.resolveAttribute(R.attr.colorControlNormal, typedValue, true)
+            typedValue.data
+        }
+        ibtn.isSelected = state
+        ibtn.setColorFilter(color)
+        return state
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.edit_trip -> {
+                editTrip()
+                true
+            }
+            android.R.id.home -> {
+                requireActivity().onBackPressed()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        super.onPrepareOptionsMenu(menu)
+        optionsMenu.findItem(R.id.edit_trip).isVisible = trip.nickname == getCurrentUser()
+
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_trip_details, menu)
+        optionsMenu = menu
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean("chattiness", chattiness)
+        outState.putBoolean("smoking", smoking)
+        outState.putBoolean("pets", pets)
+        outState.putBoolean("music", music)
+    }
+}
+
+class StopAdapter(val stops: ArrayList<String>?) :
+    RecyclerView.Adapter<StopAdapter.StopViewHolder>() {
+
+    class StopViewHolder(v: View) : RecyclerView.ViewHolder(v) {
+
+        private var stopId: TextView = v.findViewById(R.id.stopId)
+        private var stopName: TextView = v.findViewById(R.id.stopName)
+        private var stopDate: TextView = v.findViewById(R.id.stopDate)
+        private var stopTime: TextView = v.findViewById(R.id.stopTime)
+
+        fun bind(stop: String?, position: Int) {
+            stopId.text = (position + 1).toString()
+            val stringArray = stop!!.split(",")
+            stopName.text = stringArray[0].trim()
+            stopDate.text = stringArray[1].trim()
+            stopTime.text = stringArray[2].trim()
+        }
+
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StopViewHolder {
+        val layout =
+            LayoutInflater.from(parent.context).inflate(R.layout.stop_layout, parent, false)
+        return StopViewHolder(layout)
+    }
+
+    override fun onBindViewHolder(holder: StopViewHolder, position: Int) {
+        holder.bind(stops?.get(position), position)
+    }
+
+    override fun getItemCount(): Int {
+        return stops?.size ?: 0
+    }
+
+}

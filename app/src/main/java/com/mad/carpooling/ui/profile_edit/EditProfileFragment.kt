@@ -1,6 +1,6 @@
-package com.mad.carpooling
+package com.mad.carpooling.ui.profile_edit
 
-import android.app.Activity
+import android.app.Activity.RESULT_OK
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -12,6 +12,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -20,9 +21,14 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toBitmap
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
+import androidx.navigation.ui.onNavDestinationSelected
+import com.google.android.material.snackbar.Snackbar
+import com.mad.carpooling.R
 import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
@@ -31,7 +37,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-class EditProfileActivity : AppCompatActivity() {
+class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
     private lateinit var etFullName: EditText
     private lateinit var etNickname: EditText
     private lateinit var etEmail: EditText
@@ -40,56 +46,89 @@ class EditProfileActivity : AppCompatActivity() {
     private lateinit var optionsMenu: Menu
     private var currentPhotoPath: String? = null
     private var REQUEST_IMAGE_CAPTURE = 1
+    private var REQUEST_IMAGE_FROM_GALLERY = 2
     private var TMP_FILENAME_IMG = "temp_profile_pic_img.jpg"
     private var FILENAME_IMG = "profile_pic_img.jpg"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_edit_profile)
 
-        setSupportActionBar(findViewById(R.id.my_toolbar))
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
-        etFullName = findViewById<EditText>(R.id.et_fullName)
-        etNickname = findViewById<EditText>(R.id.et_nickname)
-        etEmail = findViewById<EditText>(R.id.et_email)
-        etLocation = findViewById<EditText>(R.id.et_location)
-        ivEditProfilePic = findViewById<ImageView>(R.id.et_profile_pic)
-
-        //savedInstanceState check?
-        initProfile()
-
-
-        val btnCamera = findViewById<ImageButton>(R.id.btn_camera)
-        registerForContextMenu(btnCamera)
-        btnCamera.setOnClickListener { openContextMenu(btnCamera) }
+        setHasOptionsMenu(true)
     }
 
-    private fun initProfile() {
-        etFullName.setText(intent.getStringExtra("fullName.group05.lab1"))
-        etNickname.setText(intent.getStringExtra("nickname.group05.lab1"))
-        etEmail.setText(intent.getStringExtra("email.group05.lab1"))
-        etLocation.setText(intent.getStringExtra("location.group05.lab1"))
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
+        etFullName = view.findViewById<EditText>(R.id.et_fullName)
+        etNickname = view.findViewById<EditText>(R.id.et_nickname)
+        etEmail = view.findViewById<EditText>(R.id.et_email)
+        etLocation = view.findViewById<EditText>(R.id.et_location)
+        ivEditProfilePic = view.findViewById<ImageView>(R.id.et_profile_pic)
+
+        initProfile(savedInstanceState)
+
+        val btnCamera = view.findViewById<ImageButton>(R.id.btn_camera)
+        registerForContextMenu(btnCamera)
+        btnCamera.setOnClickListener { activity?.openContextMenu(btnCamera) }
+    }
+
+    private fun initProfile(savedInstanceState: Bundle?) {
+        if (savedInstanceState == null) {    // view created navigating from ShowProfileFragment
+            val args: EditProfileFragmentArgs by navArgs()
+            etFullName.setText(args.fullname)
+            etNickname.setText(args.nickname)
+            etEmail.setText(args.email)
+            etLocation.setText(args.location)
+        } else {
+            currentPhotoPath = savedInstanceState.getString("state_currentPhoto")
+        }
         if (currentPhotoPath != null) {
             BitmapFactory.decodeFile(currentPhotoPath)?.also { bitmap ->
                 ivEditProfilePic.setImageBitmap(bitmap)
             }
         } else {
             val sharedPref =
-                this.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE) ?: return
+                context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
+                    ?: return
             val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
             if (jsonString != null) {
                 val jsonObject = JSONObject(jsonString)
-                ivEditProfilePic.setImageBitmap(
-                    BitmapFactory.decodeStream(
-                        openFileInput(
-                            jsonObject.getString(
-                                "json_profilePic.group05.lab1"
-                            )
-                        )
+                BitmapFactory.decodeFile(
+                    jsonObject.getString(
+                        "json_profilePic.group05.lab1"
                     )
-                )
+                )?.also { bitmap ->
+                    ivEditProfilePic.setImageBitmap(bitmap)
+                }
+            }
+        }
+    }
+
+    private fun dispatchGalleryPickerIntent() {
+        val galleryPickerIntent = Intent(
+            Intent.ACTION_PICK,
+            MediaStore.Images.Media.INTERNAL_CONTENT_URI
+        )
+        startActivityForResult(galleryPickerIntent, REQUEST_IMAGE_FROM_GALLERY)
+
+    }
+
+    private fun updatePathFromGallery(imageUri: Uri?) {
+        val inputStream = requireContext().contentResolver.openInputStream(imageUri!!)
+        val cursor = requireContext().contentResolver.query(imageUri, null, null, null, null)
+        cursor?.use { c ->
+            val nameIndex = c.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            if (c.moveToFirst()) {
+                val name = c.getString(nameIndex)
+                inputStream?.let { inputStream ->
+                    // create same file with same name
+                    val file = File(requireContext().cacheDir, name)
+                    val os = file.outputStream()
+                    os.use {
+                        inputStream.copyTo(it)
+                    }
+                    currentPhotoPath = file.absolutePath
+                }
             }
         }
     }
@@ -109,7 +148,7 @@ class EditProfileActivity : AppCompatActivity() {
                 // Continue only if the File was successfully created
                 photoFile?.also {
                     val photoURI: Uri = FileProvider.getUriForFile(
-                        this,
+                        requireContext(),
                         "com.mad.group05.fileprovider",
                         it
                     )
@@ -126,7 +165,7 @@ class EditProfileActivity : AppCompatActivity() {
     private fun createImageFile(): File {
         // Create an image file name
         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ITALY).format(Date())
-        val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val storageDir: File? = activity?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         return File.createTempFile(
             "JPEG_${timeStamp}_", /* prefix */
             ".jpg", /* suffix */
@@ -139,8 +178,8 @@ class EditProfileActivity : AppCompatActivity() {
 
     private fun setPic() {
         // Get the dimensions of the View
-        val targetW: Int = 512
-        val targetH: Int = 512
+        val targetW = 512
+        val targetH = 512
 
         val bmOptions = BitmapFactory.Options().apply {
             // Get the dimensions of the bitmap
@@ -153,12 +192,11 @@ class EditProfileActivity : AppCompatActivity() {
             val photoH: Int = outHeight
 
             // Determine how much to scale down the image
-            val scaleFactor: Int = Math.max(1, Math.min(photoW / targetW, photoH / targetH))
+            val scaleFactor: Int = 1.coerceAtLeast((photoW / targetW).coerceAtMost(photoH / targetH))
 
             // Decode the image file into a Bitmap sized to fill the View
             inJustDecodeBounds = false
             inSampleSize = scaleFactor
-            inPurgeable = true
         }
         BitmapFactory.decodeFile(currentPhotoPath, bmOptions)?.also { bitmap ->
 
@@ -173,13 +211,13 @@ class EditProfileActivity : AppCompatActivity() {
             ExifInterface.ORIENTATION_UNDEFINED
         )
 
-        var rotatedBitmap: Bitmap? = null
-        when (orientation) {
-            ExifInterface.ORIENTATION_ROTATE_90 -> rotatedBitmap = rotateImage(bitmap, 90f)
-            ExifInterface.ORIENTATION_ROTATE_180 -> rotatedBitmap = rotateImage(bitmap, 180f)
-            ExifInterface.ORIENTATION_ROTATE_270 -> rotatedBitmap = rotateImage(bitmap, 270f)
-            ExifInterface.ORIENTATION_NORMAL -> rotatedBitmap = bitmap
-            else -> rotatedBitmap = bitmap
+        var rotatedBitmap: Bitmap?
+        rotatedBitmap = when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(bitmap, 90f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> rotateImage(bitmap, 180f)
+            ExifInterface.ORIENTATION_ROTATE_270 -> rotateImage(bitmap, 270f)
+            ExifInterface.ORIENTATION_NORMAL -> bitmap
+            else -> bitmap
         }
 
         saveRotatedBitmap(rotatedBitmap)
@@ -199,7 +237,7 @@ class EditProfileActivity : AppCompatActivity() {
     private fun saveRotatedBitmap(rotatedBitmap: Bitmap?) {
         val oldFile = File(currentPhotoPath!!)
         val filename = TMP_FILENAME_IMG
-        val imgPath = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val imgPath = activity?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         val myFile = File(imgPath, filename)
         val fileOutputStream = FileOutputStream(myFile)
 
@@ -210,17 +248,19 @@ class EditProfileActivity : AppCompatActivity() {
     }
 
     private fun saveProfileImg() {
-        val imgPath = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val imgPath = activity?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         val filename = FILENAME_IMG
-        val tmpFile = File(imgPath, TMP_FILENAME_IMG)
         val myFile = File(imgPath, filename)
-        val fileOutputStream = openFileOutput(filename, Context.MODE_PRIVATE)
+        val fileOutputStream = FileOutputStream(myFile)
 
         (ivEditProfilePic.drawable).toBitmap()
             .compress(Bitmap.CompressFormat.JPEG, 90, fileOutputStream)
         fileOutputStream.close()
 
+        val tmpFile = File(imgPath, TMP_FILENAME_IMG)
         tmpFile.delete()
+
+        currentPhotoPath = (File(imgPath, filename)).absolutePath
     }
 
     private fun saveToSharedPref() {
@@ -231,25 +271,27 @@ class EditProfileActivity : AppCompatActivity() {
         jsonObj.put("json_nickname.group05.lab1", etNickname.text.trim().toString())
         jsonObj.put("json_email.group05.lab1", etEmail.text.trim().toString())
         jsonObj.put("json_location.group05.lab1", etLocation.text.trim().toString())
-        jsonObj.put("json_profilePic.group05.lab1", FILENAME_IMG)
+        jsonObj.put("json_profilePic.group05.lab1", currentPhotoPath)
 
-        val sharedPref = this.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE) ?: return
+        val sharedPref =
+            context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
+                ?: return
         with(sharedPref.edit()) {
             putString(getString(R.string.saved_profile_data), jsonObj.toString())
             apply()
         }
-        finish()
     }
 
-    private fun checkFullName() {
+    private fun validateProfileForm() {
         val textWatcher = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                if (optionsMenu != null) {
-                    optionsMenu.findItem(R.id.save).isEnabled = etFullName.text.trim().length > 0
-                }
+                optionsMenu.findItem(R.id.nav_show_profile).isEnabled =
+                    etFullName.text.trim().isNotEmpty() && etNickname.text.trim()
+                        .isNotEmpty() && etEmail.text.trim()
+                        .isNotEmpty() && etLocation.text.trim().isNotEmpty()
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -258,41 +300,42 @@ class EditProfileActivity : AppCompatActivity() {
         }
 
         etFullName.addTextChangedListener(textWatcher)
+        etNickname.addTextChangedListener(textWatcher)
+        etEmail.addTextChangedListener(textWatcher)
+        etLocation.addTextChangedListener(textWatcher)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        super.onCreateOptionsMenu(menu)
-
-        val inflater: MenuInflater = menuInflater
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_edit_profile, menu)
-        if (menu != null) {
-            optionsMenu = menu
-        }
-        return true
+        optionsMenu = menu
+        super.onCreateOptionsMenu(menu, inflater)
     }
 
-    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-        checkFullName()
-        return super.onPrepareOptionsMenu(menu)
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        super.onPrepareOptionsMenu(menu)
+        validateProfileForm()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.save -> {
-                setResult(Activity.RESULT_OK, Intent().also {
-                    it.putExtra("save_fullName.group05.lab1", etFullName.text.trim().toString())
-                    it.putExtra("save_nickname.group05.lab1", etNickname.text.trim().toString())
-                    it.putExtra("save_email.group05.lab1", etEmail.text.trim().toString())
-                    it.putExtra("save_location.group05.lab1", etLocation.text.trim().toString())
-                    if (currentPhotoPath != null) { //TODO is this necessary?
-                        it.putExtra("save_profilePic.group05.lab1", currentPhotoPath)
-                    }
-                })
-
+            R.id.nav_show_profile -> { //save
                 saveToSharedPref()
+
+                val action = EditProfileFragmentDirections.actionNavEditProfileToNavShowProfile(
+                    etFullName.text.trim().toString(),
+                    etNickname.text.trim().toString(),
+                    etEmail.text.trim().toString(),
+                    etLocation.text.trim().toString(),
+                    currentPhotoPath
+                )
+                findNavController().navigate(action)
+
+                Snackbar.make(requireView(), "Profile saved", Snackbar.LENGTH_SHORT).show()
                 true
             }
-            else -> super.onOptionsItemSelected(item)
+            else -> item.onNavDestinationSelected(findNavController()) || super.onOptionsItemSelected(
+                item
+            )
         }
 
     }
@@ -303,14 +346,15 @@ class EditProfileActivity : AppCompatActivity() {
         menuInfo: ContextMenu.ContextMenuInfo?
     ) {
         super.onCreateContextMenu(menu, v, menuInfo)
-        val inflater: MenuInflater = menuInflater
-        inflater.inflate(R.menu.ctx_menu_camera, menu)
+        val inflater: MenuInflater? = activity?.menuInflater
+        inflater?.inflate(R.menu.ctx_menu_camera, menu)
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.ctx_gallery -> {
-                Toast.makeText(this, "Open Gallery", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Open Gallery", Toast.LENGTH_SHORT).show()
+                dispatchGalleryPickerIntent()
                 true
             }
             R.id.ctx_camera -> {
@@ -325,40 +369,16 @@ class EditProfileActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             setPic()
+        } else if (requestCode == REQUEST_IMAGE_FROM_GALLERY && resultCode == RESULT_OK) {
+            val imageUri = data?.data
+            updatePathFromGallery(imageUri)
+            setPic()
         }
     }
 
-    override fun onBackPressed() {
-        super.onBackPressed()
-        setResult(Activity.RESULT_CANCELED)
-        finish()
-    }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putString("state_fullName.group05.lab1", etFullName.text.trim().toString())
-        outState.putString("state_nickname.group05.lab1", etNickname.text.trim().toString())
-        outState.putString("state_email.group05.lab1", etEmail.text.trim().toString())
-        outState.putString("state_location.group05.lab1", etLocation.text.trim().toString())
-        if (currentPhotoPath != null) {
-            outState.putString("state_profilePic.group05.lab1", currentPhotoPath)
-        }
-
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        etFullName.setText(savedInstanceState.getString("state_fullName.group05.lab1"))
-        etNickname.setText(savedInstanceState.getString("state_nickname.group05.lab1"))
-        etEmail.setText(savedInstanceState.getString("state_email.group05.lab1"))
-        etLocation.setText(savedInstanceState.getString("state_location.group05.lab1"))
-        currentPhotoPath = savedInstanceState.getString("state_profilePic.group05.lab1")
-        if (currentPhotoPath != null) {
-            BitmapFactory.decodeFile(currentPhotoPath)?.also { bitmap ->
-                ivEditProfilePic.setImageBitmap(bitmap)
-            }
-        }
-
+        if (currentPhotoPath != null) outState.putString("state_currentPhoto", currentPhotoPath)
     }
 
 }

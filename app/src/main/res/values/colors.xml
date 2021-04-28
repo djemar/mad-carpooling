@@ -14,4 +14,6 @@
     <color name="amber_500">#FFC107</color>
     <color name="amber_700">#FFA000</color>
     <color name="night_surface">#121212</color>
+    <color name="gray_500">#9E9E9E</color>
+    <color name="gray_dark">#8d8d8d</color>
 </resources>

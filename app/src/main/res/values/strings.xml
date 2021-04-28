@@ -13,4 +13,26 @@
     <string name="take_a_new_photo">Take a new photo</string>
     <string name="save">Save</string>
     <string name="saved_profile_data">saved_data</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">John Wick</string>
+    <string name="nav_header_subtitle">Babayaga</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_trip_list">Trip List</string>
+    <string name="menu_show_profile">Profile</string>
+    <string name="menu_trip_details">Trip Details</string>
+    <string name="menu_trip_edit">Edit Trip</string>
+    <string name="menu_edit_profile">Edit Profile</string>
+    <string name="departure">Departure</string>
+    <string name="date">Date</string>
+    <string name="time">Time</string>
+    <string name="arrival">Arrival</string>
+    <string name="duration">Duration</string>
+    <string name="price">Price</string>
+    <string name="seats">Seats</string>
+    <string name="description">Description</string>
+    <string name="lorem_ipsum">Lorem ipsum dolor sit amet.</string>
 </resources>
