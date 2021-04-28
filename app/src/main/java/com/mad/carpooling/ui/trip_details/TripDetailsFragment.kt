@@ -20,16 +20,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.mad.carpooling.R
-import com.mad.carpooling.TripUtil
+import com.mad.carpooling.Trip
 import org.json.JSONObject
 
 
 class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
     private lateinit var tripDetailsViewModel: TripDetailsViewModel
-    private lateinit var trip: TripUtil.Trip
+    private lateinit var trip: Trip
     private lateinit var ivCarPic: ImageView
-
     private lateinit var tvDepartureLocation: TextView
     private lateinit var tvDepartureDate: TextView
     private lateinit var tvDepartureTime: TextView
@@ -43,7 +42,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private lateinit var ibtnPets: ImageButton
     private lateinit var ibtnMusic: ImageButton
     private lateinit var optionsMenu: Menu
-    private var tripList: java.util.ArrayList<TripUtil.Trip>? = null
+    private var tripList: java.util.ArrayList<Trip>? = null
     private var chattiness = false
     private var smoking = false
     private var pets = false
@@ -89,7 +88,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     }
 
 
-    private fun getSavedTripList(): ArrayList<TripUtil.Trip>? {
+    private fun getSavedTripList(): ArrayList<Trip>? {
         var gson = Gson()
         val sharedPref =
             context?.getSharedPreferences("trip_pref.group05.lab2", Context.MODE_PRIVATE)
@@ -100,7 +99,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             var jsonTripList = jsonObject.getString(
                 "json_tripList.group05.lab2"
             )
-            val myType = object : TypeToken<ArrayList<TripUtil.Trip>>() {}.type
+            val myType = object : TypeToken<ArrayList<Trip>>() {}.type
             return gson.fromJson(jsonTripList, myType)
         } else return null
     }
@@ -125,18 +124,18 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                 ivCarPic.setImageBitmap(bitmap)
             }
         }
-        tvDepartureLocation.text = args.departure
-        tvArrivalLocation.text = args.arrival
-        tvDepartureDate.text = args.depDate
-        tvDepartureTime.text = args.depTime
-        tvDuration.text = args.duration
-        tvSeats.text = args.seats.toString()
-        tvPrice.text = args.price.toString()
-        tvDescription.text = args.description
-        chattiness = args.chattiness
-        smoking = args.smoking
-        pets = args.pets
-        music = args.music
+        tvDepartureLocation.text = trip.departure
+        tvArrivalLocation.text = trip.arrival
+        tvDepartureDate.text = trip.depDate
+        tvDepartureTime.text = trip.depTime
+        tvDuration.text = trip.duration
+        tvSeats.text = trip.seats.toString()
+        tvPrice.text = trip.price.toString()
+        tvDescription.text = trip.description
+        chattiness = trip.chattiness
+        smoking = trip.smoking
+        pets = trip.pets
+        music = trip.music
 
         initPreferences()
 

@@ -40,7 +40,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
-import com.mad.carpooling.TripUtil
+import com.mad.carpooling.Trip
 import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
@@ -51,7 +51,7 @@ import java.util.*
 class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
     private lateinit var tripEditViewModel: TripEditViewModel
-    private lateinit var trip: TripUtil.Trip
+    private lateinit var trip: Trip
 
     private lateinit var optionsMenu: Menu
     private lateinit var ivCarPic: ImageView
@@ -67,9 +67,9 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     private lateinit var ibtnSmoking: ImageButton
     private lateinit var ibtnPets: ImageButton
     private lateinit var ibtnMusic: ImageButton
-    private var tripList: ArrayList<TripUtil.Trip>? = null
-    private var bundleStops: Bundle? = null
     private lateinit var stops: ArrayList<String>
+    private var tripList: ArrayList<Trip>? = null
+    private var bundleStops: Bundle? = null
     private var tripId = -1
     private var chattiness = false
     private var smoking = false
@@ -166,7 +166,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
                 trip = tripList!![args.id]
 
-                /* trip = TripUtil.Trip(
+                /* trip = Trip(
                      args.id,
                      "args.nickname",
                      args.departure,
@@ -188,7 +188,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             } else { // navigating from tripList FAB
                 (activity as MainActivity).supportActionBar?.title = "Create New Trip"
                 if (tripList == null) tripId=0 else tripId=tripList!!.size
-                trip = TripUtil.Trip(tripId)
+                trip = Trip(tripId)
                 stops = ArrayList<String>()
                 bundleStops = Bundle()
                 bundleStops?.putSerializable("stops", stops)
@@ -242,7 +242,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
     }
 
-    private fun getSavedTripList(): ArrayList<TripUtil.Trip>? {
+    private fun getSavedTripList(): ArrayList<Trip>? {
         var gson = Gson()
         val sharedPref =
             context?.getSharedPreferences("trip_pref.group05.lab2", Context.MODE_PRIVATE)
@@ -253,7 +253,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             var jsonTripList = jsonObject.getString(
                 "json_tripList.group05.lab2"
             )
-            val myType = object : TypeToken<ArrayList<TripUtil.Trip>>() {}.type
+            val myType = object : TypeToken<ArrayList<Trip>>() {}.type
             return gson.fromJson(jsonTripList, myType)
         } else return null
     }
@@ -304,7 +304,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.save_trip -> {
-                val newTrip = TripUtil.Trip(
+                val newTrip = Trip(
                     tripId,
                     getCurrentUser()!!,
                     etDepartureLocation.text.trim().toString(),

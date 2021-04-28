@@ -18,13 +18,13 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.mad.carpooling.R
-import com.mad.carpooling.TripUtil
+import com.mad.carpooling.Trip
 import org.json.JSONObject
 
 private var currentUser: String? = null
 
 class TripListFragment : Fragment(R.layout.fragment_trip_list) {
-    private var tripList: ArrayList<TripUtil.Trip>? = null
+    private var tripList: ArrayList<Trip>? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -68,8 +68,8 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
         currentUser = getCurrentUser()
         tripList = getSavedTripList()
 
-        if(tripList == null){
-            tripList = TripUtil().getTripList() // for testing purposes
+        if (tripList == null) {
+            tripList = Trip().getDefaultTripList() // for testing purposes
             val jsonObj = JSONObject()
 
             val gson = Gson()
@@ -86,7 +86,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
         }
     }
 
-    private fun getSavedTripList(): ArrayList<TripUtil.Trip>? {
+    private fun getSavedTripList(): ArrayList<Trip>? {
         var gson = Gson()
         val sharedPref =
             context?.getSharedPreferences("trip_pref.group05.lab2", Context.MODE_PRIVATE)
@@ -97,7 +97,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
             var jsonTripList = jsonObject.getString(
                 "json_tripList.group05.lab2"
             )
-            val myType = object : TypeToken<ArrayList<TripUtil.Trip>>() {}.type
+            val myType = object : TypeToken<ArrayList<Trip>>() {}.type
             return gson.fromJson(jsonTripList, myType)
         } else return null
     }
@@ -117,7 +117,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
     }
 
 
-    class TripAdapter(val tripList: ArrayList<TripUtil.Trip>) :
+    class TripAdapter(val tripList: ArrayList<Trip>) :
         RecyclerView.Adapter<TripAdapter.TripViewHolder>() {
 
         class TripViewHolder(v: View) : RecyclerView.ViewHolder(v) {
@@ -130,7 +130,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
 
             var navController: NavController? = null
 
-            fun bind(trip: TripUtil.Trip) {
+            fun bind(trip: Trip) {
 
                 location.text = "${trip.departure} ${trip.arrival}"
                 duration.text = trip.duration
