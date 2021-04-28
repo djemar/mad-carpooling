@@ -1,5 +1,6 @@
 package com.mad.carpooling.ui.trip_details
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.graphics.BitmapFactory
@@ -7,7 +8,6 @@ import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
 import android.view.*
-import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
@@ -84,13 +84,12 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         initTripDetails(view)
     }
 
+    @SuppressLint("SetTextI18n")
     private fun initTripDetails(view: View) {
         val args: TripDetailsFragmentArgs by navArgs()
-        val tripId = args.id
 
         tripList = getSavedTripList()
-
-
+        
         trip = tripList!![args.id]
 
         stops = trip.stops
@@ -109,7 +108,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         tvDepartureTime.text = trip.depTime
         tvDuration.text = trip.duration
         tvSeats.text = trip.seats.toString()
-        tvPrice.text = "%.2f".format(trip.price).toString()
+        tvPrice.text = "%.2f".format(trip.price)
         tvDescription.text = trip.description
         chattiness = trip.chattiness
         smoking = trip.smoking
@@ -119,7 +118,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         initPreferences()
 
         val rv = view.findViewById<RecyclerView>(R.id.rv_tripDetails_stops)
-        rv.layoutManager = LinearLayoutManager(context);
+        rv.layoutManager = LinearLayoutManager(context)
         val stopAdapter = StopAdapter(stops)
         rv.adapter = stopAdapter
         if (stopAdapter.itemCount == 0) {
@@ -131,7 +130,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
     private fun editTrip() {
 
-        // TODO: enable button only if matching profile
         val bundle = Bundle()
         bundle.putSerializable("stops", stops)
         val action = TripDetailsFragmentDirections.actionNavTripDetailsToNavTripEdit(
@@ -163,19 +161,19 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     }
 
     private fun getSavedTripList(): ArrayList<Trip>? {
-        var gson = Gson()
+        val gson = Gson()
         val sharedPref =
             context?.getSharedPreferences("trip_pref.group05.lab2", Context.MODE_PRIVATE)
                 ?: return null
         val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
-        if (jsonString != null) {
+        return if (jsonString != null) {
             val jsonObject = JSONObject(jsonString)
-            var jsonTripList = jsonObject.getString(
+            val jsonTripList = jsonObject.getString(
                 "json_tripList.group05.lab2"
             )
             val myType = object : TypeToken<ArrayList<Trip>>() {}.type
-            return gson.fromJson(jsonTripList, myType)
-        } else return null
+            gson.fromJson(jsonTripList, myType)
+        } else null
     }
 
     private fun getCurrentUser(): String? {
@@ -183,25 +181,24 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
                 ?: return null
         val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
-        if (jsonString != null) {
+        return if (jsonString != null) {
             val jsonObject = JSONObject(jsonString)
-            return jsonObject.getString(
+            jsonObject.getString(
                 "json_nickname.group05.lab1"
             )
-        } else return "Babayaga"; //just for testing purposes
+        } else "Babayaga" //just for testing purposes
     }
 
     private fun changeStatePreference(state: Boolean, ibtn: ImageButton): Boolean {
         val typedValue = TypedValue()
         val theme = requireContext().theme
-        var color = 0
 
-        if (state) {
+        val color: Int = if (state) {
             theme.resolveAttribute(R.attr.colorControlActivated, typedValue, true)
-            color = typedValue.data //2298478592.toInt()
+            typedValue.data //2298478592.toInt()
         } else {
             theme.resolveAttribute(R.attr.colorControlNormal, typedValue, true)
-            color = typedValue.data
+            typedValue.data
         }
         ibtn.isSelected = state
         ibtn.setColorFilter(color)
@@ -248,10 +245,10 @@ class StopAdapter(val stops: ArrayList<String>?) :
 
     class StopViewHolder(v: View) : RecyclerView.ViewHolder(v) {
 
-        var stopId: TextView = v.findViewById<TextView>(R.id.stopId)
-        var stopName: TextView = v.findViewById<TextView>(R.id.stopName)
-        var stopDate: TextView = v.findViewById<TextView>(R.id.stopDate)
-        var stopTime: TextView = v.findViewById<TextView>(R.id.stopTime)
+        private var stopId: TextView = v.findViewById(R.id.stopId)
+        private var stopName: TextView = v.findViewById(R.id.stopName)
+        private var stopDate: TextView = v.findViewById(R.id.stopDate)
+        private var stopTime: TextView = v.findViewById(R.id.stopTime)
 
         fun bind(stop: String?, position: Int) {
             stopId.text = (position + 1).toString()
@@ -274,10 +271,7 @@ class StopAdapter(val stops: ArrayList<String>?) :
     }
 
     override fun getItemCount(): Int {
-        if (stops != null) {
-            return stops.size
-        }
-        else return 0
+        return stops?.size ?: 0
     }
 
 }

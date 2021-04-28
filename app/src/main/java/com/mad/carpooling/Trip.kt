@@ -6,10 +6,10 @@ import com.google.gson.Gson
 class Trip(
     val id: Int = 1,
     val nickname: String = "Babayaga",
-    val departure: String = "From x",
-    val arrival: String = "To y",
-    val duration: String = "hh:mm",
-    val depDate: String = "dd-mm-yyyy",
+    val departure: String = "",
+    val arrival: String = "",
+    val duration: String = "",
+    val depDate: String = "dd/mm/yyyy",
     val depTime: String = "hh:mm",
     val seats: Int = 1,
     val price: Float = 1f,
@@ -17,7 +17,7 @@ class Trip(
     val smoking: Boolean = false,
     val pets: Boolean = false,
     val music: Boolean = false,
-    val description: String = "Description",
+    val description: String = "",
     val stops: ArrayList<String>? = null,
     val carPhotoPath: String? = null
 ) {
@@ -33,8 +33,8 @@ class Trip(
                 "Babayaga",
                 "Torino",
                 "Ivrea",
-                "01:00",
-                "28-04-2021",
+                "1 hour",
+                "28/04/2021",
                 "07:00",
                 4,
                 25f,
@@ -44,9 +44,8 @@ class Trip(
                 false,
                 "It will be a killer of a trip!",
                 arrayListOf(
-                    "Torino, 18/04/21, 10min",
-                    "Rivoli, 18/04/21, 40min",
-                    "Ivrea, 18/04/21, 10min"
+                    "Chivasso, 28/04/21, 20min",
+                    "Caluso, 28/04/21, 20min"
                 ),
                 null
             ),
@@ -54,9 +53,9 @@ class Trip(
                 1,
                 "MrWinston",
                 "Calascibetta",
-                "Bari",
-                "06:00",
-                "28-04-2024",
+                "Taranto",
+                "7 hours",
+                "30/04/2021",
                 "05:00",
                 1,
                 45f,
@@ -66,10 +65,9 @@ class Trip(
                 true,
                 "Calascibetta caput mundi.",
                 arrayListOf(
-                    "Calascibetta, 18/04/24, 3h",
-                    "Messina, 18/04/24, 1h",
-                    "Reggio, 18/04/24, 1h",
-                    "Bari, 18/04/24, 1h",
+                    "Catania, 30/04/21, 1h",
+                    "Messina, 30/04/21, 1h 30min",
+                    "Cosenza, 30/04/21, 3h"
                 ),
                 null
             )

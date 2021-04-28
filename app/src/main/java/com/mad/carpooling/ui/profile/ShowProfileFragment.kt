@@ -25,7 +25,6 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
     private lateinit var tvEmail: TextView
     private lateinit var tvLocation: TextView
     private lateinit var ivProfilePic: ImageView
-    private lateinit var jsonObject: JSONObject
     private var currentPhotoPath: String? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -33,11 +32,11 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
 
         setHasOptionsMenu(true)
 
-        tvFullName = view.findViewById<TextView>(R.id.tv_fullName)
-        tvNickname = view.findViewById<TextView>(R.id.tv_nickname)
-        tvEmail = view.findViewById<TextView>(R.id.tv_email)
-        tvLocation = view.findViewById<TextView>(R.id.tv_location)
-        ivProfilePic = view.findViewById<ImageView>(R.id.iv_profile_pic)
+        tvFullName = view.findViewById(R.id.tv_fullName)
+        tvNickname = view.findViewById(R.id.tv_nickname)
+        tvEmail = view.findViewById(R.id.tv_email)
+        tvLocation = view.findViewById(R.id.tv_location)
+        ivProfilePic = view.findViewById(R.id.iv_profile_pic)
 
         initProfile(savedInstanceState)
     }
@@ -45,10 +44,10 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
     private fun initProfile(savedInstanceState: Bundle?) {
         val args: ShowProfileFragmentArgs by navArgs()
         if (args.currentPhotoPath != null) {    // view created navigating from EditProfileFragment
-            tvFullName.setText(args.fullname)
-            tvNickname.setText(args.nickname)
-            tvEmail.setText(args.email)
-            tvLocation.setText(args.location)
+            tvFullName.text = args.fullname
+            tvNickname.text = args.nickname
+            tvEmail.text = args.email
+            tvLocation.text = args.location
             currentPhotoPath = args.currentPhotoPath
         } else {
             if (savedInstanceState == null) {   // view created for the first time
@@ -105,7 +104,7 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
 
     }
 
-    fun editProfile() {
+    private fun editProfile() {
         val action = ShowProfileFragmentDirections.actionNavShowProfileToNavEditProfile(
             tvFullName.text.toString(),
             tvNickname.text.toString(), tvEmail.text.toString(), tvLocation.text.toString()

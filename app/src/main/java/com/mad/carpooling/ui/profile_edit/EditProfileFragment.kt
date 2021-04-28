@@ -54,7 +54,6 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
         super.onCreate(savedInstanceState)
 
         setHasOptionsMenu(true)
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -179,8 +178,8 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
 
     private fun setPic() {
         // Get the dimensions of the View
-        val targetW: Int = 512
-        val targetH: Int = 512
+        val targetW = 512
+        val targetH = 512
 
         val bmOptions = BitmapFactory.Options().apply {
             // Get the dimensions of the bitmap
@@ -193,12 +192,11 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
             val photoH: Int = outHeight
 
             // Determine how much to scale down the image
-            val scaleFactor: Int = Math.max(1, Math.min(photoW / targetW, photoH / targetH))
+            val scaleFactor: Int = 1.coerceAtLeast((photoW / targetW).coerceAtMost(photoH / targetH))
 
             // Decode the image file into a Bitmap sized to fill the View
             inJustDecodeBounds = false
             inSampleSize = scaleFactor
-            inPurgeable = true
         }
         BitmapFactory.decodeFile(currentPhotoPath, bmOptions)?.also { bitmap ->
 
@@ -213,13 +211,13 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
             ExifInterface.ORIENTATION_UNDEFINED
         )
 
-        var rotatedBitmap: Bitmap? = null
-        when (orientation) {
-            ExifInterface.ORIENTATION_ROTATE_90 -> rotatedBitmap = rotateImage(bitmap, 90f)
-            ExifInterface.ORIENTATION_ROTATE_180 -> rotatedBitmap = rotateImage(bitmap, 180f)
-            ExifInterface.ORIENTATION_ROTATE_270 -> rotatedBitmap = rotateImage(bitmap, 270f)
-            ExifInterface.ORIENTATION_NORMAL -> rotatedBitmap = bitmap
-            else -> rotatedBitmap = bitmap
+        var rotatedBitmap: Bitmap?
+        rotatedBitmap = when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(bitmap, 90f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> rotateImage(bitmap, 180f)
+            ExifInterface.ORIENTATION_ROTATE_270 -> rotateImage(bitmap, 270f)
+            ExifInterface.ORIENTATION_NORMAL -> bitmap
+            else -> bitmap
         }
 
         saveRotatedBitmap(rotatedBitmap)
@@ -257,7 +255,7 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
 
         (ivEditProfilePic.drawable).toBitmap()
             .compress(Bitmap.CompressFormat.JPEG, 90, fileOutputStream)
-        fileOutputStream?.close()
+        fileOutputStream.close()
 
         val tmpFile = File(imgPath, TMP_FILENAME_IMG)
         tmpFile.delete()

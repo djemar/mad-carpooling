@@ -1,5 +1,6 @@
 package com.mad.carpooling.ui.trip_list
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -22,13 +23,11 @@ import com.google.gson.reflect.TypeToken
 import com.mad.carpooling.R
 import com.mad.carpooling.Trip
 import org.json.JSONObject
-import java.text.DecimalFormat
 
 private var currentUser: String? = null
 
 class TripListFragment : Fragment(R.layout.fragment_trip_list) {
     private var tripList: ArrayList<Trip>? = null
-    private lateinit var ivCar: ImageView
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -48,7 +47,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
             emptyView.isVisible = true
 
         val fab = view.findViewById<FloatingActionButton>(R.id.trip_add)
-        var navController: NavController? = null
+        var navController: NavController?
         fab.setOnClickListener {
             val action = TripListFragmentDirections.actionNavTripListToNavTripEdit(
                 isNew = true
@@ -59,9 +58,9 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
         rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                if (dy > 0 && fab.getVisibility() === View.VISIBLE) {
+                if (dy > 0 && fab.visibility == View.VISIBLE) {
                     fab.hide()
-                } else if (dy < 0 && fab.getVisibility() !== View.VISIBLE) {
+                } else if (dy < 0 && fab.visibility != View.VISIBLE) {
                     fab.show()
                 }
             }
@@ -91,19 +90,19 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
     }
 
     private fun getSavedTripList(): ArrayList<Trip>? {
-        var gson = Gson()
+        val gson = Gson()
         val sharedPref =
             context?.getSharedPreferences("trip_pref.group05.lab2", Context.MODE_PRIVATE)
                 ?: return null
         val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
-        if (jsonString != null) {
+        return if (jsonString != null) {
             val jsonObject = JSONObject(jsonString)
-            var jsonTripList = jsonObject.getString(
+            val jsonTripList = jsonObject.getString(
                 "json_tripList.group05.lab2"
             )
             val myType = object : TypeToken<ArrayList<Trip>>() {}.type
-            return gson.fromJson(jsonTripList, myType)
-        } else return null
+            gson.fromJson(jsonTripList, myType)
+        } else null
     }
 
     private fun getCurrentUser(): String? {
@@ -111,34 +110,35 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
             context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
                 ?: return null
         val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
-        if (jsonString != null) {
+        return if (jsonString != null) {
             val jsonObject = JSONObject(jsonString)
-            return jsonObject.getString(
+            jsonObject.getString(
                 "json_nickname.group05.lab1"
             )
-        } else return "Babayaga"; //just for testing purposes
+        } else "Babayaga" //just for testing purposes
     }
 
 
-    class TripAdapter(val tripList: ArrayList<Trip>) :
+    class TripAdapter(private val tripList: ArrayList<Trip>) :
         RecyclerView.Adapter<TripAdapter.TripViewHolder>() {
 
         class TripViewHolder(v: View) : RecyclerView.ViewHolder(v) {
 
-            val ivCar = v.findViewById<ImageView>(R.id.trip_car)
-            val tripRL = v.findViewById<RelativeLayout>(R.id.trip_rl)
-            val location = v.findViewById<TextView>(R.id.trip_from_to)
-            val duration = v.findViewById<TextView>(R.id.trip_duration)
-            val price = v.findViewById<TextView>(R.id.trip_price)
-            val btnEdit = v.findViewById<ImageButton>(R.id.trip_edit)
+            private val ivCar = v.findViewById<ImageView>(R.id.trip_car)
+            private val tripRL = v.findViewById<RelativeLayout>(R.id.trip_rl)
+            private val location = v.findViewById<TextView>(R.id.trip_from_to)
+            private val duration = v.findViewById<TextView>(R.id.trip_duration)
+            private val price = v.findViewById<TextView>(R.id.trip_price)
+            private val btnEdit = v.findViewById<ImageButton>(R.id.trip_edit)
 
-            var navController: NavController? = null
+            private var navController: NavController? = null
 
+            @SuppressLint("SetTextI18n")
             fun bind(trip: Trip) {
 
                 location.text = "${trip.departure} - ${trip.arrival}"
-                duration.text = "Duration: ${trip.duration} h"
-                price.text = "Price: ${("%.2f".format(trip.price)).toString()} €"
+                duration.text = "Duration: ${trip.duration}"
+                price.text = "Price: ${("%.2f".format(trip.price))} €"
                 if(trip.carPhotoPath != null){
                     BitmapFactory.decodeFile(trip.carPhotoPath)?.also { bitmap ->
                         ivCar.setImageBitmap(bitmap)
@@ -201,11 +201,11 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
         }
 
         override fun onBindViewHolder(holder: TripViewHolder, position: Int) {
-            holder.bind(tripList!!.get(position))
+            holder.bind(tripList[position])
         }
 
         override fun getItemCount(): Int {
-            return tripList!!.size;
+            return tripList.size
         }
 
     }

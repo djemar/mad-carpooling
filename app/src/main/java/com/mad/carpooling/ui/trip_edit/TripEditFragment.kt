@@ -1,5 +1,6 @@
 package com.mad.carpooling.ui.trip_edit
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.Dialog
@@ -78,7 +79,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     private var REQUEST_IMAGE_CAPTURE = 1
     private var REQUEST_IMAGE_FROM_GALLERY = 2
     private var TMP_FILENAME_IMG = "temp_car_pic_img.jpg"
-    private var FILENAME_IMG = "car_pic_img.jpg"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,8 +87,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
         val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
             activity?.setResult(Activity.RESULT_CANCELED)
-            val previousFragment = findNavController().previousBackStackEntry?.destination?.label
-            when (previousFragment) {
+            when (findNavController().previousBackStackEntry?.destination?.label) {
                 "Trip List" -> {
                     findNavController().navigate(
                         R.id.action_nav_trip_edit_to_nav_trip_list
@@ -121,8 +120,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         ibtnPets = view.findViewById(R.id.btn_edit_pets)
         ibtnMusic = view.findViewById(R.id.btn_edit_music)
 
-        val args: TripEditFragmentArgs by navArgs()
-
         ibtnChattiness.setOnClickListener {
             chattiness = changeStatePreference(!chattiness, ibtnChattiness)
         }
@@ -139,19 +136,19 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         initTrip(view, savedInstanceState)
 
         val btnDate = view.findViewById<MaterialButton>(R.id.edit_date)
-        btnDate.setOnClickListener { showDatePickerDialog(view) }
+        btnDate.setOnClickListener { showDatePickerDialog() }
 
         val btnTime = view.findViewById<MaterialButton>(R.id.edit_time)
-        btnTime.setOnClickListener { showTimePickerDialog(view) }
+        btnTime.setOnClickListener { showTimePickerDialog() }
 
-        var btnCamera = view.findViewById<ImageButton>(R.id.btn_tripEdit_camera)
+        val btnCamera = view.findViewById<ImageButton>(R.id.btn_tripEdit_camera)
         registerForContextMenu(btnCamera)
         btnCamera.setOnClickListener { activity?.openContextMenu(btnCamera) }
     }
 
     private fun initTrip(view: View, savedInstanceState: Bundle?) {
         val rv = view.findViewById<RecyclerView>(R.id.rv_tripEdit_stops)
-        rv.layoutManager = LinearLayoutManager(context);
+        rv.layoutManager = LinearLayoutManager(context)
         val stopEditAdapter: StopEditAdapter
         tripList = getSavedTripList()
 
@@ -187,11 +184,11 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                      args.description,
                      stops
                  )*/
-                stopEditAdapter = StopEditAdapter(stops!!)
+                stopEditAdapter = StopEditAdapter(stops)
                 // currentPhotoPath = args.currentPhotoPath or from remote resource
             } else { // navigating from tripList FAB
                 (activity as MainActivity).supportActionBar?.title = "Create New Trip"
-                if (tripList == null) tripId = 0 else tripId = tripList!!.size
+                tripId = if (tripList == null) 0 else tripList!!.size
                 trip = Trip(tripId)
                 stops = ArrayList<String>()
                 bundleStops = Bundle()
@@ -256,14 +253,13 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     private fun changeStatePreference(state: Boolean, btn: ImageButton): Boolean {
         val typedValue = TypedValue()
         val theme = requireContext().theme
-        var color = 0
 
-        if (state) {
+        val color: Int = if (state) {
             theme.resolveAttribute(R.attr.colorControlActivated, typedValue, true)
-            color = typedValue.data
+            typedValue.data
         } else {
             theme.resolveAttribute(R.attr.colorControlNormal, typedValue, true)
-            color = typedValue.data
+            typedValue.data
         }
         btn.isSelected = state
         btn.setColorFilter(color)
@@ -345,8 +341,8 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     private fun setPic() {
         // Get the dimensions of the View
         //16:9 ratio
-        val targetW: Int = 720
-        val targetH: Int = 405
+        val targetW = 720
+        val targetH = 405
 
         val bmOptions = BitmapFactory.Options().apply {
             // Get the dimensions of the bitmap
@@ -359,12 +355,12 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             val photoH: Int = outHeight
 
             // Determine how much to scale down the image
-            val scaleFactor: Int = Math.max(1, Math.min(photoW / targetW, photoH / targetH))
+            val scaleFactor: Int =
+                1.coerceAtLeast((photoW / targetW).coerceAtMost(photoH / targetH))
 
             // Decode the image file into a Bitmap sized to fill the View
             inJustDecodeBounds = false
             inSampleSize = scaleFactor
-            inPurgeable = true
         }
         BitmapFactory.decodeFile(currentPhotoPath, bmOptions)?.also { bitmap ->
 
@@ -379,13 +375,12 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             ExifInterface.ORIENTATION_UNDEFINED
         )
 
-        var rotatedBitmap: Bitmap? = null
-        when (orientation) {
-            ExifInterface.ORIENTATION_ROTATE_90 -> rotatedBitmap = rotateImage(bitmap, 90f)
-            ExifInterface.ORIENTATION_ROTATE_180 -> rotatedBitmap = rotateImage(bitmap, 180f)
-            ExifInterface.ORIENTATION_ROTATE_270 -> rotatedBitmap = rotateImage(bitmap, 270f)
-            ExifInterface.ORIENTATION_NORMAL -> rotatedBitmap = bitmap
-            else -> rotatedBitmap = bitmap
+        val rotatedBitmap: Bitmap? = when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(bitmap, 90f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> rotateImage(bitmap, 180f)
+            ExifInterface.ORIENTATION_ROTATE_270 -> rotateImage(bitmap, 270f)
+            ExifInterface.ORIENTATION_NORMAL -> bitmap
+            else -> bitmap
         }
 
         saveRotatedBitmap(rotatedBitmap)
@@ -423,7 +418,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
         (ivCarPic.drawable).toBitmap()
             .compress(Bitmap.CompressFormat.JPEG, 90, fileOutputStream)
-        fileOutputStream?.close()
+        fileOutputStream.close()
 
         val tmpFile = File(imgPath, TMP_FILENAME_IMG)
         tmpFile.delete()
@@ -455,19 +450,19 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     }
 
     private fun getSavedTripList(): ArrayList<Trip>? {
-        var gson = Gson()
+        val gson = Gson()
         val sharedPref =
             context?.getSharedPreferences("trip_pref.group05.lab2", Context.MODE_PRIVATE)
                 ?: return null
         val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
-        if (jsonString != null) {
+        return if (jsonString != null) {
             val jsonObject = JSONObject(jsonString)
-            var jsonTripList = jsonObject.getString(
+            val jsonTripList = jsonObject.getString(
                 "json_tripList.group05.lab2"
             )
             val myType = object : TypeToken<ArrayList<Trip>>() {}.type
-            return gson.fromJson(jsonTripList, myType)
-        } else return null
+            gson.fromJson(jsonTripList, myType)
+        } else null
     }
 
     private fun getCurrentUser(): String? {
@@ -475,12 +470,12 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
                 ?: return null
         val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
-        if (jsonString != null) {
+        return if (jsonString != null) {
             val jsonObject = JSONObject(jsonString)
-            return jsonObject.getString(
+            jsonObject.getString(
                 "json_nickname.group05.lab1"
             )
-        } else return "Babayaga"; //just for testing purposes
+        } else "Babayaga"; //just for testing purposes
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -517,7 +512,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                 }
 
                 saveToSharedPref()
-                //TODO update stops with items from RecyclerView
+
                 bundleStops = Bundle()
                 bundleStops?.putSerializable("stops", stops)
                 val action = TripEditFragmentDirections.actionNavTripEditToNavTripDetails(
@@ -575,7 +570,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     class DatePickerFragment(tvDate: TextView) : DialogFragment(),
         DatePickerDialog.OnDateSetListener {
 
-        val tvDate = tvDate
+        private val tvDate = tvDate
 
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
             // Use the current date as the default date in the picker
@@ -588,13 +583,14 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             return DatePickerDialog(requireContext(), this, year, month, day)
         }
 
+        @SuppressLint("SetTextI18n")
         override fun onDateSet(view: DatePicker, year: Int, month: Int, day: Int) {
-            tvDate.text = "${day.toString()}/${(month + 1).toString()}/${year.toString()}"
+            tvDate.text = "${day}/${(month + 1)}/${year}"
         }
 
     }
 
-    private fun showDatePickerDialog(v: View) {
+    private fun showDatePickerDialog() {
         val dateFragment = DatePickerFragment(tvDate)
         dateFragment.show(requireActivity().supportFragmentManager, "datePicker")
     }
@@ -602,7 +598,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     class TimePickerFragment(tvTime: TextView) : DialogFragment(),
         TimePickerDialog.OnTimeSetListener {
 
-        val tvTime = tvTime
+        private val tvTime = tvTime
 
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
             // Use the current time as the default values for the picker
@@ -620,12 +616,17 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             )
         }
 
+        @SuppressLint("SetTextI18n")
         override fun onTimeSet(view: TimePicker, hourOfDay: Int, minute: Int) {
-            tvTime.text = "${hourOfDay.toString()} : ${minute.toString()}"
+            if (minute < 10) {
+                tvTime.text = "$hourOfDay:0$minute"
+            } else {
+                tvTime.text = "$hourOfDay:$minute"
+            }
         }
     }
 
-    private fun showTimePickerDialog(v: View) {
+    private fun showTimePickerDialog() {
         val timeFragment = TimePickerFragment(tvTime)
         timeFragment.show(requireActivity().supportFragmentManager, "timePicker")
     }
@@ -659,14 +660,14 @@ class StopEditAdapter(val stops: ArrayList<String>) :
 
     class StopEditViewHolder(v: View) : RecyclerView.ViewHolder(v) {
 
-        var stopName: EditText = v.findViewById(R.id.et_stop_location)
-        var stopDate: EditText = v.findViewById(R.id.et_stop_date)
-        var stopTime: EditText = v.findViewById(R.id.et_stop_time)
+        private var stopName: EditText = v.findViewById(R.id.et_stop_location)
+        private var stopDate: EditText = v.findViewById(R.id.et_stop_date)
+        private var stopTime: EditText = v.findViewById(R.id.et_stop_time)
         var deleteBtn: ImageButton = v.findViewById(R.id.ib_edit_delete_stop)
 
         fun bind(stops: ArrayList<String>, position: Int) {
-            Log.d("bind:", stops[position]!!)
-            val stringArray = stops[position]!!.split(",")
+            Log.d("bind:", stops[position])
+            val stringArray = stops[position].split(",")
             var stringName = stringArray[0].trim()
             var stringDate = stringArray[1].trim()
             var stringTime = stringArray[2].trim()
@@ -674,7 +675,7 @@ class StopEditAdapter(val stops: ArrayList<String>) :
             stopDate.setText(stringDate)
             stopTime.setText(stringTime)
 
-            var stop = "${stringName},${stringDate},${stringTime}"
+            var stop: String
 
             stopName.addTextChangedListener(object : TextWatcher {
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
