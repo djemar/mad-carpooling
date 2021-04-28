@@ -109,7 +109,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         super.onViewCreated(view, savedInstanceState)
 
         ivCarPic = view.findViewById(R.id.iv_tripEdit_car_pic)
-//        Toast.makeText(context, trip.nickname, Toast.LENGTH_SHORT).show()
         tvDate = view.findViewById(R.id.tv_tripEdit_date)
         tvTime = view.findViewById(R.id.tv_tripEdit_time)
         etDepartureLocation = view.findViewById(R.id.et_departure)
@@ -165,6 +164,12 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                 stops = bundleStops?.getSerializable("stops") as ArrayList<String>
 
                 trip = tripList!![args.id]
+                if (trip.carPhotoPath != null) {
+                    BitmapFactory.decodeFile(trip.carPhotoPath)?.also { bitmap ->
+                        ivCarPic.setImageBitmap(bitmap)
+                    }
+                    currentPhotoPath = trip.carPhotoPath
+                }
 
                 /* trip = Trip(
                      args.id,
@@ -304,6 +309,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.save_trip -> {
+                saveCarImage()
                 val newTrip = Trip(
                     tripId,
                     getCurrentUser()!!,
@@ -319,7 +325,8 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                     pets,
                     music,
                     etDescription.text.trim().toString(),
-                    stops
+                    stops,
+                    currentPhotoPath
                 )
                 val args: TripEditFragmentArgs by navArgs()
                 if (args.isNew) {
@@ -331,6 +338,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                         tripId, newTrip
                     )
                 }
+
                 saveToSharedPref()
                 //TODO update stops with items from RecyclerView
                 bundleStops = Bundle()
@@ -568,7 +576,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
     private fun saveCarImage() {
         val imgPath = activity?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        val filename = FILENAME_IMG
+        val filename = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ITALY).format(Date())
         val myFile = File(imgPath, filename)
         val fileOutputStream = FileOutputStream(myFile)
 
@@ -583,8 +591,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     }
 
     private fun saveToSharedPref() {
-        saveCarImage()
-
         val jsonObj = JSONObject()
         jsonObj.put("json_carPic.group05.lab2", currentPhotoPath)
 

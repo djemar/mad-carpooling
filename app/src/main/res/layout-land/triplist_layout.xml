@@ -17,9 +17,8 @@
 
             <ImageView
                 android:id="@+id/trip_car"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="4dp"
+                android:layout_width="92dp"
+                android:layout_height="92dp"
                 android:layout_margin="4dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/ic_baseline_car"

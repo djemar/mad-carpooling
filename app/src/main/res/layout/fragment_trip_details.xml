@@ -38,7 +38,7 @@
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/jpeg_mustang" />
+                    android:src="@drawable/ic_car" />
 
             </androidx.cardview.widget.CardView>
 
@@ -242,12 +242,12 @@
                         android:id="@+id/tv_tripDetails_arrival_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        app:layout_constraintHorizontal_weight="1"
                         android:text="Arrival"
                         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                         android:textStyle="bold"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/tv_tripDetails_arrivalLocation"
+                        app:layout_constraintHorizontal_weight="1"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
@@ -259,9 +259,9 @@
                         android:text="Rome"
                         android:textAlignment="center"
                         android:textSize="18sp"
-                        app:layout_constraintHorizontal_weight="2"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_weight="2"
                         app:layout_constraintStart_toEndOf="@+id/tv_tripDetails_arrival_title"
                         app:layout_constraintTop_toTopOf="parent" />
 
@@ -290,12 +290,12 @@
                         android:id="@+id/tv_tripDetails_duration_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        app:layout_constraintHorizontal_weight="1"
                         android:text="Duration"
                         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                         android:textStyle="bold"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/tv_tripDetails_duration"
+                        app:layout_constraintHorizontal_weight="1"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
@@ -304,12 +304,12 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        app:layout_constraintHorizontal_weight="2"
                         android:text="6:30"
                         android:textAlignment="center"
                         android:textSize="18sp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_weight="2"
                         app:layout_constraintStart_toEndOf="@+id/tv_tripDetails_duration_title"
                         app:layout_constraintTop_toTopOf="parent" />
 
@@ -467,14 +467,14 @@
                     android:layout_gravity="center"
                     android:layout_margin="8dp"
                     android:background="@drawable/selector_preferences"
-                    android:src="@drawable/ic_chattiness"
-                    android:tint="?attr/colorControlNormal"
                     android:clickable="false"
                     android:focusable="false"
+                    android:src="@drawable/ic_chattiness"
+                    android:tint="?attr/colorControlNormal"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/btn_tripDetails_smoking"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"/>
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageButton
                     android:id="@+id/btn_tripDetails_smoking"
@@ -483,14 +483,14 @@
                     android:layout_gravity="center"
                     android:layout_margin="8dp"
                     android:background="@drawable/selector_preferences"
-                    android:src="@drawable/ic_smoking"
-                    android:tint="?attr/colorControlNormal"
                     android:clickable="false"
                     android:focusable="false"
+                    android:src="@drawable/ic_smoking"
+                    android:tint="?attr/colorControlNormal"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/btn_tripDetails_pets"
                     app:layout_constraintStart_toEndOf="@+id/btn_tripDetails_chattiness"
-                    app:layout_constraintTop_toTopOf="parent"/>
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageButton
                     android:id="@+id/btn_tripDetails_pets"
@@ -499,14 +499,14 @@
                     android:layout_gravity="center"
                     android:layout_margin="8dp"
                     android:background="@drawable/selector_preferences"
-                    android:src="@drawable/ic_pets"
-                    android:tint="?attr/colorControlNormal"
                     android:clickable="false"
                     android:focusable="false"
+                    android:src="@drawable/ic_pets"
+                    android:tint="?attr/colorControlNormal"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/btn_tripDetails_music"
                     app:layout_constraintStart_toEndOf="@+id/btn_tripDetails_smoking"
-                    app:layout_constraintTop_toTopOf="parent"/>
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageButton
                     android:id="@+id/btn_tripDetails_music"
@@ -515,14 +515,14 @@
                     android:layout_gravity="center"
                     android:layout_margin="8dp"
                     android:background="@drawable/selector_preferences"
-                    android:src="@drawable/ic_music"
-                    android:tint="?attr/colorControlNormal"
                     android:clickable="false"
                     android:focusable="false"
+                    android:src="@drawable/ic_music"
+                    android:tint="?attr/colorControlNormal"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/btn_tripDetails_pets"
-                    app:layout_constraintTop_toTopOf="parent"/>
+                    app:layout_constraintTop_toTopOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

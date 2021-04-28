@@ -1,11 +1,13 @@
 package com.mad.carpooling.ui.trip_list
 
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.core.view.isVisible
@@ -25,6 +27,7 @@ private var currentUser: String? = null
 
 class TripListFragment : Fragment(R.layout.fragment_trip_list) {
     private var tripList: ArrayList<Trip>? = null
+    private lateinit var ivCar: ImageView
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -122,6 +125,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
 
         class TripViewHolder(v: View) : RecyclerView.ViewHolder(v) {
 
+            val ivCar = v.findViewById<ImageView>(R.id.trip_car)
             val tripRL = v.findViewById<RelativeLayout>(R.id.trip_rl)
             val location = v.findViewById<TextView>(R.id.trip_from_to)
             val duration = v.findViewById<TextView>(R.id.trip_duration)
@@ -135,6 +139,11 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
                 location.text = "${trip.departure} ${trip.arrival}"
                 duration.text = trip.duration
                 price.text = trip.price.toString()
+                if(trip.carPhotoPath != null){
+                    BitmapFactory.decodeFile(trip.carPhotoPath)?.also { bitmap ->
+                        ivCar.setImageBitmap(bitmap)
+                    }
+                }
 
                 val bundle = Bundle()
                 bundle.putSerializable("stops", trip.stops)

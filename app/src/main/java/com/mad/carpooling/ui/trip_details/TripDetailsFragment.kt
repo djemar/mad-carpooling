@@ -119,8 +119,8 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         Log.e("INFO", trip.nickname)
 
         // ivCarPic to be init from remote resource
-        if (args.currentPhotoPath != null) {
-            BitmapFactory.decodeFile(args.currentPhotoPath)?.also { bitmap ->
+        if (trip.carPhotoPath != null) {
+            BitmapFactory.decodeFile(trip.carPhotoPath)?.also { bitmap ->
                 ivCarPic.setImageBitmap(bitmap)
             }
         }
