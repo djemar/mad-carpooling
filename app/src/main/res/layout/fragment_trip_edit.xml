@@ -141,12 +141,12 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
+                        android:freezesText="true"
                         android:padding="12dp"
                         android:text="dd-mm-yyyy"
                         android:textAlignment="center"
                         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                         android:textStyle="bold"
-                        android:freezesText="true"
                         app:layout_constraintBottom_toTopOf="@id/edit_date"
                         app:layout_constraintEnd_toStartOf="@id/mcv_tripEdit_time"
                         app:layout_constraintHorizontal_weight="1"
@@ -157,20 +157,19 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/edit_date"
-                    android:layout_width="0dp"
+                    style=""
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="4dp"
-                    android:elevation="0dp"
                     android:gravity="center"
                     android:text="Pick date"
                     app:cornerRadius="16dp"
                     app:layout_constraintBottom_toTopOf="@id/textInput_tripEdit_duration"
-                    app:layout_constraintEnd_toStartOf="@id/edit_time"
+                    app:layout_constraintEnd_toEndOf="@+id/mcv_tripEdit_date"
+                    app:layout_constraintHorizontal_chainStyle="spread"
                     app:layout_constraintHorizontal_weight="1"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/mcv_tripEdit_date"
-                    style=""
-                    />
+                    app:layout_constraintTop_toBottomOf="@id/mcv_tripEdit_date" />
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/mcv_tripEdit_time"
@@ -189,9 +188,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
+                        android:freezesText="true"
                         android:padding="12dp"
                         android:text="hh:mm"
-                        android:freezesText="true"
                         android:textAlignment="center"
                         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                         android:textStyle="bold" />
@@ -200,7 +199,7 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/edit_time"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="4dp"
                     android:elevation="0dp"
@@ -210,8 +209,8 @@
                     app:layout_constraintBottom_toTopOf="@id/textInput_tripEdit_duration"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_weight="1"
-                    app:layout_constraintStart_toEndOf="@id/edit_date"
-                    app:layout_constraintTop_toBottomOf="@id/mcv_tripEdit_time"/>
+                    app:layout_constraintStart_toStartOf="@+id/mcv_tripEdit_time"
+                    app:layout_constraintTop_toBottomOf="@id/mcv_tripEdit_time" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/textInput_tripEdit_duration"
@@ -291,7 +290,7 @@
                         android:id="@+id/et_price"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="number"
+                        android:inputType="numberDecimal"
                         android:selectAllOnFocus="true"
                         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
@@ -498,21 +497,22 @@
 
                 </androidx.recyclerview.widget.RecyclerView>
 
-                <ImageButton
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/ib_add_stop"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:clickable="true"
-                    android:layout_margin="4dp"
-                    android:src="@android:drawable/ic_input_add"
-                    android:background="@drawable/shape_round_edit"
-                    android:backgroundTint="?attr/colorPrimary"
-                    android:tint="?attr/colorOnPrimary"
                     android:layout_gravity="bottom|end"
+                    android:layout_margin="4dp"
                     android:layout_marginBottom="8dp"
+                    android:clickable="true"
+                    android:text="Add stop"
+                    app:cornerRadius="26dp"
+                    android:src="@android:drawable/ic_input_add"
+                    android:tint="?attr/colorOnPrimary"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/rv_tripEdit_stops"/>
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/rv_tripEdit_stops" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
