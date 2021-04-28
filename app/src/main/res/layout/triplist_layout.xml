@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="16dp"
-    android:layout_marginEnd="16dp"
-    android:layout_marginTop="8dp"
     android:clipToPadding="false"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:paddingStart="16dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="16dp">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="110dp"
-        app:cardCornerRadius="16dp"
         android:layout_marginBottom="8dp"
-        >
+        app:cardCornerRadius="16dp">
 
         <RelativeLayout
             android:id="@+id/trip_rl"
@@ -25,51 +24,49 @@
                 android:id="@+id/trip_car"
                 android:layout_width="110dp"
                 android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_car_square"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
-                 />
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_car_square" />
 
             <LinearLayout
                 android:id="@+id/trip_info"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_toRightOf="@id/trip_car"
-                android:layout_toLeftOf="@id/trip_edit"
-                android:layout_margin="8dp"
                 android:layout_centerVertical="true"
-                >
+                android:layout_margin="8dp"
+                android:layout_toLeftOf="@id/trip_edit"
+                android:layout_toRightOf="@id/trip_car"
+                android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/trip_from_to"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:maxLines="2"
-                    android:textSize="16sp"
                     android:text="Departure and arrival location"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+                    android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                    android:textSize="16sp" />
 
                 <TextView
                     android:id="@+id/trip_duration"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:maxLines="1"
-                    android:textSize="14sp"
-                    android:text="trip duration"
                     android:paddingTop="8dp"
                     android:paddingBottom="8dp"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
+                    android:text="trip duration"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                    android:textSize="14sp" />
 
                 <TextView
                     android:id="@+id/trip_price"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:maxLines="1"
-                    android:textSize="14sp"
                     android:text="price"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                    android:textSize="14sp" />
 
             </LinearLayout>
 
@@ -77,13 +74,13 @@
                 android:id="@+id/trip_edit"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:tint="?attr/colorPrimary"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:src="@drawable/ic_baseline_edit"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:layout_marginEnd="10dp"/>
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/shape_round"
+                android:clickable="true"
+                android:src="@drawable/ic_baseline_edit"
+                android:tint="?attr/colorPrimary" />
 
         </RelativeLayout>
 

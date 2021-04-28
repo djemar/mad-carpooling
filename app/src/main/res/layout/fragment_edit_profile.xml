@@ -11,8 +11,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginBottom="16dp">
+        android:layout_marginBottom="16dp"
+        android:layout_weight="1">
 
         <androidx.cardview.widget.CardView
             android:layout_width="192dp"
@@ -39,9 +39,9 @@
             android:id="@+id/btn_camera"
             android:layout_width="64dp"
             android:layout_height="64dp"
-            android:layout_marginEnd="16dp"
             android:layout_gravity="center|bottom"
             android:layout_margin="4dp"
+            android:layout_marginEnd="16dp"
             android:background="@drawable/shape_round_camera_profile"
             android:elevation="4dp"
             android:src="@drawable/ic_baseline_camera"

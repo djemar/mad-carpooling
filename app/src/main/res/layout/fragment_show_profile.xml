@@ -129,9 +129,9 @@
                 android:id="@+id/tv_email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:autoLink="email"
                 android:freezesText="true"
                 android:text="@string/default_email"
-                android:autoLink="email"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 android:textColor="?android:attr/textColorPrimary" />
         </LinearLayout>

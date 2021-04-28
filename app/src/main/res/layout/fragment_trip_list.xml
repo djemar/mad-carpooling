@@ -4,33 +4,32 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:clipToPadding="false"
+    android:orientation="vertical"
     tools:context=".ui.trip_list.TripListFragment">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/triplist_rv"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
+        android:layout_height="match_parent" />
 
     <TextView
         android:id="@+id/no_trips_available"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:visibility="gone"
         android:text="No trips in your list"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display1"/>
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+        android:visibility="gone" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/trip_add"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:clickable="true"
+        android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:src="@android:drawable/ic_input_add"
-        android:layout_gravity="bottom|end"/>
+        android:clickable="true"
+        android:src="@android:drawable/ic_input_add" />
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
