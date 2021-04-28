@@ -421,7 +421,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:padding="8dp"
-                            android:text="Euros"
+                            android:text="€"
                             android:textSize="18sp"
                             android:textStyle="bold"
                             app:layout_constraintBottom_toBottomOf="parent"
