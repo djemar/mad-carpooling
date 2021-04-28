@@ -89,23 +89,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         }
     }
 
-
-    private fun getSavedTripList(): ArrayList<Trip>? {
-        var gson = Gson()
-        val sharedPref =
-            context?.getSharedPreferences("trip_pref.group05.lab2", Context.MODE_PRIVATE)
-                ?: return null
-        val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
-        if (jsonString != null) {
-            val jsonObject = JSONObject(jsonString)
-            var jsonTripList = jsonObject.getString(
-                "json_tripList.group05.lab2"
-            )
-            val myType = object : TypeToken<ArrayList<Trip>>() {}.type
-            return gson.fromJson(jsonTripList, myType)
-        } else return null
-    }
-
     private fun initTripDetails(view: View) {
         val args: TripDetailsFragmentArgs by navArgs()
         val tripId = args.id
@@ -131,7 +114,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         tvDepartureTime.text = trip.depTime
         tvDuration.text = trip.duration
         tvSeats.text = trip.seats.toString()
-        tvPrice.text = trip.price.toString()
+        tvPrice.text = "%.2f".format(trip.price).toString()
         tvDescription.text = trip.description
         chattiness = trip.chattiness
         smoking = trip.smoking
@@ -184,6 +167,35 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         music = changeStatePreference(music, ibtnMusic)
     }
 
+    private fun getSavedTripList(): ArrayList<Trip>? {
+        var gson = Gson()
+        val sharedPref =
+            context?.getSharedPreferences("trip_pref.group05.lab2", Context.MODE_PRIVATE)
+                ?: return null
+        val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
+        if (jsonString != null) {
+            val jsonObject = JSONObject(jsonString)
+            var jsonTripList = jsonObject.getString(
+                "json_tripList.group05.lab2"
+            )
+            val myType = object : TypeToken<ArrayList<Trip>>() {}.type
+            return gson.fromJson(jsonTripList, myType)
+        } else return null
+    }
+
+    private fun getCurrentUser(): String? {
+        val sharedPref =
+            context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
+                ?: return null
+        val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
+        if (jsonString != null) {
+            val jsonObject = JSONObject(jsonString)
+            return jsonObject.getString(
+                "json_nickname.group05.lab1"
+            )
+        } else return "Babayaga"; //just for testing purposes
+    }
+
     private fun changeStatePreference(state: Boolean, ibtn: ImageButton): Boolean {
         val typedValue = TypedValue()
         val theme = requireContext().theme
@@ -219,19 +231,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         super.onPrepareOptionsMenu(menu)
         optionsMenu.findItem(R.id.edit_trip).isVisible = trip.nickname == getCurrentUser()
 
-    }
-
-    private fun getCurrentUser(): String? {
-        val sharedPref =
-            context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
-                ?: return null
-        val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
-        if (jsonString != null) {
-            val jsonObject = JSONObject(jsonString)
-            return jsonObject.getString(
-                "json_nickname.group05.lab1"
-            )
-        } else return "Babayaga"; //just for testing purposes
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

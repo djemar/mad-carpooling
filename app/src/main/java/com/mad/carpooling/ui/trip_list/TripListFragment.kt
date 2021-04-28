@@ -22,6 +22,7 @@ import com.google.gson.reflect.TypeToken
 import com.mad.carpooling.R
 import com.mad.carpooling.Trip
 import org.json.JSONObject
+import java.text.DecimalFormat
 
 private var currentUser: String? = null
 
@@ -105,7 +106,6 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
         } else return null
     }
 
-
     private fun getCurrentUser(): String? {
         val sharedPref =
             context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
@@ -136,9 +136,9 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
 
             fun bind(trip: Trip) {
 
-                location.text = "${trip.departure} ${trip.arrival}"
-                duration.text = trip.duration
-                price.text = trip.price.toString()
+                location.text = "${trip.departure} - ${trip.arrival}"
+                duration.text = "Duration: ${trip.duration} h"
+                price.text = "Price: ${("%.2f".format(trip.price)).toString()} €"
                 if(trip.carPhotoPath != null){
                     BitmapFactory.decodeFile(trip.carPhotoPath)?.also { bitmap ->
                         ivCar.setImageBitmap(bitmap)

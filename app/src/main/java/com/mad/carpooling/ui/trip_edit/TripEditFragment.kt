@@ -52,7 +52,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
     private lateinit var tripEditViewModel: TripEditViewModel
     private lateinit var trip: Trip
-
     private lateinit var optionsMenu: Menu
     private lateinit var ivCarPic: ImageView
     private lateinit var tvDate: TextView
@@ -192,7 +191,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                 // currentPhotoPath = args.currentPhotoPath or from remote resource
             } else { // navigating from tripList FAB
                 (activity as MainActivity).supportActionBar?.title = "Create New Trip"
-                if (tripList == null) tripId=0 else tripId=tripList!!.size
+                if (tripList == null) tripId = 0 else tripId = tripList!!.size
                 trip = Trip(tripId)
                 stops = ArrayList<String>()
                 bundleStops = Bundle()
@@ -234,7 +233,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             currentPhotoPath = savedInstanceState.getString("state_currentPhoto")
         }
 
-        val btnAddStop = view.findViewById<ImageButton>(R.id.ib_add_stop)
+        val btnAddStop = view.findViewById<MaterialButton>(R.id.ib_add_stop)
         btnAddStop.setOnClickListener {
             stopEditAdapter.addEmpty(",,", stops.size + 1)
         }
@@ -245,22 +244,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             }
         }
 
-    }
-
-    private fun getSavedTripList(): ArrayList<Trip>? {
-        var gson = Gson()
-        val sharedPref =
-            context?.getSharedPreferences("trip_pref.group05.lab2", Context.MODE_PRIVATE)
-                ?: return null
-        val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
-        if (jsonString != null) {
-            val jsonObject = JSONObject(jsonString)
-            var jsonTripList = jsonObject.getString(
-                "json_tripList.group05.lab2"
-            )
-            val myType = object : TypeToken<ArrayList<Trip>>() {}.type
-            return gson.fromJson(jsonTripList, myType)
-        } else return null
     }
 
     private fun initPreferences() {
@@ -285,148 +268,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         btn.isSelected = state
         btn.setColorFilter(color)
         return state
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.menu_trip_edit, menu)
-        optionsMenu = menu
-        super.onCreateOptionsMenu(menu, inflater)
-    }
-
-    private fun getCurrentUser(): String? {
-        val sharedPref =
-            context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
-                ?: return null
-        val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
-        if (jsonString != null) {
-            val jsonObject = JSONObject(jsonString)
-            return jsonObject.getString(
-                "json_nickname.group05.lab1"
-            )
-        } else return "Babayaga"; //just for testing purposes
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.save_trip -> {
-                saveCarImage()
-                val newTrip = Trip(
-                    tripId,
-                    getCurrentUser()!!,
-                    etDepartureLocation.text.trim().toString(),
-                    etArrivalLocation.text.trim().toString(),
-                    etDuration.text.trim().toString(),
-                    tvDate.text.trim().toString(),
-                    tvTime.text.trim().toString(),
-                    etSeats.text.trim().toString().toInt(),
-                    etPrice.text.trim().toString().toFloat(),
-                    chattiness,
-                    smoking,
-                    pets,
-                    music,
-                    etDescription.text.trim().toString(),
-                    stops,
-                    currentPhotoPath
-                )
-                val args: TripEditFragmentArgs by navArgs()
-                if (args.isNew) {
-                    tripList?.add(
-                        newTrip
-                    )
-                } else {
-                    tripList?.set(
-                        tripId, newTrip
-                    )
-                }
-
-                saveToSharedPref()
-                //TODO update stops with items from RecyclerView
-                bundleStops = Bundle()
-                bundleStops?.putSerializable("stops", stops)
-                val action = TripEditFragmentDirections.actionNavTripEditToNavTripDetails(
-                    tripId,
-                    etDepartureLocation.text.trim().toString(),
-                    etArrivalLocation.text.trim().toString(),
-                    etDuration.text.trim().toString(),
-                    etPrice.text.trim().toString().toFloat(),
-                    etSeats.text.trim().toString().toInt(),
-                    tvDate.text.trim().toString(),
-                    tvTime.text.trim().toString(),
-                    chattiness,
-                    smoking,
-                    pets,
-                    music,
-                    etDescription.text.trim().toString(),
-                    bundleStops,
-                    currentPhotoPath
-                )
-                findNavController().navigate(action)
-
-                Snackbar.make(requireView(), "Trip saved", Snackbar.LENGTH_SHORT).show()
-                true
-            }
-            else -> item.onNavDestinationSelected(findNavController()) || super.onOptionsItemSelected(
-                item
-            )
-        }
-    }
-
-    class DatePickerFragment(tvDate: TextView) : DialogFragment(),
-        DatePickerDialog.OnDateSetListener {
-
-        val tvDate = tvDate
-
-        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-            // Use the current date as the default date in the picker
-            val c = Calendar.getInstance()
-            val year = c.get(Calendar.YEAR)
-            val month = c.get(Calendar.MONTH)
-            val day = c.get(Calendar.DAY_OF_MONTH)
-
-            // Create a new instance of DatePickerDialog and return it
-            return DatePickerDialog(requireContext(), this, year, month, day)
-        }
-
-        override fun onDateSet(view: DatePicker, year: Int, month: Int, day: Int) {
-            tvDate.text = "${day.toString()}/${(month+1).toString()}/${year.toString()}"
-        }
-
-    }
-
-    private fun showDatePickerDialog(v: View) {
-        val dateFragment = DatePickerFragment(tvDate)
-        dateFragment.show(requireActivity().supportFragmentManager, "datePicker")
-    }
-
-    class TimePickerFragment(tvTime: TextView) : DialogFragment(),
-        TimePickerDialog.OnTimeSetListener {
-
-        val tvTime = tvTime
-
-        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-            // Use the current time as the default values for the picker
-            val c = Calendar.getInstance()
-            val hour = c.get(Calendar.HOUR_OF_DAY)
-            val minute = c.get(Calendar.MINUTE)
-
-            // Create a new instance of TimePickerDialog and return it
-            return TimePickerDialog(
-                activity,
-                this,
-                hour,
-                minute,
-                DateFormat.is24HourFormat(activity)
-            )
-        }
-
-        override fun onTimeSet(view: TimePicker, hourOfDay: Int, minute: Int) {
-            tvTime.text = "${hourOfDay.toString()} : ${minute.toString()}"
-        }
-    }
-
-    private fun showTimePickerDialog(v: View) {
-        val timeFragment = TimePickerFragment(tvTime)
-        timeFragment.show(requireActivity().supportFragmentManager, "timePicker")
     }
 
     private fun dispatchGalleryPickerIntent() {
@@ -607,6 +448,106 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         }
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_trip_edit, menu)
+        optionsMenu = menu
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    private fun getSavedTripList(): ArrayList<Trip>? {
+        var gson = Gson()
+        val sharedPref =
+            context?.getSharedPreferences("trip_pref.group05.lab2", Context.MODE_PRIVATE)
+                ?: return null
+        val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
+        if (jsonString != null) {
+            val jsonObject = JSONObject(jsonString)
+            var jsonTripList = jsonObject.getString(
+                "json_tripList.group05.lab2"
+            )
+            val myType = object : TypeToken<ArrayList<Trip>>() {}.type
+            return gson.fromJson(jsonTripList, myType)
+        } else return null
+    }
+
+    private fun getCurrentUser(): String? {
+        val sharedPref =
+            context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
+                ?: return null
+        val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
+        if (jsonString != null) {
+            val jsonObject = JSONObject(jsonString)
+            return jsonObject.getString(
+                "json_nickname.group05.lab1"
+            )
+        } else return "Babayaga"; //just for testing purposes
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.save_trip -> {
+                saveCarImage()
+                val newTrip = Trip(
+                    tripId,
+                    getCurrentUser()!!,
+                    etDepartureLocation.text.trim().toString(),
+                    etArrivalLocation.text.trim().toString(),
+                    etDuration.text.trim().toString(),
+                    tvDate.text.trim().toString(),
+                    tvTime.text.trim().toString(),
+                    etSeats.text.trim().toString().toInt(),
+                    etPrice.text.trim().toString().toFloat(),
+                    chattiness,
+                    smoking,
+                    pets,
+                    music,
+                    etDescription.text.trim().toString(),
+                    stops,
+                    currentPhotoPath
+                )
+                val args: TripEditFragmentArgs by navArgs()
+                if (args.isNew) {
+                    tripList?.add(
+                        newTrip
+                    )
+                } else {
+                    tripList?.set(
+                        tripId, newTrip
+                    )
+                }
+
+                saveToSharedPref()
+                //TODO update stops with items from RecyclerView
+                bundleStops = Bundle()
+                bundleStops?.putSerializable("stops", stops)
+                val action = TripEditFragmentDirections.actionNavTripEditToNavTripDetails(
+                    tripId,
+                    etDepartureLocation.text.trim().toString(),
+                    etArrivalLocation.text.trim().toString(),
+                    etDuration.text.trim().toString(),
+                    etPrice.text.trim().toString().toFloat(),
+                    etSeats.text.trim().toString().toInt(),
+                    tvDate.text.trim().toString(),
+                    tvTime.text.trim().toString(),
+                    chattiness,
+                    smoking,
+                    pets,
+                    music,
+                    etDescription.text.trim().toString(),
+                    bundleStops,
+                    currentPhotoPath
+                )
+                findNavController().navigate(action)
+
+                Snackbar.make(requireView(), "Trip saved", Snackbar.LENGTH_SHORT).show()
+                true
+            }
+            else -> item.onNavDestinationSelected(findNavController()) || super.onOptionsItemSelected(
+                item
+            )
+        }
+    }
+
     override fun onCreateContextMenu(
         menu: ContextMenu,
         v: View,
@@ -629,6 +570,64 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             }
             else -> super.onContextItemSelected(item)
         }
+    }
+
+    class DatePickerFragment(tvDate: TextView) : DialogFragment(),
+        DatePickerDialog.OnDateSetListener {
+
+        val tvDate = tvDate
+
+        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+            // Use the current date as the default date in the picker
+            val c = Calendar.getInstance()
+            val year = c.get(Calendar.YEAR)
+            val month = c.get(Calendar.MONTH)
+            val day = c.get(Calendar.DAY_OF_MONTH)
+
+            // Create a new instance of DatePickerDialog and return it
+            return DatePickerDialog(requireContext(), this, year, month, day)
+        }
+
+        override fun onDateSet(view: DatePicker, year: Int, month: Int, day: Int) {
+            tvDate.text = "${day.toString()}/${(month + 1).toString()}/${year.toString()}"
+        }
+
+    }
+
+    private fun showDatePickerDialog(v: View) {
+        val dateFragment = DatePickerFragment(tvDate)
+        dateFragment.show(requireActivity().supportFragmentManager, "datePicker")
+    }
+
+    class TimePickerFragment(tvTime: TextView) : DialogFragment(),
+        TimePickerDialog.OnTimeSetListener {
+
+        val tvTime = tvTime
+
+        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+            // Use the current time as the default values for the picker
+            val c = Calendar.getInstance()
+            val hour = c.get(Calendar.HOUR_OF_DAY)
+            val minute = c.get(Calendar.MINUTE)
+
+            // Create a new instance of TimePickerDialog and return it
+            return TimePickerDialog(
+                activity,
+                this,
+                hour,
+                minute,
+                DateFormat.is24HourFormat(activity)
+            )
+        }
+
+        override fun onTimeSet(view: TimePicker, hourOfDay: Int, minute: Int) {
+            tvTime.text = "${hourOfDay.toString()} : ${minute.toString()}"
+        }
+    }
+
+    private fun showTimePickerDialog(v: View) {
+        val timeFragment = TimePickerFragment(tvTime)
+        timeFragment.show(requireActivity().supportFragmentManager, "timePicker")
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
