@@ -109,15 +109,13 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private fun initTripDetails(view: View) {
         val args: TripDetailsFragmentArgs by navArgs()
         val tripId = args.id
-        val bundle = args.stops
 
         tripList = getSavedTripList()
 
-        if (bundle != null)
-            stops = bundle.getSerializable("stops") as ArrayList<String>
 
         trip = tripList!![args.id]
 
+        stops = trip.stops
         Log.e("INFO", trip.nickname)
 
         // ivCarPic to be init from remote resource
@@ -144,7 +142,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
         val rv = view.findViewById<RecyclerView>(R.id.rv_tripDetails_stops)
         rv.layoutManager = LinearLayoutManager(context);
-        val stopAdapter = StopAdapter(stops!!)
+        val stopAdapter = StopAdapter(stops)
         rv.adapter = stopAdapter
         if (stopAdapter.itemCount == 0) {
             val tripStopsTitle = view.findViewById<TextView>(R.id.tv_tripDetails_stops)
@@ -251,7 +249,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     }
 }
 
-class StopAdapter(val stops: ArrayList<String>) :
+class StopAdapter(val stops: ArrayList<String>?) :
     RecyclerView.Adapter<StopAdapter.StopViewHolder>() {
 
     class StopViewHolder(v: View) : RecyclerView.ViewHolder(v) {
@@ -278,11 +276,14 @@ class StopAdapter(val stops: ArrayList<String>) :
     }
 
     override fun onBindViewHolder(holder: StopViewHolder, position: Int) {
-        holder.bind(stops[position], position)
+        holder.bind(stops?.get(position), position)
     }
 
     override fun getItemCount(): Int {
-        return stops.size
+        if (stops != null) {
+            return stops.size
+        }
+        else return 0
     }
 
 }
