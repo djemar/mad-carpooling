@@ -38,7 +38,7 @@
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/ic_car" />
+                    android:src="@drawable/ic_car_square" />
 
             </androidx.cardview.widget.CardView>
 

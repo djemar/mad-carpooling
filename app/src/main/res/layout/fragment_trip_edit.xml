@@ -29,7 +29,7 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:scaleType="centerCrop"
-                android:src="@drawable/jpeg_mustang" />
+                android:src="@drawable/ic_car_square" />
 
             <ImageButton
                 android:id="@+id/btn_tripEdit_camera"
