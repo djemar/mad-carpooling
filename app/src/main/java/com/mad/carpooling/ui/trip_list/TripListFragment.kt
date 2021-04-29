@@ -13,6 +13,8 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,27 +24,48 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.mad.carpooling.R
 import com.mad.carpooling.Trip
+import com.mad.carpooling.ui.SharedViewModel
 import org.json.JSONObject
 
 private var currentUser: String? = null
 
 class TripListFragment : Fragment(R.layout.fragment_trip_list) {
-    private var tripList: ArrayList<Trip>? = null
+    private lateinit var rv: RecyclerView
+    private var tripMap: HashMap<String, Trip>? = null
+
+    // Use the 'by activityViewModels()' Kotlin property delegate
+    // from the fragment-ktx artifact
+    private val model: SharedViewModel by activityViewModels()
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initTripList()
+        model.getTrips().observe(viewLifecycleOwner, Observer { newTrips ->
+            // Update the UI
+            updateTripList(newTrips, view)
+        })
 
-        val rv = view.findViewById<RecyclerView>(R.id.triplist_rv)
+       // initTripList()
+
+    }
+
+    private fun initTripList() {
+        currentUser = getCurrentUser()
+        tripMap = model.getTrips().value
+    }
+
+    private fun updateTripList(newTrips: HashMap<String, Trip>, view: View) {
+        currentUser = getCurrentUser()
+        rv = view.findViewById<RecyclerView>(R.id.triplist_rv)
         rv.layoutManager = LinearLayoutManager(context)
         //just an example, real trips needed
 
-        val tripAdapter = TripAdapter(tripList!!)
+        val tripAdapter = TripAdapter(ArrayList((newTrips.values)))
         rv.adapter = tripAdapter
 
+        //TODO check on tripList size instead
         val emptyView = view.findViewById<TextView>(R.id.no_trips_available)
-
         if (tripAdapter.itemCount == 0) //from getItemCount
             emptyView.isVisible = true
 
@@ -50,6 +73,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
         var navController: NavController?
         fab.setOnClickListener {
             val action = TripListFragmentDirections.actionNavTripListToNavTripEdit(
+                "",
                 isNew = true
             )
             navController = Navigation.findNavController(fab)
@@ -65,28 +89,6 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
                 }
             }
         })
-    }
-
-    private fun initTripList() {
-        currentUser = getCurrentUser()
-        tripList = getSavedTripList()
-
-        if (tripList == null) {
-            tripList = Trip().getDefaultTripList() // for testing purposes
-            val jsonObj = JSONObject()
-
-            val gson = Gson()
-            val jsonTripList = gson.toJson(tripList)
-            jsonObj.put("json_tripList.group05.lab2", jsonTripList)
-
-            val sharedPref =
-                context?.getSharedPreferences("trip_pref.group05.lab2", Context.MODE_PRIVATE)
-                    ?: return
-            with(sharedPref.edit()) {
-                putString(getString(R.string.saved_profile_data), jsonObj.toString())
-                apply()
-            }
-        }
     }
 
     private fun getSavedTripList(): ArrayList<Trip>? {
@@ -124,23 +126,22 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
 
         class TripViewHolder(v: View) : RecyclerView.ViewHolder(v) {
 
+            val tripRL = v.findViewById<RelativeLayout>(R.id.trip_rl)
+            val btnEdit = v.findViewById<ImageButton>(R.id.trip_edit)
             private val ivCar = v.findViewById<ImageView>(R.id.trip_car)
-            private val tripRL = v.findViewById<RelativeLayout>(R.id.trip_rl)
             private val location = v.findViewById<TextView>(R.id.trip_from_to)
             private val duration = v.findViewById<TextView>(R.id.trip_duration)
             private val price = v.findViewById<TextView>(R.id.trip_price)
-            private val btnEdit = v.findViewById<ImageButton>(R.id.trip_edit)
 
             private var navController: NavController? = null
 
             @SuppressLint("SetTextI18n")
             fun bind(trip: Trip) {
-
                 location.text = "${trip.departure} - ${trip.arrival}"
                 duration.text = "Duration: ${trip.duration}"
                 price.text = "Price: ${("%.2f".format(trip.price))} €"
-                if(trip.carPhotoPath != null){
-                    BitmapFactory.decodeFile(trip.carPhotoPath)?.also { bitmap ->
+                if (trip.imageCarURL != null) {
+                    BitmapFactory.decodeFile(trip.imageCarURL)?.also { bitmap ->
                         ivCar.setImageBitmap(bitmap)
                     }
                 }
@@ -149,48 +150,9 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
                 bundle.putSerializable("stops", trip.stops)
 
                 tripRL.setOnClickListener {
-                    val action = TripListFragmentDirections.actionNavTripListToNavTripDetails(
-                        trip.id,
-                        trip.departure,
-                        trip.arrival,
-                        trip.duration,
-                        trip.price,
-                        trip.seats,
-                        trip.depDate,
-                        trip.depTime,
-                        trip.chattiness,
-                        trip.smoking,
-                        trip.pets,
-                        trip.music,
-                        trip.description,
-                        bundle
-                    )
-                    navController = Navigation.findNavController(tripRL)
-                    navController!!.navigate(action)
+
                 }
-                if (trip.nickname == currentUser) {
-                    btnEdit.setOnClickListener {
-                        val action = TripListFragmentDirections.actionNavTripListToNavTripEdit(
-                            trip.id,
-                            trip.departure,
-                            trip.arrival,
-                            trip.duration,
-                            trip.price,
-                            trip.seats,
-                            trip.depDate,
-                            trip.depTime,
-                            trip.chattiness,
-                            trip.smoking,
-                            trip.pets,
-                            trip.music,
-                            trip.description,
-                            bundle,
-                            false
-                        )
-                        navController = Navigation.findNavController(btnEdit)
-                        navController!!.navigate(action) //modify an existing one
-                    }
-                } else btnEdit.visibility = View.GONE
+
             }
         }
 
@@ -201,11 +163,30 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
         }
 
         override fun onBindViewHolder(holder: TripViewHolder, position: Int) {
-            holder.bind(tripList[position])
+            val trip = tripList?.get(position)
+            trip?.let { holder.bind(it) }
+            holder.tripRL.setOnClickListener {
+                val action = TripListFragmentDirections.actionNavTripListToNavTripDetails(
+                    trip.id,
+                )
+                Navigation.findNavController(holder.tripRL)!!.navigate(action)
+            }
+            if (trip.owner!!.id == currentUser) {
+                holder.btnEdit.setOnClickListener {
+                    val action = TripListFragmentDirections.actionNavTripListToNavTripEdit(
+                        trip.id,
+                        isNew = false
+                    )
+                    Navigation.findNavController(holder.btnEdit)!!
+                        .navigate(action) //modify an existing one
+                }
+            } else holder.btnEdit.visibility = View.GONE
         }
 
         override fun getItemCount(): Int {
-            return tripList.size
+            if (tripList != null) {
+                return tripList.size
+            } else return 0
         }
 
     }

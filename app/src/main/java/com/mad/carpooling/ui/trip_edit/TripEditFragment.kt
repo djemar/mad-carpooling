@@ -30,6 +30,7 @@ import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.onNavDestinationSelected
@@ -42,15 +43,18 @@ import com.google.gson.reflect.TypeToken
 import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.Trip
+import com.mad.carpooling.ui.SharedViewModel
 import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.*
 
 class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
+    private val model: SharedViewModel by activityViewModels()
     private lateinit var tripEditViewModel: TripEditViewModel
     private lateinit var trip: Trip
     private lateinit var optionsMenu: Menu
@@ -68,9 +72,9 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     private lateinit var ibtnPets: ImageButton
     private lateinit var ibtnMusic: ImageButton
     private lateinit var stops: ArrayList<String>
-    private var tripList: ArrayList<Trip>? = null
+    private var tripMap: HashMap<String, Trip>? = null
     private var bundleStops: Bundle? = null
-    private var tripId = -1
+    private var tripId = "id"
     private var chattiness = false
     private var smoking = false
     private var pets = false
@@ -150,7 +154,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         val rv = view.findViewById<RecyclerView>(R.id.rv_tripEdit_stops)
         rv.layoutManager = LinearLayoutManager(context)
         val stopEditAdapter: StopEditAdapter
-        tripList = getSavedTripList()
+        tripMap = model.getTrips().value
 
         if (savedInstanceState == null) {// view created navigating from tripList or tripDetails
             val args: TripEditFragmentArgs by navArgs()
@@ -159,44 +163,26 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                 bundleStops = args.stops
                 stops = bundleStops?.getSerializable("stops") as ArrayList<String>
 
-                trip = tripList!![args.id]
-                if (trip.carPhotoPath != null) {
-                    BitmapFactory.decodeFile(trip.carPhotoPath)?.also { bitmap ->
+                trip = tripMap?.get(args.id)!!
+                if (trip.imageCarURL != null) {
+                    BitmapFactory.decodeFile(trip.imageCarURL)?.also { bitmap ->
                         ivCarPic.setImageBitmap(bitmap)
                     }
-                    currentPhotoPath = trip.carPhotoPath
+                    currentPhotoPath = trip.imageCarURL
                 }
-
-                /* trip = Trip(
-                     args.id,
-                     "args.nickname",
-                     args.departure,
-                     args.arrival,
-                     args.duration,
-                     args.depDate,
-                     args.depTime,
-                     args.seats,
-                     args.price,
-                     args.chattiness,
-                     args.smoking,
-                     args.pets,
-                     args.music,
-                     args.description,
-                     stops
-                 )*/
                 stopEditAdapter = StopEditAdapter(stops)
                 // currentPhotoPath = args.currentPhotoPath or from remote resource
             } else { // navigating from tripList FAB
                 (activity as MainActivity).supportActionBar?.title = "Create New Trip"
-                tripId = if (tripList == null) 0 else tripList!!.size
-                trip = Trip(tripId)
+                tripId = com.google.firebase.Timestamp.now().toString()
+                trip = Trip()
                 stops = ArrayList<String>()
                 bundleStops = Bundle()
                 bundleStops?.putSerializable("stops", stops)
                 stopEditAdapter = StopEditAdapter(stops)
             }
-            tvDate.text = trip.depDate
-            tvTime.text = trip.depTime
+            tvDate.text = trip.timestamp.toDate().toString()
+            tvTime.text = (trip.timestamp.seconds / 3600).toString()
             etDepartureLocation.setText(trip.departure)
             etArrivalLocation.setText(trip.arrival)
             etDuration.setText(trip.duration)
@@ -211,7 +197,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             initPreferences()
 
         } else {
-            tripId = savedInstanceState.getInt("id")
+            //tripId = savedInstanceState.getInt("id")
 
             // Manage bundle for stops
             bundleStops = savedInstanceState.getBundle("stops")!!
@@ -431,7 +417,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         jsonObj.put("json_carPic.group05.lab2", currentPhotoPath)
 
         val gson = Gson()
-        val jsonTripList = gson.toJson(tripList)
+        val jsonTripList = gson.toJson(tripMap)
         jsonObj.put("json_tripList.group05.lab2", jsonTripList)
 
         val sharedPref =
@@ -482,7 +468,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         return when (item.itemId) {
             R.id.save_trip -> {
                 saveCarImage()
-                val newTrip = Trip(
+                /*val newTrip = Trip(
                     tripId,
                     getCurrentUser()!!,
                     etDepartureLocation.text.trim().toString(),
@@ -499,16 +485,16 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                     etDescription.text.trim().toString(),
                     stops,
                     currentPhotoPath
-                )
+                )*/
                 val args: TripEditFragmentArgs by navArgs()
                 if (args.isNew) {
-                    tripList?.add(
+                    /*tripMap?.add(
                         newTrip
-                    )
+                    )*/
                 } else {
-                    tripList?.set(
+                   /* tripMap?.set(
                         tripId, newTrip
-                    )
+                    )*/
                 }
 
                 saveToSharedPref()
@@ -649,7 +635,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         outState.putBoolean("pets", pets)
         outState.putBoolean("music", music)
         outState.putBundle("stops", bundleStops)
-        outState.putInt("id", tripId)
+        //outState.putInt("id", tripId)
         if (currentPhotoPath != null) outState.putString("state_currentPhoto", currentPhotoPath)
     }
 

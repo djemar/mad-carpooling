@@ -13,6 +13,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,12 +22,17 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.mad.carpooling.R
 import com.mad.carpooling.Trip
+import com.mad.carpooling.ui.SharedViewModel
 import org.json.JSONObject
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 
 class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
-    private lateinit var tripDetailsViewModel: TripDetailsViewModel
+    private val model: SharedViewModel by activityViewModels()
     private lateinit var trip: Trip
     private lateinit var ivCarPic: ImageView
     private lateinit var tvDepartureLocation: TextView
@@ -43,7 +49,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private lateinit var ibtnMusic: ImageButton
     private lateinit var optionsMenu: Menu
     private lateinit var tvNickname: TextView
-    private var tripList: java.util.ArrayList<Trip>? = null
+    private lateinit var tripMap: HashMap<String, Trip>
     private var chattiness = false
     private var smoking = false
     private var pets = false
@@ -88,24 +94,24 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private fun initTripDetails(view: View) {
         val args: TripDetailsFragmentArgs by navArgs()
 
-        tripList = getSavedTripList()
-        
-        trip = tripList!![args.id]
+        tripMap = model.getTrips().value!!
+
+        trip = tripMap.get(args.id)!!
 
         stops = trip.stops
-        Log.e("INFO", trip.nickname)
+        Log.e("INFO", trip.owner!!.id)
 
         // ivCarPic to be init from remote resource
-        if (trip.carPhotoPath != null) {
-            BitmapFactory.decodeFile(trip.carPhotoPath)?.also { bitmap ->
+        if (trip.imageCarURL != null) {
+            BitmapFactory.decodeFile(trip.imageCarURL)?.also { bitmap ->
                 ivCarPic.setImageBitmap(bitmap)
             }
         }
-        tvNickname.text = trip.nickname
+        tvNickname.text = trip.owner!!.id
         tvDepartureLocation.text = trip.departure
         tvArrivalLocation.text = trip.arrival
-        tvDepartureDate.text = trip.depDate
-        tvDepartureTime.text = trip.depTime
+        tvDepartureDate.text = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(trip.timestamp.toDate()).toString()
+        tvDepartureTime.text = SimpleDateFormat("hh:mm", Locale.getDefault()).format(trip.timestamp.toDate()).toString()
         tvDuration.text = trip.duration
         tvSeats.text = trip.seats.toString()
         tvPrice.text = "%.2f".format(trip.price)
@@ -134,20 +140,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         bundle.putSerializable("stops", stops)
         val action = TripDetailsFragmentDirections.actionNavTripDetailsToNavTripEdit(
             trip.id,
-            trip.departure,
-            trip.arrival,
-            trip.duration,
-            trip.price,
-            trip.seats,
-            trip.depDate,
-            trip.depTime,
-            trip.chattiness,
-            trip.smoking,
-            trip.pets,
-            trip.music,
-            trip.description,
-            bundle,
-            false
+            isNew = false
         )
 
         findNavController().navigate(action)
@@ -221,7 +214,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
-        optionsMenu.findItem(R.id.edit_trip).isVisible = trip.nickname == getCurrentUser()
+        optionsMenu.findItem(R.id.edit_trip).isVisible = trip.owner!!.id == getCurrentUser()
 
     }
 
