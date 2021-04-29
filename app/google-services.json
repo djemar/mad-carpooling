@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "226429145509",
+    "project_id": "mad-carpooling",
+    "storage_bucket": "mad-carpooling.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:226429145509:android:d0871633bfaa99ae1f584c",
+        "android_client_info": {
+          "package_name": "com.mad.carpooling"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "226429145509-dh7q8qbg0cq24u7uk6on7cmh9e14d1ac.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mad.carpooling",
+            "certificate_hash": "7da227692e4be31d785c2177a713e28dfff7aef6"
+          }
+        },
+        {
+          "client_id": "226429145509-cagufso74naml0jo95ovg3r2u0ljnj24.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAPSvYIhDOW-G2pcMzsO5ee712gtSTPcgw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "226429145509-cagufso74naml0jo95ovg3r2u0ljnj24.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
