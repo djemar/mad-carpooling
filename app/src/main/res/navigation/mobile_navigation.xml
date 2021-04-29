@@ -119,8 +119,7 @@
             app:popExitAnim="@anim/fragment_close_exit" />
         <argument
             android:name="id"
-            android:defaultValue="0"
-            app:argType="integer" />
+            app:argType="string" />
         <argument
             android:name="departure"
             android:defaultValue="x"
@@ -195,8 +194,7 @@
             app:popExitAnim="@anim/fragment_close_exit" />
         <argument
             android:name="id"
-            android:defaultValue="0"
-            app:argType="integer" />
+            app:argType="string" />
         <argument
             android:name="departure"
             android:defaultValue="x"
