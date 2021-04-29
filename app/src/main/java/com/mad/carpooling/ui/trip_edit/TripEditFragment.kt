@@ -38,6 +38,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.mad.carpooling.MainActivity
@@ -486,13 +490,14 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                     stops,
                     currentPhotoPath
                 )*/
+                updateFirestoreTrips()
                 val args: TripEditFragmentArgs by navArgs()
                 if (args.isNew) {
                     /*tripMap?.add(
                         newTrip
                     )*/
                 } else {
-                   /* tripMap?.set(
+                    /* tripMap?.set(
                         tripId, newTrip
                     )*/
                 }
@@ -503,7 +508,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                 bundleStops?.putSerializable("stops", stops)
                 val action = TripEditFragmentDirections.actionNavTripEditToNavTripDetails(
                     tripId,
-                    etDepartureLocation.text.trim().toString(),
+/*                    etDepartureLocation.text.trim().toString(),
                     etArrivalLocation.text.trim().toString(),
                     etDuration.text.trim().toString(),
                     etPrice.text.trim().toString().toFloat(),
@@ -516,7 +521,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                     music,
                     etDescription.text.trim().toString(),
                     bundleStops,
-                    currentPhotoPath
+                    currentPhotoPath*/
                 )
                 findNavController().navigate(action)
 
@@ -526,6 +531,34 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             else -> item.onNavDestinationSelected(findNavController()) || super.onOptionsItemSelected(
                 item
             )
+        }
+    }
+
+    private fun updateFirestoreTrips() {
+        /*val dateFormat = SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS")
+        val parsedDate = dateFormat.parse(yourString)
+        val timestamp: Timestamp = Timestamp(parsedDate.time)*/
+        val id = hashCode().toString()
+        val newTrip = Trip(
+            id,
+            FirebaseFirestore.getInstance().document("users/babayaga"),
+            etDepartureLocation.text.trim().toString(),
+            etArrivalLocation.text.trim().toString(),
+            etDuration.text.trim().toString(),
+            com.google.firebase.Timestamp.now(),
+            etSeats.text.trim().toString().toInt(),
+            etPrice.text.trim().toString().toFloat(),
+            chattiness,
+            smoking,
+            pets,
+            music,
+            etDescription.text.trim().toString(),
+            stops,
+            currentPhotoPath
+        )
+        val db = Firebase.firestore
+        db.collection("trips").document(id).set(newTrip, SetOptions.merge()).addOnSuccessListener {
+
         }
     }
 
