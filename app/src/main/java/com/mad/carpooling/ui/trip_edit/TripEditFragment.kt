@@ -163,8 +163,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             val args: TripEditFragmentArgs by navArgs()
             if (!args.isNew) {  // navigating from any edit btn
                 tripId = args.id
-                bundleStops = args.stops
-                stops = bundleStops?.getSerializable("stops") as ArrayList<String>
 
                 trip = tripMap?.get(args.id)!!
                 if (trip.imageCarURL != null) {
@@ -177,11 +175,9 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                 // currentPhotoPath = args.currentPhotoPath or from remote resource
             } else { // navigating from tripList FAB
                 (activity as MainActivity).supportActionBar?.title = "Create New Trip"
-                tripId = com.google.firebase.Timestamp.now().toString()
+                tripId = Timestamp.now().toString()
                 trip = Trip()
                 stops = ArrayList<String>()
-                bundleStops = Bundle()
-                bundleStops?.putSerializable("stops", stops)
                 stopEditAdapter = StopEditAdapter(stops)
             }
             tvDate.text = trip.timestamp.toDate().toString()
@@ -501,30 +497,11 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                     )*/
                 }
 
-                saveToSharedPref()
+                //saveToSharedPref()
 
                 bundleStops = Bundle()
                 bundleStops?.putSerializable("stops", stops)
-                val action = TripEditFragmentDirections.actionNavTripEditToNavTripDetails(
-                    tripId,
-/*                    etDepartureLocation.text.trim().toString(),
-                    etArrivalLocation.text.trim().toString(),
-                    etDuration.text.trim().toString(),
-                    etPrice.text.trim().toString().toFloat(),
-                    etSeats.text.trim().toString().toInt(),
-                    tvDate.text.trim().toString(),
-                    tvTime.text.trim().toString(),
-                    chattiness,
-                    smoking,
-                    pets,
-                    music,
-                    etDescription.text.trim().toString(),
-                    bundleStops,
-                    currentPhotoPath*/
-                )
-                findNavController().navigate(action)
 
-                Snackbar.make(requireView(), "Trip saved", Snackbar.LENGTH_SHORT).show()
                 true
             }
             else -> item.onNavDestinationSelected(findNavController()) || super.onOptionsItemSelected(
@@ -559,8 +536,18 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         )
         newDocRef.set(newTrip).addOnSuccessListener {
             Snackbar.make(requireView(), "New trip created", Snackbar.LENGTH_SHORT).show()
+            navigateToTripDetails(newDocRef.id)
         }
 
+    }
+
+    private fun navigateToTripDetails(newId: String) {
+        val action = TripEditFragmentDirections.actionNavTripEditToNavTripDetails(
+            id = newId
+        )
+        findNavController().navigate(action)
+
+        Snackbar.make(requireView(), "Trip saved", Snackbar.LENGTH_SHORT).show()
     }
 
     override fun onCreateContextMenu(
