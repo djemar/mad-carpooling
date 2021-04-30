@@ -121,59 +121,6 @@
             android:name="id"
             app:argType="string" />
         <argument
-            android:name="departure"
-            android:defaultValue="x"
-            app:argType="string" />
-        <argument
-            android:name="arrival"
-            android:defaultValue="y"
-            app:argType="string" />
-        <argument
-            android:name="duration"
-            android:defaultValue="hh:mm"
-            app:argType="string" />
-        <argument
-            android:name="price"
-            android:defaultValue="1"
-            app:argType="float" />
-        <argument
-            android:name="seats"
-            android:defaultValue="1"
-            app:argType="integer" />
-        <argument
-            android:name="depDate"
-            android:defaultValue="dd-mm-yyyy"
-            app:argType="string" />
-        <argument
-            android:name="depTime"
-            android:defaultValue="hh:mm"
-            app:argType="string" />
-        <argument
-            android:name="chattiness"
-            android:defaultValue="false"
-            app:argType="boolean" />
-        <argument
-            android:name="smoking"
-            android:defaultValue="false"
-            app:argType="boolean" />
-        <argument
-            android:name="pets"
-            android:defaultValue="false"
-            app:argType="boolean" />
-        <argument
-            android:name="music"
-            android:defaultValue="false"
-            app:argType="boolean" />
-        <argument
-            android:name="description"
-            android:defaultValue="Description"
-            app:argType="string" />
-        <argument
-            android:name="stops"
-            android:defaultValue="@null"
-            app:argType="android.os.Bundle"
-            app:nullable="true" />
-        <argument
             android:name="currentPhotoPath"
             app:argType="string"
             app:nullable="true"
@@ -195,59 +142,6 @@
         <argument
             android:name="id"
             app:argType="string" />
-        <argument
-            android:name="departure"
-            android:defaultValue="x"
-            app:argType="string" />
-        <argument
-            android:name="arrival"
-            android:defaultValue="y"
-            app:argType="string" />
-        <argument
-            android:name="duration"
-            android:defaultValue="hh:mm"
-            app:argType="string" />
-        <argument
-            android:name="price"
-            android:defaultValue="1"
-            app:argType="float" />
-        <argument
-            android:name="seats"
-            android:defaultValue="1"
-            app:argType="integer" />
-        <argument
-            android:name="depDate"
-            android:defaultValue="dd-mm-yyyy"
-            app:argType="string" />
-        <argument
-            android:name="depTime"
-            android:defaultValue="hh:mm"
-            app:argType="string" />
-        <argument
-            android:name="chattiness"
-            android:defaultValue="false"
-            app:argType="boolean" />
-        <argument
-            android:name="smoking"
-            android:defaultValue="false"
-            app:argType="boolean" />
-        <argument
-            android:name="pets"
-            android:defaultValue="false"
-            app:argType="boolean" />
-        <argument
-            android:name="music"
-            android:defaultValue="false"
-            app:argType="boolean" />
-        <argument
-            android:name="description"
-            android:defaultValue="Description"
-            app:argType="string" />
-        <argument
-            android:name="stops"
-            android:defaultValue="@null"
-            app:argType="android.os.Bundle"
-            app:nullable="true" />
         <argument
             android:name="isNew"
             app:argType="boolean"
