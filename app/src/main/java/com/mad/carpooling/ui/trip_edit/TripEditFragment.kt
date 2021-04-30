@@ -38,8 +38,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
@@ -52,7 +52,6 @@ import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -433,12 +432,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.menu_trip_edit, menu)
-        optionsMenu = menu
-        super.onCreateOptionsMenu(menu, inflater)
-    }
-
     private fun getSavedTripList(): ArrayList<Trip>? {
         val gson = Gson()
         val sharedPref =
@@ -466,6 +459,12 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                 "json_nickname.group05.lab1"
             )
         } else "Babayaga"; //just for testing purposes
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_trip_edit, menu)
+        optionsMenu = menu
+        super.onCreateOptionsMenu(menu, inflater)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -538,14 +537,16 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         /*val dateFormat = SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS")
         val parsedDate = dateFormat.parse(yourString)
         val timestamp: Timestamp = Timestamp(parsedDate.time)*/
-        val id = hashCode().toString()
+        val userRef = FirebaseFirestore.getInstance().document("users/babayaga")
+        val db = Firebase.firestore
+        val newDocRef = db.collection("trips").document()
         val newTrip = Trip(
-            id,
-            FirebaseFirestore.getInstance().document("users/babayaga"),
+            newDocRef.id,
+            userRef,
             etDepartureLocation.text.trim().toString(),
             etArrivalLocation.text.trim().toString(),
             etDuration.text.trim().toString(),
-            com.google.firebase.Timestamp.now(),
+            Timestamp.now(),
             etSeats.text.trim().toString().toInt(),
             etPrice.text.trim().toString().toFloat(),
             chattiness,
@@ -556,10 +557,10 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             stops,
             currentPhotoPath
         )
-        val db = Firebase.firestore
-        db.collection("trips").document(id).set(newTrip, SetOptions.merge()).addOnSuccessListener {
-
+        newDocRef.set(newTrip).addOnSuccessListener {
+            Snackbar.make(requireView(), "New trip created", Snackbar.LENGTH_SHORT).show()
         }
+
     }
 
     override fun onCreateContextMenu(
