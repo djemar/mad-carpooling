@@ -41,12 +41,12 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        model.getTrips().observe(viewLifecycleOwner, Observer { newTrips ->
+        model.getTrips().observe(viewLifecycleOwner, Observer { newTripsMap ->
             // Update the UI
-            updateTripList(newTrips, view)
+            updateTripList(newTripsMap, view)
         })
 
-       // initTripList()
+        // initTripList()
 
     }
 
@@ -55,13 +55,13 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
         tripMap = model.getTrips().value
     }
 
-    private fun updateTripList(newTrips: HashMap<String, Trip>, view: View) {
+    private fun updateTripList(tripsMap: HashMap<String, Trip>, view: View) {
         currentUser = getCurrentUser()
         rv = view.findViewById<RecyclerView>(R.id.triplist_rv)
         rv.layoutManager = LinearLayoutManager(context)
         //just an example, real trips needed
 
-        val tripAdapter = TripAdapter(ArrayList((newTrips.values)))
+        val tripAdapter = TripAdapter(ArrayList((tripsMap.values)))
         rv.adapter = tripAdapter
 
         //TODO check on tripList size instead
