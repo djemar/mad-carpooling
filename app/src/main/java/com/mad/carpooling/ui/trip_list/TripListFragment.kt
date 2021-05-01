@@ -117,7 +117,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
             jsonObject.getString(
                 "json_nickname.group05.lab1"
             )
-        } else "Babayaga" //just for testing purposes
+        } else "babayaga" //just for testing purposes
     }
 
 
@@ -140,8 +140,8 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
                 location.text = "${trip.departure} - ${trip.arrival}"
                 duration.text = "Duration: ${trip.duration}"
                 price.text = "Price: ${("%.2f".format(trip.price))} €"
-                if (trip.imageCarURL != null) {
-                    BitmapFactory.decodeFile(trip.imageCarURL)?.also { bitmap ->
+                if (trip.imageCarRef != null) {
+                    BitmapFactory.decodeFile(trip.imageCarRef)?.also { bitmap ->
                         ivCar.setImageBitmap(bitmap)
                     }
                 }
@@ -163,13 +163,13 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
         }
 
         override fun onBindViewHolder(holder: TripViewHolder, position: Int) {
-            val trip = tripList?.get(position)
-            trip?.let { holder.bind(it) }
+            val trip = tripList[position]
+            trip.let { holder.bind(it) }
             holder.tripRL.setOnClickListener {
                 val action = TripListFragmentDirections.actionNavTripListToNavTripDetails(
                     trip.id,
                 )
-                Navigation.findNavController(holder.tripRL)!!.navigate(action)
+                Navigation.findNavController(holder.tripRL).navigate(action)
             }
             if (trip.owner!!.id == currentUser) {
                 holder.btnEdit.setOnClickListener {
@@ -177,16 +177,14 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
                         trip.id,
                         isNew = false
                     )
-                    Navigation.findNavController(holder.btnEdit)!!
+                    Navigation.findNavController(holder.btnEdit)
                         .navigate(action) //modify an existing one
                 }
             } else holder.btnEdit.visibility = View.GONE
         }
 
         override fun getItemCount(): Int {
-            if (tripList != null) {
-                return tripList.size
-            } else return 0
+            return tripList.size
         }
 
     }
