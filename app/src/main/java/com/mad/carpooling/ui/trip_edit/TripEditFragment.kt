@@ -37,9 +37,11 @@ import androidx.navigation.ui.onNavDestinationSelected
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.android.gms.tasks.Task
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -78,6 +80,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     private lateinit var ibtnPets: ImageButton
     private lateinit var ibtnMusic: ImageButton
     private lateinit var stops: ArrayList<String>
+    private var isNew = false
     private var tripMap: HashMap<String, Trip>? = null
     private var bundleStops: Bundle? = null
     private var tripId = "id"
@@ -161,6 +164,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         rv.layoutManager = LinearLayoutManager(context)
         val stopEditAdapter: StopEditAdapter
         tripMap = model.getTrips().value
+        isNew = args.isNew
 
         if (savedInstanceState == null) {// view created navigating from tripList or tripDetails
             val args: TripEditFragmentArgs by navArgs()
@@ -487,8 +491,16 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         val userRef = FirebaseFirestore.getInstance().document("users/babayaga")
         val db = Firebase.firestore
         val newDocRef = db.collection("trips").document()
+        val doc: Task<Void?>
+
+        val id: String = if (isNew) {
+            newDocRef.id
+        } else {
+            trip.id
+        }
+
         val newTrip = Trip(
-            newDocRef.id,
+            id,
             userRef,
             etDepartureLocation.text.trim().toString(),
             etArrivalLocation.text.trim().toString(),
@@ -504,9 +516,16 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             stops,
             currentPhotoPath
         )
-        newDocRef.set(newTrip).addOnSuccessListener {
-            Snackbar.make(requireView(), "New trip created", Snackbar.LENGTH_SHORT).show()
-            navigateToTripDetails(newDocRef.id)
+
+        doc = if (isNew) {
+            newDocRef.set(newTrip)
+        } else {
+            db.collection("trips").document(trip.id).set(newTrip)
+        }
+
+        doc.addOnSuccessListener {
+            Snackbar.make(requireView(), "Trip updated", Snackbar.LENGTH_SHORT).show()
+            navigateToTripDetails(id)
         }
 
     }
