@@ -168,7 +168,9 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
                 trip = tripMap?.get(args.id)!!
 
-                val storageRef = Firebase.storage.reference.child("images_car/${trip.imageCarRef}")
+            if (trip.imageCarURL != "") {
+                val storageRef =
+                    Firebase.storage.reference.child("images_car/${trip.imageCarURL}")
                 Glide.with(requireContext()).load(storageRef).into(ivCarPic)
 
                 stopEditAdapter = StopEditAdapter(stops)
