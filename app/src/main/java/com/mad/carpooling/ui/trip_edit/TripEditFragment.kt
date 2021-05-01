@@ -481,9 +481,9 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     }
 
     private fun updateFirestoreTrips() {
-        /*val dateFormat = SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS")
-        val parsedDate = dateFormat.parse(yourString)
-        val timestamp: Timestamp = Timestamp(parsedDate.time)*/
+        val dateFormat = SimpleDateFormat("dd/MM/yyyyHH:mm")
+        val parsedDate = dateFormat.parse(tvDate.text.toString() + tvTime.text.toString())
+        val timestamp: Timestamp = Timestamp(parsedDate!!)
         val userRef = FirebaseFirestore.getInstance().document("users/babayaga")
         val db = Firebase.firestore
         val newDocRef = db.collection("trips").document()
@@ -493,7 +493,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             etDepartureLocation.text.trim().toString(),
             etArrivalLocation.text.trim().toString(),
             etDuration.text.trim().toString(),
-            Timestamp.now(),
+            timestamp,
             etSeats.text.trim().toString().toInt(),
             etPrice.text.trim().toString().toFloat(),
             chattiness,
