@@ -182,8 +182,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                 stops = ArrayList<String>()
                 stopEditAdapter = StopEditAdapter(stops)
             }
-            tvDate.text = trip.timestamp.toDate().toString()
-            tvTime.text = (trip.timestamp.seconds / 3600).toString()
             etDepartureLocation.setText(trip.departure)
             etArrivalLocation.setText(trip.arrival)
             etDuration.setText(trip.duration)
@@ -217,6 +215,12 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             currentPhotoPath = savedInstanceState.getString("state_currentPhoto")
         }
 
+        tvDate.text =
+            SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(trip.timestamp.toDate())
+                .toString()
+        tvTime.text =
+            SimpleDateFormat("HH:mm", Locale.getDefault()).format(trip.timestamp.toDate())
+                .toString()
         val btnAddStop = view.findViewById<MaterialButton>(R.id.ib_add_stop)
         btnAddStop.setOnClickListener {
             stopEditAdapter.addEmpty(",,", stops.size + 1)
