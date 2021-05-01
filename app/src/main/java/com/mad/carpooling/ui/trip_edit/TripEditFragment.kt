@@ -403,8 +403,9 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
     private fun saveCarImage() {
         val imgPath = activity?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val uniqueString = trip.owner?.id + Timestamp.now()
         val filename =
-            MessageDigest.getInstance("SHA256").digest("pippo1".toByteArray()).toString()
+            MessageDigest.getInstance("SHA256").digest(uniqueString.toByteArray()).toString()
         val myFile = File(imgPath, filename)
         val file = Uri.fromFile(myFile)
         val fileOutputStream = FileOutputStream(myFile)
@@ -417,7 +418,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         // Register observers to listen for when the download is done or if it fails
         carRef.putFile(file).addOnFailureListener {
             // Handle unsuccessful uploads
-        }.addOnSuccessListener { taskSnapshot ->
+        }.addOnSuccessListener {
             myFile.delete()
             currentPhotoPath = file.lastPathSegment
             val tmpFile = File(imgPath, TMP_FILENAME_IMG)
