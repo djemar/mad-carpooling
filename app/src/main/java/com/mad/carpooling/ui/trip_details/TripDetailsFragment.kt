@@ -102,9 +102,10 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 //                ivCarPic.setImageBitmap(bitmap)
 //            }
 //        }
-
-        val storageRef = Firebase.storage.reference.child("images_car/${trip.imageCarRef}")
-        Glide.with(requireContext()).load(storageRef).into(ivCarPic)
+        if (trip.imageCarURL != "") {
+            val storageRef = Firebase.storage.reference.child("images_car/${trip.imageCarURL}")
+            Glide.with(requireContext()).load(storageRef).into(ivCarPic)
+        }
 
         tvNickname.text = trip.owner!!.id
         tvDepartureLocation.text = trip.departure
