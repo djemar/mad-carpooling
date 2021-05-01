@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,7 +20,10 @@ import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.mad.carpooling.R
@@ -50,10 +54,10 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
 
     }
 
-    private fun initTripList() {
-        currentUser = getCurrentUser()
-        tripMap = model.getTrips().value
-    }
+//    private fun initTripList() {
+//        currentUser = getCurrentUser()
+//        tripMap = model.getTrips().value
+//    }
 
     private fun updateTripList(tripsMap: HashMap<String, Trip>, view: View) {
         currentUser = getCurrentUser()
@@ -91,22 +95,6 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
         })
     }
 
-    private fun getSavedTripList(): ArrayList<Trip>? {
-        val gson = Gson()
-        val sharedPref =
-            context?.getSharedPreferences("trip_pref.group05.lab2", Context.MODE_PRIVATE)
-                ?: return null
-        val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
-        return if (jsonString != null) {
-            val jsonObject = JSONObject(jsonString)
-            val jsonTripList = jsonObject.getString(
-                "json_tripList.group05.lab2"
-            )
-            val myType = object : TypeToken<ArrayList<Trip>>() {}.type
-            gson.fromJson(jsonTripList, myType)
-        } else null
-    }
-
     private fun getCurrentUser(): String? {
         val sharedPref =
             context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
@@ -140,19 +128,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
                 location.text = "${trip.departure} - ${trip.arrival}"
                 duration.text = "Duration: ${trip.duration}"
                 price.text = "Price: ${("%.2f".format(trip.price))} €"
-                if (trip.imageCarRef != null) {
-                    BitmapFactory.decodeFile(trip.imageCarRef)?.also { bitmap ->
-                        ivCar.setImageBitmap(bitmap)
-                    }
                 }
-
-                val bundle = Bundle()
-                bundle.putSerializable("stops", trip.stops)
-
-                tripRL.setOnClickListener {
-
-                }
-
             }
         }
 
