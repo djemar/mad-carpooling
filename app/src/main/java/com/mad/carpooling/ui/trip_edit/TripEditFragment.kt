@@ -36,12 +36,14 @@ import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.onNavDestinationSelected
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.mad.carpooling.MainActivity
@@ -52,6 +54,7 @@ import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -162,15 +165,12 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         if (savedInstanceState == null) {// view created navigating from tripList or tripDetails
             val args: TripEditFragmentArgs by navArgs()
             if (!args.isNew) {  // navigating from any edit btn
-                tripId = args.id
 
                 trip = tripMap?.get(args.id)!!
-                if (trip.imageCarURL != null) {
-                    BitmapFactory.decodeFile(trip.imageCarURL)?.also { bitmap ->
-                        ivCarPic.setImageBitmap(bitmap)
-                    }
-                    currentPhotoPath = trip.imageCarURL
-                }
+
+                val storageRef = Firebase.storage.reference.child("images_car/${trip.imageCarRef}")
+                Glide.with(requireContext()).load(storageRef).into(ivCarPic)
+
                 stopEditAdapter = StopEditAdapter(stops)
                 // currentPhotoPath = args.currentPhotoPath or from remote resource
             } else { // navigating from tripList FAB
@@ -397,64 +397,28 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
     private fun saveCarImage() {
         val imgPath = activity?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        val filename = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ITALY).format(Date())
+        val filename =
+            MessageDigest.getInstance("SHA256").digest("pippo1".toByteArray()).toString()
         val myFile = File(imgPath, filename)
+        val file = Uri.fromFile(myFile)
         val fileOutputStream = FileOutputStream(myFile)
+        val carRef = Firebase.storage.reference.child("images_car/${file.lastPathSegment}")
 
         (ivCarPic.drawable).toBitmap()
             .compress(Bitmap.CompressFormat.JPEG, 90, fileOutputStream)
         fileOutputStream.close()
 
-        val tmpFile = File(imgPath, TMP_FILENAME_IMG)
-        tmpFile.delete()
-
-        currentPhotoPath = (File(imgPath, filename)).absolutePath
-    }
-
-    private fun saveToSharedPref() {
-        val jsonObj = JSONObject()
-        jsonObj.put("json_carPic.group05.lab2", currentPhotoPath)
-
-        val gson = Gson()
-        val jsonTripList = gson.toJson(tripMap)
-        jsonObj.put("json_tripList.group05.lab2", jsonTripList)
-
-        val sharedPref =
-            context?.getSharedPreferences("trip_pref.group05.lab2", Context.MODE_PRIVATE)
-                ?: return
-        with(sharedPref.edit()) {
-            putString(getString(R.string.saved_profile_data), jsonObj.toString())
-            apply()
+        // Register observers to listen for when the download is done or if it fails
+        carRef.putFile(file).addOnFailureListener {
+            // Handle unsuccessful uploads
+        }.addOnSuccessListener { taskSnapshot ->
+            myFile.delete()
+            currentPhotoPath = file.lastPathSegment
+            val tmpFile = File(imgPath, TMP_FILENAME_IMG)
+            tmpFile.delete()
+            updateFirestoreTrips()
         }
-    }
 
-    private fun getSavedTripList(): ArrayList<Trip>? {
-        val gson = Gson()
-        val sharedPref =
-            context?.getSharedPreferences("trip_pref.group05.lab2", Context.MODE_PRIVATE)
-                ?: return null
-        val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
-        return if (jsonString != null) {
-            val jsonObject = JSONObject(jsonString)
-            val jsonTripList = jsonObject.getString(
-                "json_tripList.group05.lab2"
-            )
-            val myType = object : TypeToken<ArrayList<Trip>>() {}.type
-            gson.fromJson(jsonTripList, myType)
-        } else null
-    }
-
-    private fun getCurrentUser(): String? {
-        val sharedPref =
-            context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
-                ?: return null
-        val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
-        return if (jsonString != null) {
-            val jsonObject = JSONObject(jsonString)
-            jsonObject.getString(
-                "json_nickname.group05.lab1"
-            )
-        } else "Babayaga"; //just for testing purposes
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -485,7 +449,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                     stops,
                     currentPhotoPath
                 )*/
-                updateFirestoreTrips()
                 val args: TripEditFragmentArgs by navArgs()
                 if (args.isNew) {
                     /*tripMap?.add(

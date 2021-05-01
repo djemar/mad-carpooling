@@ -3,7 +3,6 @@ package com.mad.carpooling.ui.trip_details
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
@@ -18,16 +17,15 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import com.bumptech.glide.Glide
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import com.mad.carpooling.R
 import com.mad.carpooling.Trip
 import com.mad.carpooling.ui.SharedViewModel
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 
 class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
@@ -54,8 +52,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private var smoking = false
     private var pets = false
     private var music = false
-
-    var stops: ArrayList<String>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,17 +92,20 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
         tripMap = model.getTrips().value!!
 
-        trip = tripMap.get(args.id)!!
+        trip = tripMap[args.id]!!
 
-        stops = trip.stops
         Log.e("INFO", trip.owner!!.id)
 
         // ivCarPic to be init from remote resource
-        if (trip.imageCarURL != null) {
-            BitmapFactory.decodeFile(trip.imageCarURL)?.also { bitmap ->
-                ivCarPic.setImageBitmap(bitmap)
-            }
-        }
+//        if (trip.imageCarURL != null) {
+//            BitmapFactory.decodeFile(trip.imageCarURL)?.also { bitmap ->
+//                ivCarPic.setImageBitmap(bitmap)
+//            }
+//        }
+
+        val storageRef = Firebase.storage.reference.child("images_car/${trip.imageCarRef}")
+        Glide.with(requireContext()).load(storageRef).into(ivCarPic)
+
         tvNickname.text = trip.owner!!.id
         tvDepartureLocation.text = trip.departure
         tvArrivalLocation.text = trip.arrival
@@ -125,7 +124,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
         val rv = view.findViewById<RecyclerView>(R.id.rv_tripDetails_stops)
         rv.layoutManager = LinearLayoutManager(context)
-        val stopAdapter = StopAdapter(stops)
+        val stopAdapter = StopAdapter(trip.stops)
         rv.adapter = stopAdapter
         if (stopAdapter.itemCount == 0) {
             val tripStopsTitle = view.findViewById<TextView>(R.id.tv_tripDetails_stops)
@@ -136,8 +135,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
     private fun editTrip() {
 
-        val bundle = Bundle()
-        bundle.putSerializable("stops", stops)
         val action = TripDetailsFragmentDirections.actionNavTripDetailsToNavTripEdit(
             trip.id,
             isNew = false
@@ -153,22 +150,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         music = changeStatePreference(music, ibtnMusic)
     }
 
-    private fun getSavedTripList(): ArrayList<Trip>? {
-        val gson = Gson()
-        val sharedPref =
-            context?.getSharedPreferences("trip_pref.group05.lab2", Context.MODE_PRIVATE)
-                ?: return null
-        val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
-        return if (jsonString != null) {
-            val jsonObject = JSONObject(jsonString)
-            val jsonTripList = jsonObject.getString(
-                "json_tripList.group05.lab2"
-            )
-            val myType = object : TypeToken<ArrayList<Trip>>() {}.type
-            gson.fromJson(jsonTripList, myType)
-        } else null
-    }
-
     private fun getCurrentUser(): String? {
         val sharedPref =
             context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
@@ -179,7 +160,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             jsonObject.getString(
                 "json_nickname.group05.lab1"
             )
-        } else "Babayaga" //just for testing purposes
+        } else "babayaga" //just for testing purposes
     }
 
     private fun changeStatePreference(state: Boolean, ibtn: ImageButton): Boolean {
@@ -188,7 +169,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
         val color: Int = if (state) {
             theme.resolveAttribute(R.attr.colorControlActivated, typedValue, true)
-            typedValue.data //2298478592.toInt()
+            typedValue.data
         } else {
             theme.resolveAttribute(R.attr.colorControlNormal, typedValue, true)
             typedValue.data
@@ -224,16 +205,9 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putBoolean("chattiness", chattiness)
-        outState.putBoolean("smoking", smoking)
-        outState.putBoolean("pets", pets)
-        outState.putBoolean("music", music)
-    }
 }
 
-class StopAdapter(val stops: ArrayList<String>?) :
+class StopAdapter(private val stops: ArrayList<String>?) :
     RecyclerView.Adapter<StopAdapter.StopViewHolder>() {
 
     class StopViewHolder(v: View) : RecyclerView.ViewHolder(v) {

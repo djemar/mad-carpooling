@@ -19,6 +19,6 @@ data class Trip(
     var music: Boolean = false,
     var description: String = "",
     var stops: ArrayList<String>? = null,
-    var imageCarURL: String? = null
+    var imageCarRef: String? = null
 ) {
 }
