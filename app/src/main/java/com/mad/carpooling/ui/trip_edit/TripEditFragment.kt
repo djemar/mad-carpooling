@@ -6,7 +6,6 @@ import android.app.DatePickerDialog
 import android.app.Dialog
 import android.app.TimePickerDialog
 import android.content.ActivityNotFoundException
-import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -46,13 +45,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.Trip
 import com.mad.carpooling.ui.SharedViewModel
-import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -82,8 +78,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     private lateinit var stops: ArrayList<String>
     private var isNew = false
     private var tripMap: HashMap<String, Trip>? = null
-    private var bundleStops: Bundle? = null
-    private var tripId = "id"
     private var chattiness = false
     private var smoking = false
     private var pets = false
@@ -160,63 +154,30 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     }
 
     private fun initTrip(view: View, savedInstanceState: Bundle?) {
+        val args: TripEditFragmentArgs by navArgs()
         val rv = view.findViewById<RecyclerView>(R.id.rv_tripEdit_stops)
         rv.layoutManager = LinearLayoutManager(context)
         val stopEditAdapter: StopEditAdapter
         tripMap = model.getTrips().value
         isNew = args.isNew
 
-        if (savedInstanceState == null) {// view created navigating from tripList or tripDetails
-            val args: TripEditFragmentArgs by navArgs()
-            if (!args.isNew) {  // navigating from any edit btn
+        if (!args.isNew) {  // navigating from any edit btn
 
-                trip = tripMap?.get(args.id)!!
+            trip = tripMap?.get(args.id)!!
+            stops = trip.stops!!
 
             if (trip.imageCarURL != "") {
                 val storageRef =
                     Firebase.storage.reference.child("images_car/${trip.imageCarURL}")
                 Glide.with(requireContext()).load(storageRef).into(ivCarPic)
-
-                stopEditAdapter = StopEditAdapter(stops)
-                // currentPhotoPath = args.currentPhotoPath or from remote resource
-            } else { // navigating from tripList FAB
-                (activity as MainActivity).supportActionBar?.title = "Create New Trip"
-                tripId = Timestamp.now().toString()
-                trip = Trip()
-                stops = ArrayList<String>()
-                stopEditAdapter = StopEditAdapter(stops)
             }
-            etDepartureLocation.setText(trip.departure)
-            etArrivalLocation.setText(trip.arrival)
-            etDuration.setText(trip.duration)
-            etSeats.setText(trip.seats.toString())
-            etPrice.setText(trip.price.toString())
-            etDescription.setText(trip.description)
 
-            //val rv = view.findViewById<RecyclerView>(R.id.rv_tripEdit_stops)
-            //rv.layoutManager = LinearLayoutManager(context);
-            //val stopAdapter = StopEditAdapter(trip.stops!!)
-            rv.adapter = stopEditAdapter
-            initPreferences()
-
-        } else {
-            //tripId = savedInstanceState.getInt("id")
-
-            // Manage bundle for stops
-            bundleStops = savedInstanceState.getBundle("stops")!!
-            stops = bundleStops?.getSerializable("stops") as ArrayList<String>
             stopEditAdapter = StopEditAdapter(stops)
-            rv.adapter = stopEditAdapter
-
-            chattiness = savedInstanceState.getBoolean("chattiness")
-            smoking = savedInstanceState.getBoolean("smoking")
-            pets = savedInstanceState.getBoolean("pets")
-            music = savedInstanceState.getBoolean("music")
-            chattiness = changeStatePreference(chattiness, ibtnChattiness)
-            smoking = changeStatePreference(smoking, ibtnSmoking)
-            pets = changeStatePreference(pets, ibtnPets)
-            music = changeStatePreference(music, ibtnMusic)
-            currentPhotoPath = savedInstanceState.getString("state_currentPhoto")
+        } else { // navigating from tripList FAB
+            (activity as MainActivity).supportActionBar?.title = "Create New Trip"
+            trip = Trip()
+            stops = ArrayList<String>()
+            stopEditAdapter = StopEditAdapter(stops)
         }
 
         tvDate.text =
@@ -225,15 +186,19 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         tvTime.text =
             SimpleDateFormat("HH:mm", Locale.getDefault()).format(trip.timestamp.toDate())
                 .toString()
+        etDepartureLocation.setText(trip.departure)
+        etArrivalLocation.setText(trip.arrival)
+        etDuration.setText(trip.duration)
+        etSeats.setText(trip.seats.toString())
+        etPrice.setText(trip.price.toString())
+        etDescription.setText(trip.description)
+
+        rv.adapter = stopEditAdapter
+        initPreferences()
+
         val btnAddStop = view.findViewById<MaterialButton>(R.id.ib_add_stop)
         btnAddStop.setOnClickListener {
             stopEditAdapter.addEmpty(",,", stops.size + 1)
-        }
-
-        if (currentPhotoPath != null) {
-            BitmapFactory.decodeFile(currentPhotoPath)?.also { bitmap ->
-                ivCarPic.setImageBitmap(bitmap)
-            }
         }
 
     }
@@ -441,41 +406,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.save_trip -> {
-                saveCarImage()
-                /*val newTrip = Trip(
-                    tripId,
-                    getCurrentUser()!!,
-                    etDepartureLocation.text.trim().toString(),
-                    etArrivalLocation.text.trim().toString(),
-                    etDuration.text.trim().toString(),
-                    tvDate.text.trim().toString(),
-                    tvTime.text.trim().toString(),
-                    etSeats.text.trim().toString().toInt(),
-                    etPrice.text.trim().toString().toFloat(),
-                    chattiness,
-                    smoking,
-                    pets,
-                    music,
-                    etDescription.text.trim().toString(),
-                    stops,
-                    currentPhotoPath
-                )*/
-                val args: TripEditFragmentArgs by navArgs()
-                if (args.isNew) {
-                    /*tripMap?.add(
-                        newTrip
-                    )*/
-                } else {
-                    /* tripMap?.set(
-                        tripId, newTrip
-                    )*/
-                }
-
-                //saveToSharedPref()
-
-                bundleStops = Bundle()
-                bundleStops?.putSerializable("stops", stops)
-
+                saveCarImage() //TODO in questo modo salva sempre l'immagine, anche quando non viene caricata una nuova foto
                 true
             }
             else -> item.onNavDestinationSelected(findNavController()) || super.onOptionsItemSelected(
@@ -637,18 +568,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             setPic()
         }
     }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putBoolean("chattiness", chattiness)
-        outState.putBoolean("smoking", smoking)
-        outState.putBoolean("pets", pets)
-        outState.putBoolean("music", music)
-        outState.putBundle("stops", bundleStops)
-        //outState.putInt("id", tripId)
-        if (currentPhotoPath != null) outState.putString("state_currentPhoto", currentPhotoPath)
-    }
-
 }
 
 class StopEditAdapter(val stops: ArrayList<String>) :
