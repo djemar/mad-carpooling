@@ -128,6 +128,9 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
                 location.text = "${trip.departure} - ${trip.arrival}"
                 duration.text = "Duration: ${trip.duration}"
                 price.text = "Price: ${("%.2f".format(trip.price))} €"
+                if (trip.imageCarURL != "") {
+                    val storageRef = Firebase.storage.reference.child("images_car/${trip.imageCarURL}")
+                    Glide.with(this.itemView).load(storageRef).into(ivCar)
                 }
             }
         }
