@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.navigation.ui.onNavDestinationSelected
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -56,13 +57,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-        val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
-            activity?.setResult(Activity.RESULT_CANCELED)
-            findNavController().navigate(
-                R.id.action_nav_trip_details_to_nav_trip_list
-            )
-        }
-        callback.isEnabled = true
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -82,6 +76,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         ibtnPets = view.findViewById(R.id.btn_tripDetails_pets)
         ibtnMusic = view.findViewById(R.id.btn_tripDetails_music)
         tvNickname = view.findViewById(R.id.tv_tripDetails_fullName)
+
 
         initTripDetails(view)
     }
@@ -190,11 +185,9 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                 editTrip()
                 true
             }
-            android.R.id.home -> {
-                requireActivity().onBackPressed()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
+            else -> item.onNavDestinationSelected(findNavController()) || super.onOptionsItemSelected(
+                item
+            )
         }
     }
 
