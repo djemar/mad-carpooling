@@ -30,6 +30,7 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.onNavDestinationSelected
@@ -49,6 +50,7 @@ import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.Trip
 import com.mad.carpooling.ui.SharedViewModel
+import com.mad.carpooling.ui.trip_list.TripListFragmentDirections
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -59,8 +61,6 @@ import java.util.*
 class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
     private val model: SharedViewModel by activityViewModels()
-    private lateinit var tripEditViewModel: TripEditViewModel
-    private lateinit var trip: Trip
     private lateinit var optionsMenu: Menu
     private lateinit var ivCarPic: ImageView
     private lateinit var tvDate: TextView
@@ -76,22 +76,18 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     private lateinit var ibtnPets: ImageButton
     private lateinit var ibtnMusic: ImageButton
     private lateinit var stops: ArrayList<String>
+    private lateinit var trip: Trip
     private var isNew = false
     private var tripMap: HashMap<String, Trip>? = null
-    private var chattiness = false
-    private var smoking = false
-    private var pets = false
-    private var music = false
     private var currentPhotoPath: String? = null
     private var REQUEST_IMAGE_CAPTURE = 1
     private var REQUEST_IMAGE_FROM_GALLERY = 2
     private var TMP_FILENAME_IMG = "temp_car_pic_img.jpg"
+    private val viewModel: TripEditViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setHasOptionsMenu(true)
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -111,20 +107,20 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         ibtnPets = view.findViewById(R.id.btn_edit_pets)
         ibtnMusic = view.findViewById(R.id.btn_edit_music)
 
+        initTrip(view, viewModel, savedInstanceState)
+
         ibtnChattiness.setOnClickListener {
-            chattiness = changeStatePreference(!chattiness, ibtnChattiness)
+            trip.chattiness = changeStatePreference(!trip.chattiness, ibtnChattiness)
         }
         ibtnSmoking.setOnClickListener {
-            smoking = changeStatePreference(!smoking, ibtnSmoking)
+            trip.smoking = changeStatePreference(!trip.smoking, ibtnSmoking)
         }
         ibtnPets.setOnClickListener {
-            pets = changeStatePreference(!pets, ibtnPets)
+            trip.pets = changeStatePreference(!trip.pets, ibtnPets)
         }
         ibtnMusic.setOnClickListener {
-            music = changeStatePreference(!music, ibtnMusic)
+            trip.music = changeStatePreference(!trip.music, ibtnMusic)
         }
-
-        initTrip(view, savedInstanceState)
 
         val btnDate = view.findViewById<MaterialButton>(R.id.edit_date)
         btnDate.setOnClickListener { showDatePickerDialog() }
@@ -137,33 +133,36 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         btnCamera.setOnClickListener { activity?.openContextMenu(btnCamera) }
     }
 
-    private fun initTrip(view: View, savedInstanceState: Bundle?) {
+    private fun initTrip(view: View, viewModel: TripEditViewModel, savedInstanceState: Bundle?) {
         val args: TripEditFragmentArgs by navArgs()
         val rv = view.findViewById<RecyclerView>(R.id.rv_tripEdit_stops)
         rv.layoutManager = LinearLayoutManager(context)
-        val stopEditAdapter: StopEditAdapter
         tripMap = model.getTrips().value
         isNew = args.isNew
 
         if (!args.isNew) {  // navigating from any edit btn
 
-            trip = tripMap?.get(args.id)!!
-            stops = trip.stops!!
-
-            if (trip.imageCarURL != "") {
-                val storageRef =
-                    Firebase.storage.reference.child("images_car/${trip.imageCarURL}")
-                Glide.with(requireContext()).load(storageRef).into(ivCarPic)
+            if (savedInstanceState == null) {
+                viewModel.setTrip(tripMap?.get(args.id)!!.copy())
+                if (viewModel.getTrip().imageCarURL != "") {
+                    val storageRef =
+                        Firebase.storage.reference.child("images_car/${viewModel.getTrip().imageCarURL}")
+                    Glide.with(requireContext()).load(storageRef).into(ivCarPic)
+                }
             }
 
-            stopEditAdapter = StopEditAdapter(stops)
         } else { // navigating from tripList FAB
+
             (activity as MainActivity).supportActionBar?.title = "Create New Trip"
-            trip = Trip()
-            stops = ArrayList<String>()
-            stopEditAdapter = StopEditAdapter(stops)
+            if (savedInstanceState == null) {
+                viewModel.setTrip(Trip())
+            }
+
         }
 
+        trip = viewModel.getTrip()
+        stops = trip.stops!!.toMutableList() as ArrayList<String>
+        val stopEditAdapter = StopEditAdapter(stops)
         tvDate.text =
             SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(trip.timestamp.toDate())
                 .toString()
@@ -187,11 +186,17 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        trip.stops = stops
+        viewModel.setTrip(trip)
+        outState.putBoolean("changeState", true)
+    }
+
     private fun initPreferences() {
-        chattiness = changeStatePreference(trip.chattiness, ibtnChattiness)
-        smoking = changeStatePreference(trip.smoking, ibtnSmoking)
-        pets = changeStatePreference(trip.pets, ibtnPets)
-        music = changeStatePreference(trip.music, ibtnMusic)
+        trip.chattiness = changeStatePreference(trip.chattiness, ibtnChattiness)
+        trip.smoking = changeStatePreference(trip.smoking, ibtnSmoking)
+        trip.pets = changeStatePreference(trip.pets, ibtnPets)
+        trip.music = changeStatePreference(trip.music, ibtnMusic)
     }
 
     private fun changeStatePreference(state: Boolean, btn: ImageButton): Boolean {
@@ -403,44 +408,39 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         val dateFormat = SimpleDateFormat("dd/MM/yyyyHH:mm")
         val parsedDate = dateFormat.parse(tvDate.text.toString() + tvTime.text.toString())
         val timestamp: Timestamp = Timestamp(parsedDate!!)
+
+        // TODO take username from login
         val userRef = FirebaseFirestore.getInstance().document("users/babayaga")
         val db = Firebase.firestore
         val newDocRef = db.collection("trips").document()
-        val doc: Task<Void?>
 
-        val id: String = if (isNew) {
+        trip.departure = etDepartureLocation.text.trim().toString()
+        trip.arrival = etArrivalLocation.text.trim().toString()
+        trip.duration = etDuration.text.trim().toString()
+        trip.timestamp = timestamp
+        trip.seats = etSeats.text.trim().toString().toInt()
+        trip.price = etPrice.text.trim().toString().toFloat()
+        trip.description = etDescription.text.trim().toString()
+        trip.stops = stops
+        trip.imageCarURL = currentPhotoPath
+
+        trip.id = if (isNew) {
             newDocRef.id
         } else {
             trip.id
         }
 
-        val newTrip = Trip(
-            id,
-            userRef,
-            etDepartureLocation.text.trim().toString(),
-            etArrivalLocation.text.trim().toString(),
-            etDuration.text.trim().toString(),
-            timestamp,
-            etSeats.text.trim().toString().toInt(),
-            etPrice.text.trim().toString().toFloat(),
-            chattiness,
-            smoking,
-            pets,
-            music,
-            etDescription.text.trim().toString(),
-            stops,
-            currentPhotoPath
-        )
-
-        doc = if (isNew) {
-            newDocRef.set(newTrip)
+        if (isNew) {
+            trip.owner = userRef
+            newDocRef.set(trip).addOnSuccessListener {
+                Snackbar.make(requireView(), "Trip created", Snackbar.LENGTH_SHORT).show()
+                navigateToTripDetails(trip.id)
+            }
         } else {
-            db.collection("trips").document(trip.id).set(newTrip)
-        }
-
-        doc.addOnSuccessListener {
-            Snackbar.make(requireView(), "Trip updated", Snackbar.LENGTH_SHORT).show()
-            navigateToTripDetails(id)
+            db.collection("trips").document(trip.id).set(trip).addOnSuccessListener {
+                Snackbar.make(requireView(), "Trip updated", Snackbar.LENGTH_SHORT).show()
+                navigateToTripDetails(trip.id)
+            }
         }
 
     }
