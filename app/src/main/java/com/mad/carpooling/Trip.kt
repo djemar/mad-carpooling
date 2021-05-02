@@ -18,7 +18,7 @@ data class Trip(
     var pets: Boolean = false,
     var music: Boolean = false,
     var description: String = "",
-    var stops: ArrayList<String>? = null,
+    var stops: ArrayList<String>? = java.util.ArrayList<String>(),
     var imageCarURL: String? = null //TODO change also in DB to imageCarRef
 ) {
 }
