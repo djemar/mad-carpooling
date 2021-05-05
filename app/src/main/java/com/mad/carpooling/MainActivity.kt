@@ -1,14 +1,13 @@
 package com.mad.carpooling
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.drawerlayout.widget.DrawerLayout
@@ -17,8 +16,8 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.bumptech.glide.Glide
 import com.firebase.ui.auth.AuthUI
-import com.firebase.ui.auth.IdpResponse
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
@@ -26,14 +25,16 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.data.User
-import org.json.JSONObject
+import com.mad.carpooling.ui.SharedViewModel
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var auth: FirebaseAuth
+    private lateinit var currentUser: User
     private val RC_SIGN_IN: Int = 1
+    private val model: SharedViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -101,22 +102,13 @@ class MainActivity : AppCompatActivity() {
         val ivProfileHeader: ImageView = headerView.findViewById(R.id.nav_header_profile_pic)
         val tvFullNameHeader: TextView = headerView.findViewById(R.id.nav_header_fullName)
         val tvNicknameHeader: TextView = headerView.findViewById(R.id.nav_header_nickname)
-        val sharedPref =
-            getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE) ?: return
-        val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
-        if (jsonString != null) {
-            val jsonObject = JSONObject(jsonString)
-            tvFullNameHeader.text = jsonObject.getString("json_fullName.group05.lab1")
-            tvNicknameHeader.text = jsonObject.getString("json_nickname.group05.lab1")
-            BitmapFactory.decodeFile(
-                jsonObject.getString(
-                    "json_profilePic.group05.lab1"
-                )
-            )?.also { bitmap ->
-                ivProfileHeader.setImageBitmap(bitmap)
-            }
-        }
 
+        model.getCurrentUser().observe(this, { currentUser ->
+            // Update the UI
+            tvFullNameHeader.text = currentUser.fullname
+            tvNicknameHeader.text = currentUser.nickname
+            Glide.with(this).load(currentUser.imageUserRef).into(ivProfileHeader)
+        })
 
         //TODO logout button
         ivProfileHeader.setOnLongClickListener {
@@ -138,9 +130,9 @@ class MainActivity : AppCompatActivity() {
                     val db = Firebase.firestore
                     val newUser = User(
                         uid = user.uid,
-                        fullname = if(user.displayName != null) user.displayName else "Fullname",
-                        email = if(user.email!= null) user.email else "email@address.com",
-                        imageUserRef = if(user.photoUrl != null) user.photoUrl!!.toString() else null
+                        fullname = if (user.displayName != null) user.displayName else "Fullname",
+                        email = if (user.email != null) user.email else "email@address.com",
+                        imageUserRef = if (user.photoUrl != null) user.photoUrl!!.toString() else null
                     )
                     db.collection("users").document(user.uid).set(newUser).addOnSuccessListener {
                         Snackbar.make(
