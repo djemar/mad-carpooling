@@ -4,9 +4,11 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.data.Trip
+import com.mad.carpooling.data.User
 
 class SharedViewModel : ViewModel() {
 
@@ -16,8 +18,33 @@ class SharedViewModel : ViewModel() {
         }
     }
 
-    fun getTrips(): LiveData<HashMap<String, Trip>> {
-        return trips
+    private val currentUser: MutableLiveData<User> by lazy {
+        MutableLiveData<User>().also {
+            loadUser()
+        }
+    }
+
+    private fun loadUser() {
+        // Do an asynchronous operation to fetch user.
+        val db = Firebase.firestore
+        db.collection("users").addSnapshotListener { value, e ->
+            if (e != null) {
+                currentUser.value = null
+                Log.e("loadUser() exception => ", e.toString())
+                return@addSnapshotListener
+            }
+            var user = User()
+            for (doc in value!!) {
+                if(doc.id == Firebase.auth.currentUser?.uid)
+                     user = doc.toObject(User::class.java)
+            }
+            currentUser.value = user
+        }
+
+    }
+
+    fun getCurrentUser(): LiveData<User> {
+        return currentUser
     }
 
     private fun loadTrips() {
@@ -36,5 +63,11 @@ class SharedViewModel : ViewModel() {
             trips.value = tripsMap
         }
     }
+
+    fun getTrips(): LiveData<HashMap<String, Trip>> {
+        return trips
+    }
+
+
 }
 
