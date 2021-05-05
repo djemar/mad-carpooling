@@ -45,7 +45,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
-import com.mad.carpooling.Trip
+import com.mad.carpooling.data.Trip
 import com.mad.carpooling.ui.SharedViewModel
 import java.io.File
 import java.io.FileOutputStream

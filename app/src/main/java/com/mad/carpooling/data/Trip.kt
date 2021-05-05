@@ -1,4 +1,4 @@
-package com.mad.carpooling
+package com.mad.carpooling.data
 
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentReference

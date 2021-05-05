@@ -27,7 +27,7 @@ import com.google.firebase.storage.ktx.storage
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.mad.carpooling.R
-import com.mad.carpooling.Trip
+import com.mad.carpooling.data.Trip
 import com.mad.carpooling.ui.SharedViewModel
 import org.json.JSONObject
 
