@@ -312,7 +312,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             inSampleSize = scaleFactor
         }
         BitmapFactory.decodeFile(currentPhotoPath, bmOptions)?.also { bitmap ->
-
             ivCarPic.setImageBitmap(validateBitmapOrientation(bitmap))
         }
     }
@@ -350,10 +349,14 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         val oldFile = File(currentPhotoPath!!)
         val filename = TMP_FILENAME_IMG
         val imgPath = activity?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        val myFile = File(imgPath, filename)
+        var myFile = File(imgPath, filename)
+        if (myFile.exists()) {
+            myFile.delete()
+        }
         val fileOutputStream = FileOutputStream(myFile)
 
         rotatedBitmap?.compress(Bitmap.CompressFormat.JPEG, 90, fileOutputStream)
+        fileOutputStream.flush()
         fileOutputStream.close()
         oldFile.delete()    // delete old img with wrong orientation, maybe is better to add a check if successful?
         currentPhotoPath = myFile.absolutePath  // update the path to point to the new fixed img
