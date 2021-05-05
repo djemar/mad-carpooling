@@ -1,7 +1,6 @@
 package com.mad.carpooling.ui.trip_details
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
@@ -10,7 +9,6 @@ import android.view.*
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -22,7 +20,7 @@ import com.bumptech.glide.Glide
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import com.mad.carpooling.R
-import com.mad.carpooling.Trip
+import com.mad.carpooling.data.Trip
 import com.mad.carpooling.ui.SharedViewModel
 import org.json.JSONObject
 import java.text.SimpleDateFormat
