@@ -20,16 +20,20 @@ import androidx.navigation.ui.setupWithNavController
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
 import com.google.android.material.navigation.NavigationView
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.mad.carpooling.data.User
 import org.json.JSONObject
+
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var auth: FirebaseAuth
-    private val RC_SIGN_IN : Int = 1
+    private val RC_SIGN_IN: Int = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,11 +75,15 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private fun logout(){
+    private fun logout() {
         AuthUI.getInstance()
             .signOut(this)
-            .addOnCompleteListener {
-                // TODO logout
+            .addOnSuccessListener {
+                Snackbar.make(
+                    findViewById(R.id.triplist_rv),
+                    "Logout successful",
+                    Snackbar.LENGTH_SHORT
+                ).show()
             }
     }
 
@@ -108,19 +116,42 @@ class MainActivity : AppCompatActivity() {
                 ivProfileHeader.setImageBitmap(bitmap)
             }
         }
+
+
+        //TODO logout button
+        ivProfileHeader.setOnLongClickListener {
+            logout()
+            true
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == RC_SIGN_IN) {
-            val response = IdpResponse.fromResultIntent(data)
+            //val response = IdpResponse.fromResultIntent(data)
 
             if (resultCode == Activity.RESULT_OK) {
                 // Successfully signed in
-                val user = FirebaseAuth.getInstance().currentUser
-                // add to user db, check if exists
-                //user.uid
+                val user = auth.currentUser
+                if (user != null) {
+                    val db = Firebase.firestore
+                    val newUser = User(
+                        uid = user.uid,
+                        fullname = if(user.displayName != null) user.displayName else "Fullname",
+                        email = if(user.email!= null) user.email else "email@address.com",
+                        imageUserRef = if(user.photoUrl != null) user.photoUrl!!.toString() else null
+                    )
+                    db.collection("users").document(user.uid).set(newUser).addOnSuccessListener {
+                        Snackbar.make(
+                            findViewById(R.id.triplist_rv),
+                            "Login successful",
+                            Snackbar.LENGTH_SHORT
+                        ).show()
+                    }
+
+                }
+
                 Log.d("Login result", "Sign in success")
                 // ...
             } else {
