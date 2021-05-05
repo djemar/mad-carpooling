@@ -24,7 +24,6 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.widget.*
-import androidx.activity.addCallback
 import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.DialogFragment
@@ -37,11 +36,9 @@ import androidx.navigation.ui.onNavDestinationSelected
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.google.android.gms.tasks.Task
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Timestamp
-import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -50,7 +47,6 @@ import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.Trip
 import com.mad.carpooling.ui.SharedViewModel
-import com.mad.carpooling.ui.trip_list.TripListFragmentDirections
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -140,27 +136,31 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         tripMap = model.getTrips().value
         isNew = args.isNew
 
-        if (!args.isNew) {  // navigating from any edit btn
-
-            if (savedInstanceState == null) {
+        if (savedInstanceState == null) {
+            if (!args.isNew) {  // navigating from any edit btn
                 viewModel.setTrip(tripMap?.get(args.id)!!.copy())
-                if (viewModel.getTrip().imageCarURL != "") {
-                    val storageRef =
-                        Firebase.storage.reference.child("images_car/${viewModel.getTrip().imageCarURL}")
-                    Glide.with(requireContext()).load(storageRef).into(ivCarPic)
-                }
-            }
-
-        } else { // navigating from tripList FAB
-
-            (activity as MainActivity).supportActionBar?.title = "Create New Trip"
-            if (savedInstanceState == null) {
+            } else { // navigating from tripList FAB
+                (activity as MainActivity).supportActionBar?.title = "Create New Trip"
                 viewModel.setTrip(Trip())
             }
-
+        } else {
+            currentPhotoPath = savedInstanceState.getString("state_currentPhotoPath")
         }
 
         trip = viewModel.getTrip()
+
+        if (currentPhotoPath != null) {
+            BitmapFactory.decodeFile(currentPhotoPath)?.also { bitmap ->
+                ivCarPic.setImageBitmap(bitmap)
+            }
+        } else {
+            if (trip.imageCarURL != "" && trip.imageCarURL != null) {
+                val storageRef =
+                    Firebase.storage.reference.child("images_car/${trip.imageCarURL}")
+                Glide.with(requireContext()).load(storageRef).into(ivCarPic)
+            }
+        }
+
         stops = trip.stops!!.toMutableList() as ArrayList<String>
         val stopEditAdapter = StopEditAdapter(stops)
         tvDate.text =
@@ -189,7 +189,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     override fun onSaveInstanceState(outState: Bundle) {
         trip.stops = stops
         viewModel.setTrip(trip)
-        outState.putBoolean("changeState", true)
+        outState.putString("state_currentPhotoPath", currentPhotoPath)
     }
 
     private fun initPreferences() {
