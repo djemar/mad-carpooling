@@ -366,7 +366,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         val imgPath = activity?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         val uniqueString = trip.owner?.id + Timestamp.now()
         val filename =
-            MessageDigest.getInstance("SHA256").digest(uniqueString.toByteArray()).toString()
+            MessageDigest.getInstance("SHA256").digest(uniqueString.toByteArray()).toString() + ".jpg"
         val myFile = File(imgPath, filename)
         val file = Uri.fromFile(myFile)
         val fileOutputStream = FileOutputStream(myFile)
@@ -398,7 +398,11 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.save_trip -> {
-                saveCarImage() //TODO in questo modo salva sempre l'immagine, anche quando non viene caricata una nuova foto
+                if (currentPhotoPath != null) {
+                    saveCarImage()
+                } else {
+                    updateFirestoreTrips()
+                }
                 true
             }
             else -> item.onNavDestinationSelected(findNavController()) || super.onOptionsItemSelected(
@@ -425,7 +429,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         trip.price = etPrice.text.trim().toString().toFloat()
         trip.description = etDescription.text.trim().toString()
         trip.stops = stops
-        trip.imageCarURL = currentPhotoPath
+        if(currentPhotoPath != null) trip.imageCarURL = currentPhotoPath
 
         trip.id = if (isNew) {
             newDocRef.id
