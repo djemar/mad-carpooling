@@ -42,26 +42,9 @@
             app:popExitAnim="@anim/fragment_close_exit"
             app:popUpTo="@id/nav_show_profile" />
         <argument
-            android:name="fullname"
-            android:defaultValue="Fullname"
-            app:argType="string" />
-        <argument
-            android:name="nickname"
-            android:defaultValue="Nickname"
-            app:argType="string" />
-        <argument
-            android:name="email"
-            android:defaultValue="Email"
-            app:argType="string" />
-        <argument
-            android:name="location"
-            android:defaultValue="Location"
-            app:argType="string" />
-        <argument
-            android:name="currentPhotoPath"
-            android:defaultValue="@null"
+            android:name="uid"
             app:argType="string"
-            app:nullable="true" />
+            android:defaultValue="uid" />
     </fragment>
 
     <fragment
@@ -77,21 +60,9 @@
             app:popEnterAnim="@android:anim/accelerate_decelerate_interpolator"
             app:popExitAnim="@android:anim/slide_out_right" />
         <argument
-            android:name="fullname"
-            android:defaultValue="Fullname"
-            app:argType="string" />
-        <argument
-            android:name="nickname"
-            android:defaultValue="Nickname"
-            app:argType="string" />
-        <argument
-            android:name="email"
-            android:defaultValue="Email"
-            app:argType="string" />
-        <argument
-            android:name="location"
-            android:defaultValue="Location"
-            app:argType="string" />
+            android:name="uid"
+            app:argType="string"
+            android:defaultValue="uid" />
     </fragment>
 
     <fragment
