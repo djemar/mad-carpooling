@@ -1,6 +1,5 @@
 package com.mad.carpooling.ui.profile
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -11,12 +10,16 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.onNavDestinationSelected
+import com.bumptech.glide.Glide
 import com.google.android.material.navigation.NavigationView
 import com.mad.carpooling.R
-import org.json.JSONObject
+import com.mad.carpooling.data.User
+import com.mad.carpooling.ui.SharedViewModel
 
 
 class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
@@ -25,7 +28,9 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
     private lateinit var tvEmail: TextView
     private lateinit var tvLocation: TextView
     private lateinit var ivProfilePic: ImageView
+    private lateinit var user: User
     private var currentPhotoPath: String? = null
+    private val model: SharedViewModel by activityViewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -38,76 +43,26 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
         tvLocation = view.findViewById(R.id.tv_location)
         ivProfilePic = view.findViewById(R.id.iv_profile_pic)
 
-        initProfile(savedInstanceState)
+        //this works only for currentUser
+        model.getCurrentUser().observe(viewLifecycleOwner, Observer { currentUser ->
+            // Update the UI
+            initProfile(currentUser)
+        })
     }
 
-    private fun initProfile(savedInstanceState: Bundle?) {
-        val args: ShowProfileFragmentArgs by navArgs()
-        if (args.currentPhotoPath != null) {    // view created navigating from EditProfileFragment
-            tvFullName.text = args.fullname
-            tvNickname.text = args.nickname
-            tvEmail.text = args.email
-            tvLocation.text = args.location
-            currentPhotoPath = args.currentPhotoPath
-        } else {
-            if (savedInstanceState == null) {   // view created for the first time
-                val sharedPref =
-                    context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
-                        ?: return
-                val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
-                if (jsonString != null) {
-                    val jsonObject = JSONObject(jsonString)
-                    tvFullName.text = jsonObject.getString("json_fullName.group05.lab1")
-                    tvNickname.text = jsonObject.getString("json_nickname.group05.lab1")
-                    tvEmail.text = jsonObject.getString("json_email.group05.lab1")
-                    tvLocation.text = jsonObject.getString("json_location.group05.lab1")
-                    currentPhotoPath = jsonObject.getString("json_profilePic.group05.lab1")
-                }
-            } else {                            // view created from state restore
-                if (savedInstanceState.containsKey("state_currentPhoto")) {
-                    currentPhotoPath = savedInstanceState.getString("state_currentPhoto")
-                } else {
-                    val sharedPref =
-                        context?.getSharedPreferences(
-                            "profile_pref.group05.lab1",
-                            Context.MODE_PRIVATE
-                        )
-                            ?: return
-                    val jsonString =
-                        sharedPref.getString(getString(R.string.saved_profile_data), null)
-                    if (jsonString != null) {
-                        val jsonObject = JSONObject(jsonString)
-                        currentPhotoPath = jsonObject.getString(
-                            "json_profilePic.group05.lab1"
-                        )
-                    }
-                }
-            }
-        }   // set img and init drawer
-        BitmapFactory.decodeFile(currentPhotoPath)?.also { bitmap ->
-            ivProfilePic.setImageBitmap(bitmap)
-            initDrawerHeader(bitmap)
-        }
-    }
-
-
-    private fun initDrawerHeader(bitmap: Bitmap) {
-        val navView: NavigationView? = activity?.findViewById(R.id.nav_view)
-        val headerView: View? = navView?.getHeaderView(0)
-        val ivProfileHeader: ImageView? = headerView?.findViewById(R.id.nav_header_profile_pic)
-        val tvFullNameHeader: TextView? = headerView?.findViewById(R.id.nav_header_fullName)
-        val tvNicknameHeader: TextView? = headerView?.findViewById(R.id.nav_header_nickname)
-
-        tvFullNameHeader?.text = tvFullName.text
-        tvNicknameHeader?.text = tvNickname.text
-        ivProfileHeader?.setImageBitmap(bitmap)
-
+    private fun initProfile(currentUser: User) {
+        //val args: ShowProfileFragmentArgs by navArgs() needed only if supporting other profiles
+        user = currentUser
+        tvFullName.text = currentUser.fullname
+        tvNickname.text = currentUser.nickname
+        tvEmail.text = currentUser.email
+        tvLocation.text = currentUser.location
+        Glide.with(this).load(currentUser.imageUserRef).into(ivProfilePic)
     }
 
     private fun editProfile() {
         val action = ShowProfileFragmentDirections.actionNavShowProfileToNavEditProfile(
-            tvFullName.text.toString(),
-            tvNickname.text.toString(), tvEmail.text.toString(), tvLocation.text.toString()
+            user.uid
         )
         findNavController().navigate(action)
     }
