@@ -18,9 +18,11 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.bumptech.glide.Glide
 import com.firebase.ui.auth.AuthUI
+import com.firebase.ui.auth.IdpResponse
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -33,15 +35,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var auth: FirebaseAuth
     private lateinit var currentUser: User
+    private var userState: FirebaseUser? = null
     private val RC_SIGN_IN: Int = 1
     private val model: SharedViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        auth = Firebase.auth
-
+                setContentView(R.layout.activity_main)
         val toolbar: Toolbar = findViewById(R.id.my_toolbar)
         setSupportActionBar(toolbar)
 
@@ -58,7 +58,17 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
-        initDrawerHeader(navView)
+        auth = Firebase.auth
+        auth.addAuthStateListener {authState ->
+            userState = authState.currentUser
+            if(userState == null){
+                Log.d("AuthListener", "null user")
+            } else {
+                initDrawerHeader(navView)
+            }
+        }
+
+
     }
 
     private fun login() {
@@ -86,6 +96,8 @@ class MainActivity : AppCompatActivity() {
                     Snackbar.LENGTH_SHORT
                 ).show()
             }
+        startActivity(Intent(this, MainActivity::class.java))
+        finish()
     }
 
     public override fun onStart() {
@@ -103,31 +115,36 @@ class MainActivity : AppCompatActivity() {
         val tvFullNameHeader: TextView = headerView.findViewById(R.id.nav_header_fullName)
         val tvNicknameHeader: TextView = headerView.findViewById(R.id.nav_header_nickname)
 
-        model.getCurrentUser().observe(this, { currentUser ->
-            // Update the UI
-            tvFullNameHeader.text = currentUser.fullname
-            tvNicknameHeader.text = currentUser.nickname
-            Glide.with(this).load(currentUser.imageUserRef).into(ivProfileHeader)
-        })
-
+        if(auth.currentUser != null)
+            model.getCurrentUser().observe(this, { currentUser ->
+                // Update the UI
+                tvFullNameHeader.text = currentUser.fullname
+                tvNicknameHeader.text = currentUser.nickname
+                Glide.with(this).load(currentUser.imageUserRef).into(ivProfileHeader)
+            })
         //TODO logout button
-        ivProfileHeader.setOnLongClickListener {
-            logout()
-            true
-        }
+            ivProfileHeader.setOnLongClickListener {
+                logout()
+                true
+            }
+
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == RC_SIGN_IN) {
-            //val response = IdpResponse.fromResultIntent(data)
+            val response = IdpResponse.fromResultIntent(data)
 
             if (resultCode == Activity.RESULT_OK) {
                 // Successfully signed in
                 val user = auth.currentUser
+                user.reload()
+                user.getIdToken(true)
                 if (user != null) {
                     val db = Firebase.firestore
+                    //TODO check if user exists
                     val newUser = User(
                         uid = user.uid,
                         fullname = if (user.displayName != null) user.displayName else "Fullname",
@@ -141,7 +158,6 @@ class MainActivity : AppCompatActivity() {
                             Snackbar.LENGTH_SHORT
                         ).show()
                     }
-
                 }
 
                 Log.d("Login result", "Sign in success")
