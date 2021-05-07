@@ -65,12 +65,10 @@ class MainActivity : AppCompatActivity() {
             if (userState == null) {
                 Log.d("AuthListener", "null user")
             } else {
-
+                model.getTrips()
                 initDrawerHeader(navView)
             }
         }
-
-
     }
 
     private fun login() {
