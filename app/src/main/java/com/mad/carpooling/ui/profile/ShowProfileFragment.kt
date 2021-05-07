@@ -85,8 +85,4 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {    //no need to save TextViews state because freezesText=true in xml layout
-        if (currentPhotoPath != null) outState.putString("state_currentPhoto", currentPhotoPath)
-    }
-
 }

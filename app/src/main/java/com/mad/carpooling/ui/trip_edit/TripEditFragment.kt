@@ -349,7 +349,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         val oldFile = File(currentPhotoPath!!)
         val filename = TMP_FILENAME_IMG
         val imgPath = activity?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        var myFile = File(imgPath, filename)
+        val myFile = File(imgPath, filename)
         if (myFile.exists()) {
             myFile.delete()
         }

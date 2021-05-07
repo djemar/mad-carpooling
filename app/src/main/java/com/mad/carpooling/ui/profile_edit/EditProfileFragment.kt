@@ -24,15 +24,26 @@ import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.onNavDestinationSelected
+import com.bumptech.glide.Glide
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import com.mad.carpooling.R
+import com.mad.carpooling.data.User
+import com.mad.carpooling.ui.SharedViewModel
+import com.mad.carpooling.ui.trip_edit.TripEditFragmentDirections
 import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -44,7 +55,10 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
     private lateinit var etLocation: EditText
     private lateinit var ivEditProfilePic: ImageView
     private lateinit var optionsMenu: Menu
+    private lateinit var user: User
     private var currentPhotoPath: String? = null
+    private val viewModel: EditProfileViewModel by viewModels()
+    private val model: SharedViewModel by activityViewModels()
     private var REQUEST_IMAGE_CAPTURE = 1
     private var REQUEST_IMAGE_FROM_GALLERY = 2
     private var TMP_FILENAME_IMG = "temp_profile_pic_img.jpg"
@@ -65,43 +79,45 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
         etLocation = view.findViewById<EditText>(R.id.et_location)
         ivEditProfilePic = view.findViewById<ImageView>(R.id.et_profile_pic)
 
-        initProfile(savedInstanceState)
+        initProfile(model.getCurrentUser().value!!, viewModel, savedInstanceState)
 
         val btnCamera = view.findViewById<ImageButton>(R.id.btn_camera)
         registerForContextMenu(btnCamera)
         btnCamera.setOnClickListener { activity?.openContextMenu(btnCamera) }
     }
 
-    private fun initProfile(savedInstanceState: Bundle?) {
-        if (savedInstanceState == null) {    // view created navigating from ShowProfileFragment
-            val args: EditProfileFragmentArgs by navArgs()
-            etFullName.setText(args.fullname)
-            etNickname.setText(args.nickname)
-            etEmail.setText(args.email)
-            etLocation.setText(args.location)
+    private fun initProfile(
+        currentUser: User,
+        viewModel: EditProfileViewModel,
+        savedInstanceState: Bundle?
+    ) {
+
+        if (savedInstanceState == null) {
+            viewModel.setUser(currentUser)
         } else {
-            currentPhotoPath = savedInstanceState.getString("state_currentPhoto")
+            currentPhotoPath = savedInstanceState.getString("state_currentPhotoPath")
         }
+
+        user = viewModel.getUser()
+
         if (currentPhotoPath != null) {
             BitmapFactory.decodeFile(currentPhotoPath)?.also { bitmap ->
                 ivEditProfilePic.setImageBitmap(bitmap)
             }
         } else {
-            val sharedPref =
-                context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
-                    ?: return
-            val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
-            if (jsonString != null) {
-                val jsonObject = JSONObject(jsonString)
-                BitmapFactory.decodeFile(
-                    jsonObject.getString(
-                        "json_profilePic.group05.lab1"
-                    )
-                )?.also { bitmap ->
-                    ivEditProfilePic.setImageBitmap(bitmap)
-                }
-            }
+            Glide.with(requireContext()).load(user.imageUserRef).into(ivEditProfilePic)
         }
+
+        etFullName.setText(user.fullname)
+        etNickname.setText(user.nickname)
+        etEmail.setText(user.email)
+        etLocation.setText(user.location)
+
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        viewModel.setUser(user)
+        outState.putString("state_currentPhotoPath", currentPhotoPath)
     }
 
     private fun dispatchGalleryPickerIntent() {
@@ -192,7 +208,8 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
             val photoH: Int = outHeight
 
             // Determine how much to scale down the image
-            val scaleFactor: Int = 1.coerceAtLeast((photoW / targetW).coerceAtMost(photoH / targetH))
+            val scaleFactor: Int =
+                1.coerceAtLeast((photoW / targetW).coerceAtMost(photoH / targetH))
 
             // Decode the image file into a Bitmap sized to fill the View
             inJustDecodeBounds = false
@@ -239,9 +256,13 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
         val filename = TMP_FILENAME_IMG
         val imgPath = activity?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         val myFile = File(imgPath, filename)
+        if (myFile.exists()) {
+            myFile.delete()
+        }
         val fileOutputStream = FileOutputStream(myFile)
 
         rotatedBitmap?.compress(Bitmap.CompressFormat.JPEG, 90, fileOutputStream)
+        fileOutputStream.flush()
         fileOutputStream.close()
         oldFile.delete()    // delete old img with wrong orientation, maybe is better to add a check if successful?
         currentPhotoPath = myFile.absolutePath  // update the path to point to the new fixed img
@@ -249,38 +270,51 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
 
     private fun saveProfileImg() {
         val imgPath = activity?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        val filename = FILENAME_IMG
+        val uniqueString = user.uid + Timestamp.now()
+        val filename = MessageDigest.getInstance("SHA256").digest(uniqueString.toByteArray())
+            .toString() + ".jpg"
         val myFile = File(imgPath, filename)
+        val file = Uri.fromFile(myFile)
         val fileOutputStream = FileOutputStream(myFile)
+        val userRef = Firebase.storage.reference.child("images_user/${file.lastPathSegment}")
 
         (ivEditProfilePic.drawable).toBitmap()
             .compress(Bitmap.CompressFormat.JPEG, 90, fileOutputStream)
         fileOutputStream.close()
 
-        val tmpFile = File(imgPath, TMP_FILENAME_IMG)
-        tmpFile.delete()
+        userRef.putFile(file).addOnFailureListener {
 
-        currentPhotoPath = (File(imgPath, filename)).absolutePath
-    }
-
-    private fun saveToSharedPref() {
-        saveProfileImg()
-
-        val jsonObj = JSONObject()
-        jsonObj.put("json_fullName.group05.lab1", etFullName.text.trim().toString())
-        jsonObj.put("json_nickname.group05.lab1", etNickname.text.trim().toString())
-        jsonObj.put("json_email.group05.lab1", etEmail.text.trim().toString())
-        jsonObj.put("json_location.group05.lab1", etLocation.text.trim().toString())
-        jsonObj.put("json_profilePic.group05.lab1", currentPhotoPath)
-
-        val sharedPref =
-            context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
-                ?: return
-        with(sharedPref.edit()) {
-            putString(getString(R.string.saved_profile_data), jsonObj.toString())
-            apply()
+        }.addOnSuccessListener {
+            myFile.delete()
+            currentPhotoPath = file.lastPathSegment
+            val tmpFile = File(imgPath, TMP_FILENAME_IMG)
+            tmpFile.delete()
+            userRef.downloadUrl.addOnCompleteListener {
+                user.imageUserRef = it.result.toString()
+                updateFirestoreUser()
+            }
         }
+
     }
+
+//    private fun saveToSharedPref() {
+//        saveProfileImg()
+//
+//        val jsonObj = JSONObject()
+//        jsonObj.put("json_fullName.group05.lab1", etFullName.text.trim().toString())
+//        jsonObj.put("json_nickname.group05.lab1", etNickname.text.trim().toString())
+//        jsonObj.put("json_email.group05.lab1", etEmail.text.trim().toString())
+//        jsonObj.put("json_location.group05.lab1", etLocation.text.trim().toString())
+//        jsonObj.put("json_profilePic.group05.lab1", currentPhotoPath)
+//
+//        val sharedPref =
+//            context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
+//                ?: return
+//        with(sharedPref.edit()) {
+//            putString(getString(R.string.saved_profile_data), jsonObj.toString())
+//            apply()
+//        }
+//    }
 
     private fun validateProfileForm() {
         val textWatcher = object : TextWatcher {
@@ -319,25 +353,33 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.nav_show_profile -> { //save
-                saveToSharedPref()
-
-                val action = EditProfileFragmentDirections.actionNavEditProfileToNavShowProfile(
-                    etFullName.text.trim().toString(),
-                    etNickname.text.trim().toString(),
-                    etEmail.text.trim().toString(),
-                    etLocation.text.trim().toString(),
-                    currentPhotoPath
-                )
-                findNavController().navigate(action)
-
-                Snackbar.make(requireView(), "Profile saved", Snackbar.LENGTH_SHORT).show()
+                if (currentPhotoPath != null) {
+                    saveProfileImg()
+                } else {
+                    updateFirestoreUser()
+                }
                 true
             }
             else -> item.onNavDestinationSelected(findNavController()) || super.onOptionsItemSelected(
                 item
             )
         }
+    }
 
+    private fun updateFirestoreUser() {
+        val db = Firebase.firestore
+        val docUser = db.collection("users").document(user.uid)
+
+        user.fullname = etFullName.text.trim().toString()
+        user.nickname = etNickname.text.trim().toString()
+        user.email = etEmail.text.trim().toString()
+        user.location = etLocation.text.trim().toString()
+
+        docUser.set(user).addOnSuccessListener {
+            Snackbar.make(requireView(), "User updated", Snackbar.LENGTH_SHORT).show()
+            findNavController().navigate(EditProfileFragmentDirections.actionNavEditProfileToNavShowProfile())
+            Snackbar.make(requireView(), "User saved", Snackbar.LENGTH_SHORT).show()
+        }
     }
 
     override fun onCreateContextMenu(
@@ -374,11 +416,6 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
             updatePathFromGallery(imageUri)
             setPic()
         }
-    }
-
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        if (currentPhotoPath != null) outState.putString("state_currentPhoto", currentPhotoPath)
     }
 
 }
