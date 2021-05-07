@@ -9,6 +9,7 @@
     android:paddingEnd="16dp">
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/triplist_card"
         android:layout_width="match_parent"
         android:layout_height="110dp"
         android:layout_marginBottom="8dp"
@@ -34,9 +35,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_margin="8dp"
-                android:layout_toLeftOf="@id/trip_edit"
-                android:layout_toRightOf="@id/trip_car"
+                android:layout_marginStart="16dp"
+                android:layout_toStartOf="@id/trip_edit"
+                android:layout_toEndOf="@id/trip_car"
                 android:orientation="vertical">
 
                 <TextView
@@ -72,6 +73,7 @@
 
             <ImageButton
                 android:id="@+id/trip_edit"
+                android:visibility="gone"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_alignParentEnd="true"
@@ -81,6 +83,18 @@
                 android:clickable="true"
                 android:src="@drawable/ic_baseline_edit"
                 android:tint="?attr/colorPrimary" />
+
+            <CheckBox
+                android:id="@+id/trip_star"
+                android:visibility="gone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:button="@drawable/sl_favourite"
+                android:buttonTint="?attr/colorSecondary"
+                android:clickable="true" />
+
 
         </RelativeLayout>
 
