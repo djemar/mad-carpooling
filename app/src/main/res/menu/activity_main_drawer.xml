@@ -12,5 +12,10 @@
             android:id="@+id/nav_trip_list"
             android:icon="@drawable/ic_menu_list"
             android:title="@string/menu_trip_list" />
+
+        <item
+            android:id="@+id/nav_others_trip_list"
+            android:icon="@drawable/ic_baseline_car"
+            android:title="@string/menu_others_trips" />
     </group>
 </menu>
