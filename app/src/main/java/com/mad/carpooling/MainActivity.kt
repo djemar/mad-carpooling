@@ -24,6 +24,8 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.data.User
@@ -41,7 +43,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-                setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_main)
         val toolbar: Toolbar = findViewById(R.id.my_toolbar)
         setSupportActionBar(toolbar)
 
@@ -57,13 +59,13 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
-
         auth = Firebase.auth
-        auth.addAuthStateListener {authState ->
+        auth.addAuthStateListener { authState ->
             userState = authState.currentUser
-            if(userState == null){
+            if (userState == null) {
                 Log.d("AuthListener", "null user")
             } else {
+
                 initDrawerHeader(navView)
             }
         }
@@ -95,9 +97,9 @@ class MainActivity : AppCompatActivity() {
                     "Logout successful",
                     Snackbar.LENGTH_SHORT
                 ).show()
+                startActivity(Intent(this, MainActivity::class.java))
+                finish()
             }
-        startActivity(Intent(this, MainActivity::class.java))
-        finish()
     }
 
     public override fun onStart() {
@@ -115,7 +117,7 @@ class MainActivity : AppCompatActivity() {
         val tvFullNameHeader: TextView = headerView.findViewById(R.id.nav_header_fullName)
         val tvNicknameHeader: TextView = headerView.findViewById(R.id.nav_header_nickname)
 
-        if(auth.currentUser != null)
+        if (auth.currentUser != null)
             model.getCurrentUser().observe(this, { currentUser ->
                 // Update the UI
                 tvFullNameHeader.text = currentUser.fullname
@@ -123,10 +125,10 @@ class MainActivity : AppCompatActivity() {
                 Glide.with(this).load(currentUser.imageUserRef).into(ivProfileHeader)
             })
         //TODO logout button
-            ivProfileHeader.setOnLongClickListener {
-                logout()
-                true
-            }
+        ivProfileHeader.setOnLongClickListener {
+            logout()
+            true
+        }
 
 
     }
@@ -145,19 +147,40 @@ class MainActivity : AppCompatActivity() {
                 if (user != null) {
                     val db = Firebase.firestore
                     //TODO check if user exists
-                    val newUser = User(
-                        uid = user.uid,
-                        fullname = if (user.displayName != null) user.displayName else "Fullname",
-                        email = if (user.email != null) user.email else "email@address.com",
-                        imageUserRef = if (user.photoUrl != null) user.photoUrl!!.toString() else null
-                    )
-                    db.collection("users").document(user.uid).set(newUser).addOnSuccessListener {
-                        Snackbar.make(
-                            findViewById(R.id.triplist_rv),
-                            "Login successful",
-                            Snackbar.LENGTH_SHORT
-                        ).show()
+                    db.collection("users").document(user.uid).get().addOnSuccessListener { document ->
+                        if (document != null) {
+                            Log.d("LOGIN", "User login")
+                            // timestamp of latest login -> it triggers the observer and loads the user data
+                            val updates = hashMapOf<String, Any>(
+                                "timestamp" to FieldValue.serverTimestamp()
+                            )
+                            db.collection("users").document(user.uid).update(updates)
+                                .addOnCompleteListener {
+                                    Snackbar.make(
+                                        findViewById(R.id.triplist_rv),
+                                        "Login successful",
+                                        Snackbar.LENGTH_SHORT
+                                    ).show()
+                                }
+                        } else {
+                            Log.d("LOGIN", "New user signed up")
+                            val newUser = User(
+                                uid = user.uid,
+                                fullname = if (user.displayName != null) user.displayName else "Fullname",
+                                email = if (user.email != null) user.email else "email@address.com",
+                                imageUserRef = if (user.photoUrl != null) user.photoUrl!!.toString() else null
+                            )
+                            db.collection("users").document(user.uid).set(newUser, SetOptions.merge())
+                                .addOnSuccessListener {
+                                    Snackbar.make(
+                                        findViewById(R.id.triplist_rv),
+                                        "Login successful",
+                                        Snackbar.LENGTH_SHORT
+                                    ).show()
+                                }
+                        }
                     }
+
                 }
 
                 Log.d("Login result", "Sign in success")
