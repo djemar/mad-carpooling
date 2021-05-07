@@ -115,6 +115,7 @@ class MainActivity : AppCompatActivity() {
         val tvFullNameHeader: TextView = headerView.findViewById(R.id.nav_header_fullName)
         val tvNicknameHeader: TextView = headerView.findViewById(R.id.nav_header_nickname)
 
+
         if (auth.currentUser != null)
             model.getCurrentUser().observe(this, { currentUser ->
                 // Update the UI
@@ -144,40 +145,44 @@ class MainActivity : AppCompatActivity() {
                 user.getIdToken(true)
                 if (user != null) {
                     val db = Firebase.firestore
-                    //TODO check if user exists
-                    db.collection("users").document(user.uid).get().addOnSuccessListener { document ->
-                        if (document != null) {
-                            Log.d("LOGIN", "User login")
-                            // timestamp of latest login -> it triggers the observer and loads the user data
-                            val updates = hashMapOf<String, Any>(
-                                "timestamp" to FieldValue.serverTimestamp()
-                            )
-                            db.collection("users").document(user.uid).update(updates)
-                                .addOnCompleteListener {
-                                    Snackbar.make(
-                                        findViewById(R.id.triplist_rv),
-                                        "Login successful",
-                                        Snackbar.LENGTH_SHORT
-                                    ).show()
-                                }
-                        } else {
-                            Log.d("LOGIN", "New user signed up")
-                            val newUser = User(
-                                uid = user.uid,
-                                fullname = if (user.displayName != null) user.displayName else "Fullname",
-                                email = if (user.email != null) user.email else "email@address.com",
-                                imageUserRef = if (user.photoUrl != null) user.photoUrl!!.toString() else null
-                            )
-                            db.collection("users").document(user.uid).set(newUser, SetOptions.merge())
-                                .addOnSuccessListener {
-                                    Snackbar.make(
-                                        findViewById(R.id.triplist_rv),
-                                        "Login successful",
-                                        Snackbar.LENGTH_SHORT
-                                    ).show()
-                                }
+                    db.collection("users").document(user.uid).get()
+                        .addOnSuccessListener { document ->
+                            if (document != null) {
+                                Log.d("LOGIN", "User login")
+                                // timestamp of latest login -> this triggers the observer and loads the user data
+                                val updates = hashMapOf<String, Any>(
+                                    "timestamp" to FieldValue.serverTimestamp()
+                                )
+                                db.collection("users").document(user.uid).update(updates)
+                                    .addOnCompleteListener {
+                                        Snackbar.make(
+                                            findViewById(R.id.triplist_rv),
+                                            "Login successful",
+                                            Snackbar.LENGTH_SHORT
+                                        ).show()
+                                        // TODO check if alternative way exists
+                                        startActivity(Intent(this, MainActivity::class.java))
+                                        finish()
+                                    }
+                            } else {
+                                Log.d("LOGIN", "New user signed up")
+                                val newUser = User(
+                                    uid = user.uid,
+                                    fullname = if (user.displayName != null) user.displayName else "Fullname",
+                                    email = if (user.email != null) user.email else "email@address.com",
+                                    imageUserRef = if (user.photoUrl != null) user.photoUrl!!.toString() else null
+                                )
+                                db.collection("users").document(user.uid)
+                                    .set(newUser, SetOptions.merge())
+                                    .addOnSuccessListener {
+                                        Snackbar.make(
+                                            findViewById(R.id.triplist_rv),
+                                            "Login successful",
+                                            Snackbar.LENGTH_SHORT
+                                        ).show()
+                                    }
+                            }
                         }
-                    }
 
                 }
 
