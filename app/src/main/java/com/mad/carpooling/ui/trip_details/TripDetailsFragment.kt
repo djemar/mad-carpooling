@@ -105,10 +105,16 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             Glide.with(requireContext()).load(trip.imageCarURL).into(ivCarPic)
         }
 
-        val userDoc = db.collection("users").document(trip.owner!!.id).get().addOnSuccessListener{
-            tvNickname.text = it.get("nickname").toString()
-            Glide.with(requireContext()).load(it.get("imageUserRef")).into(ivProfilePic)
-        }
+        val userDoc =
+            db.collection("users").document(trip.owner!!.id).addSnapshotListener { value, e ->
+                if (e != null) {
+                    Log.e("userDoc exception => ", e.toString())
+                    return@addSnapshotListener
+                }
+                tvNickname.text = value?.get("nickname").toString()
+                Glide.with(view).load(value?.get("imageUserRef"))
+                    .into(ivProfilePic)
+            }
         tvDepartureLocation.text = trip.departure
         tvArrivalLocation.text = trip.arrival
         tvDepartureDate.text =
