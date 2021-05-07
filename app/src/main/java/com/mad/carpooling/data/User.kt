@@ -1,7 +1,7 @@
 package com.mad.carpooling.data
 
 class User(
-    var uid: String = "",
+    var uid: String = "uid",
     var fullname: String = "Fullname",
     var nickname: String = "Nickname",
     var email: String = "email@address.com",
