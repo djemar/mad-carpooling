@@ -1,7 +1,6 @@
 package com.mad.carpooling.ui.trip_details
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
@@ -11,7 +10,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.LiveData
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.onNavDestinationSelected
@@ -20,11 +18,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.ktx.storage
 import com.mad.carpooling.R
 import com.mad.carpooling.data.Trip
 import com.mad.carpooling.ui.SharedViewModel
-import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -192,7 +188,8 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
-        optionsMenu.findItem(R.id.edit_trip).isVisible = trip.owner!!.id == model.getCurrentUser().value?.uid
+        optionsMenu.findItem(R.id.edit_trip).isVisible =
+            trip.owner!!.id == model.getCurrentUser().value?.uid
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
