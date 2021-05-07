@@ -297,25 +297,6 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
 
     }
 
-//    private fun saveToSharedPref() {
-//        saveProfileImg()
-//
-//        val jsonObj = JSONObject()
-//        jsonObj.put("json_fullName.group05.lab1", etFullName.text.trim().toString())
-//        jsonObj.put("json_nickname.group05.lab1", etNickname.text.trim().toString())
-//        jsonObj.put("json_email.group05.lab1", etEmail.text.trim().toString())
-//        jsonObj.put("json_location.group05.lab1", etLocation.text.trim().toString())
-//        jsonObj.put("json_profilePic.group05.lab1", currentPhotoPath)
-//
-//        val sharedPref =
-//            context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
-//                ?: return
-//        with(sharedPref.edit()) {
-//            putString(getString(R.string.saved_profile_data), jsonObj.toString())
-//            apply()
-//        }
-//    }
-
     private fun validateProfileForm() {
         val textWatcher = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {

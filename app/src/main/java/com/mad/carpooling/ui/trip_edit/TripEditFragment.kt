@@ -155,9 +155,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             }
         } else {
             if (trip.imageCarURL != "" && trip.imageCarURL != null) {
-                val storageRef =
-                    Firebase.storage.reference.child("images_car/${trip.imageCarURL}")
-                Glide.with(requireContext()).load(storageRef).into(ivCarPic)
+                Glide.with(requireContext()).load(trip.imageCarURL).into(ivCarPic)
             }
         }
 
@@ -366,7 +364,8 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         val imgPath = activity?.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         val uniqueString = trip.owner?.id + Timestamp.now()
         val filename =
-            MessageDigest.getInstance("SHA256").digest(uniqueString.toByteArray()).toString() + ".jpg"
+            MessageDigest.getInstance("SHA256").digest(uniqueString.toByteArray())
+                .toString() + ".jpg"
         val myFile = File(imgPath, filename)
         val file = Uri.fromFile(myFile)
         val fileOutputStream = FileOutputStream(myFile)
@@ -384,7 +383,10 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             currentPhotoPath = file.lastPathSegment
             val tmpFile = File(imgPath, TMP_FILENAME_IMG)
             tmpFile.delete()
-            updateFirestoreTrips()
+            carRef.downloadUrl.addOnCompleteListener {
+                trip.imageCarURL = it.result.toString()
+                updateFirestoreTrips()
+            }
         }
 
     }
@@ -416,8 +418,9 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         val parsedDate = dateFormat.parse(tvDate.text.toString() + tvTime.text.toString())
         val timestamp: Timestamp = Timestamp(parsedDate!!)
 
+
         // TODO take username from login
-        val userRef = FirebaseFirestore.getInstance().document("users/babayaga")
+        val userRef = FirebaseFirestore.getInstance().document("users/${model.getCurrentUser().value?.uid}")
         val db = Firebase.firestore
         val newDocRef = db.collection("trips").document()
 
@@ -429,7 +432,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         trip.price = etPrice.text.trim().toString().toFloat()
         trip.description = etDescription.text.trim().toString()
         trip.stops = stops
-        if(currentPhotoPath != null) trip.imageCarURL = currentPhotoPath
 
         trip.id = if (isNew) {
             newDocRef.id

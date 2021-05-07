@@ -57,7 +57,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
 //    }
 
     private fun updateTripList(tripsMap: HashMap<String, Trip>, view: View) {
-        currentUser = getCurrentUser()
+        currentUser = model.getCurrentUser().value?.uid
         rv = view.findViewById<RecyclerView>(R.id.triplist_rv)
         rv.layoutManager = LinearLayoutManager(context)
         //just an example, real trips needed
@@ -92,20 +92,6 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
         })
     }
 
-    private fun getCurrentUser(): String? {
-        val sharedPref =
-            context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
-                ?: return null
-        val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
-        return if (jsonString != null) {
-            val jsonObject = JSONObject(jsonString)
-            jsonObject.getString(
-                "json_nickname.group05.lab1"
-            )
-        } else "babayaga" //just for testing purposes
-    }
-
-
     class TripAdapter(private val tripList: ArrayList<Trip>) :
         RecyclerView.Adapter<TripAdapter.TripViewHolder>() {
 
@@ -126,8 +112,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
                 duration.text = "Duration: ${trip.duration}"
                 price.text = "Price: ${("%.2f".format(trip.price))} €"
                 if (trip.imageCarURL != "") {
-                    val storageRef = Firebase.storage.reference.child("images_car/${trip.imageCarURL}")
-                    Glide.with(this.itemView).load(storageRef).into(ivCar)
+                    Glide.with(this.itemView).load(trip.imageCarURL).into(ivCar)
                 }
             }
         }

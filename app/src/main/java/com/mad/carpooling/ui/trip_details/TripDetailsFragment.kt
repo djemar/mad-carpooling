@@ -17,6 +17,7 @@ import androidx.navigation.ui.onNavDestinationSelected
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import com.mad.carpooling.R
@@ -32,6 +33,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private val model: SharedViewModel by activityViewModels()
     private lateinit var trip: Trip
     private lateinit var ivCarPic: ImageView
+    private lateinit var ivProfilePic: ImageView
     private lateinit var tvDepartureLocation: TextView
     private lateinit var tvDepartureDate: TextView
     private lateinit var tvDepartureTime: TextView
@@ -61,6 +63,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         super.onViewCreated(view, savedInstanceState)
 
         ivCarPic = view.findViewById(R.id.iv_tripDetails_car_pic)
+        ivProfilePic = view.findViewById(R.id.iv_tripDetails_profile_pic)
         tvDepartureLocation = view.findViewById(R.id.tv_tripDetails_departureLocation)
         tvDepartureDate = view.findViewById(R.id.tv_tripDetails_departureDate)
         tvDepartureTime = view.findViewById(R.id.tv_tripDetails_departureTime)
@@ -82,6 +85,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     @SuppressLint("SetTextI18n")
     private fun initTripDetails(view: View) {
         val args: TripDetailsFragmentArgs by navArgs()
+        val db = Firebase.firestore
 
         tripMap = model.getTrips().value!!
 
@@ -96,11 +100,13 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 //            }
 //        }
         if (trip.imageCarURL != "") {
-            val storageRef = Firebase.storage.reference.child("images_car/${trip.imageCarURL}")
-            Glide.with(requireContext()).load(storageRef).into(ivCarPic)
+            Glide.with(requireContext()).load(trip.imageCarURL).into(ivCarPic)
         }
 
-        tvNickname.text = trip.owner!!.id
+        val userDoc = db.collection("users").document(trip.owner!!.id).get().addOnSuccessListener{
+            tvNickname.text = it.get("nickname").toString()
+            Glide.with(requireContext()).load(it.get("imageUserRef")).into(ivProfilePic)
+        }
         tvDepartureLocation.text = trip.departure
         tvArrivalLocation.text = trip.arrival
         tvDepartureDate.text =
@@ -148,19 +154,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         music = changeStatePreference(music, ibtnMusic)
     }
 
-    private fun getCurrentUser(): String? {
-        val sharedPref =
-            context?.getSharedPreferences("profile_pref.group05.lab1", Context.MODE_PRIVATE)
-                ?: return null
-        val jsonString = sharedPref.getString(getString(R.string.saved_profile_data), null)
-        return if (jsonString != null) {
-            val jsonObject = JSONObject(jsonString)
-            jsonObject.getString(
-                "json_nickname.group05.lab1"
-            )
-        } else "babayaga" //just for testing purposes
-    }
-
     private fun changeStatePreference(state: Boolean, ibtn: ImageButton): Boolean {
         val typedValue = TypedValue()
         val theme = requireContext().theme
@@ -191,8 +184,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
-        optionsMenu.findItem(R.id.edit_trip).isVisible = trip.owner!!.id == getCurrentUser()
-
+        optionsMenu.findItem(R.id.edit_trip).isVisible = trip.owner!!.id == model.getCurrentUser().value?.uid
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
