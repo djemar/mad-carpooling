@@ -11,6 +11,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.LiveData
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.onNavDestinationSelected
@@ -78,18 +79,19 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         ibtnMusic = view.findViewById(R.id.btn_tripDetails_music)
         tvNickname = view.findViewById(R.id.tv_tripDetails_fullName)
 
-
-        initTripDetails(view)
+        model.getTrips().observe(viewLifecycleOwner, { newTripsMap ->
+            // Update the UI
+            initTripDetails(newTripsMap, view)
+        })
     }
 
     @SuppressLint("SetTextI18n")
-    private fun initTripDetails(view: View) {
+    private fun initTripDetails(newTripsMap: HashMap<String, Trip>, view: View) {
+
         val args: TripDetailsFragmentArgs by navArgs()
         val db = Firebase.firestore
 
-        tripMap = model.getTrips().value!!
-
-        trip = tripMap[args.id]!!
+        trip = newTripsMap[args.id]!!
 
         Log.e("INFO", trip.owner!!.id)
 
