@@ -133,7 +133,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         val args: TripEditFragmentArgs by navArgs()
         val rv = view.findViewById<RecyclerView>(R.id.rv_tripEdit_stops)
         rv.layoutManager = LinearLayoutManager(context)
-        tripMap = model.getTrips().value
+        tripMap = model.getMyTrips().value
         isNew = args.isNew
 
         if (savedInstanceState == null) {

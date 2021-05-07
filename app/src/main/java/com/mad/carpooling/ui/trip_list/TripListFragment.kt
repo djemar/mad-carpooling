@@ -1,7 +1,6 @@
 package com.mad.carpooling.ui.trip_list
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -20,14 +19,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.ktx.storage
 import com.mad.carpooling.R
 import com.mad.carpooling.data.Trip
 import com.mad.carpooling.ui.SharedViewModel
-import org.json.JSONObject
 
-private var currentUser: String? = null
 
 class TripListFragment : Fragment(R.layout.fragment_trip_list) {
     private lateinit var rv: RecyclerView
@@ -41,7 +36,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        model.getTrips().observe(viewLifecycleOwner, Observer { newTripsMap ->
+        model.getMyTrips().observe(viewLifecycleOwner, Observer { newTripsMap ->
             // Update the UI
             updateTripList(newTripsMap, view)
         })
@@ -57,7 +52,6 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
 //    }
 
     private fun updateTripList(tripsMap: HashMap<String, Trip>, view: View) {
-        currentUser = model.getCurrentUser().value?.uid
         rv = view.findViewById<RecyclerView>(R.id.triplist_rv)
         rv.layoutManager = LinearLayoutManager(context)
         //just an example, real trips needed
@@ -97,8 +91,8 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
 
         class TripViewHolder(v: View) : RecyclerView.ViewHolder(v) {
 
-            val tripRL = v.findViewById<RelativeLayout>(R.id.trip_rl)
-            val btnEdit = v.findViewById<ImageButton>(R.id.trip_edit)
+            val tripRL: RelativeLayout = v.findViewById<RelativeLayout>(R.id.trip_rl)
+            val btnEdit: ImageButton = v.findViewById<ImageButton>(R.id.trip_edit)
             private val ivCar = v.findViewById<ImageView>(R.id.trip_car)
             private val location = v.findViewById<TextView>(R.id.trip_from_to)
             private val duration = v.findViewById<TextView>(R.id.trip_duration)
@@ -132,16 +126,16 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
                 )
                 Navigation.findNavController(holder.tripRL).navigate(action)
             }
-            if (trip.owner!!.id == currentUser) {
-                holder.btnEdit.setOnClickListener {
-                    val action = TripListFragmentDirections.actionNavTripListToNavTripEdit(
-                        trip.id,
-                        isNew = false
-                    )
-                    Navigation.findNavController(holder.btnEdit)
-                        .navigate(action) //modify an existing one
-                }
-            } else holder.btnEdit.visibility = View.GONE
+            holder.btnEdit.visibility = View.VISIBLE
+            holder.btnEdit.setOnClickListener {
+                val action = TripListFragmentDirections.actionNavTripListToNavTripEdit(
+                    trip.id,
+                    isNew = false
+                )
+                Navigation.findNavController(holder.btnEdit)
+                    .navigate(action) //modify an existing one
+
+            }
         }
 
         override fun getItemCount(): Int {
