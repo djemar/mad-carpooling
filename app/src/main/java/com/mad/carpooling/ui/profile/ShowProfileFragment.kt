@@ -9,7 +9,9 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
@@ -31,6 +33,7 @@ import com.mad.carpooling.ui.SharedViewModel
 class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
     private lateinit var tvFullName: TextView
     private lateinit var tvNickname: TextView
+    private lateinit var llEmail: LinearLayout
     private lateinit var tvEmail: TextView
     private lateinit var tvLocation: TextView
     private lateinit var ivProfilePic: ImageView
@@ -47,6 +50,7 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
 
         tvFullName = view.findViewById(R.id.tv_fullName)
         tvNickname = view.findViewById(R.id.tv_nickname)
+        llEmail = view.findViewById(R.id.title_email)
         tvEmail = view.findViewById(R.id.tv_email)
         tvLocation = view.findViewById(R.id.tv_location)
         ivProfilePic = view.findViewById(R.id.iv_profile_pic)
@@ -83,6 +87,7 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
         tvEmail.text = user.email
         tvLocation.text = user.location
         Glide.with(this).load(user.imageUserRef).into(ivProfilePic)
+        llEmail.isVisible = uid == model.getCurrentUser().value?.uid
     }
 
     private fun editProfile() {
