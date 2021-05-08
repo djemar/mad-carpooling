@@ -88,7 +88,7 @@
                 android:id="@+id/trip_star"
                 android:visibility="gone"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:button="@drawable/sl_favourite"
