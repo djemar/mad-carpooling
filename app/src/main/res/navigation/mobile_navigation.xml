@@ -101,6 +101,10 @@
             app:argType="string"
             app:nullable="true"
             android:defaultValue="@null" />
+        <action
+            android:id="@+id/action_nav_trip_details_to_nav_show_profile"
+            app:destination="@id/nav_show_profile"
+            app:popUpTo="@id/nav_trip_details" />
     </fragment>
 
     <fragment

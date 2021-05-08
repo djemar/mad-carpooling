@@ -16,6 +16,7 @@ import androidx.navigation.ui.onNavDestinationSelected
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.android.material.button.MaterialButton
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.R
@@ -46,6 +47,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private lateinit var optionsMenu: Menu
     private lateinit var tvNickname: TextView
     private lateinit var tripMap: HashMap<String, Trip>
+    private lateinit var btnProfile: MaterialButton
     private var chattiness = false
     private var smoking = false
     private var pets = false
@@ -74,6 +76,15 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         ibtnPets = view.findViewById(R.id.btn_tripDetails_pets)
         ibtnMusic = view.findViewById(R.id.btn_tripDetails_music)
         tvNickname = view.findViewById(R.id.tv_tripDetails_fullName)
+        btnProfile = view.findViewById(R.id.btn_showProfile)
+
+        btnProfile.setOnClickListener {
+            val action = TripDetailsFragmentDirections.actionNavTripDetailsToNavShowProfile(
+                trip.owner?.id!!
+            )
+
+            findNavController().navigate(action)
+        }
 
         model.getTrips().observe(viewLifecycleOwner, { newTripsMap ->
             // Update the UI
