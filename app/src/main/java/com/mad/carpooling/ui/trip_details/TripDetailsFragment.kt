@@ -8,6 +8,7 @@ import android.view.*
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -78,14 +79,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         tvNickname = view.findViewById(R.id.tv_tripDetails_fullName)
         btnProfile = view.findViewById(R.id.btn_showProfile)
 
-        btnProfile.setOnClickListener {
-            val action = TripDetailsFragmentDirections.actionNavTripDetailsToNavShowProfile(
-                trip.owner?.id!!
-            )
-
-            findNavController().navigate(action)
-        }
-
         model.getTrips().observe(viewLifecycleOwner, { newTripsMap ->
             // Update the UI
             initTripDetails(newTripsMap, view)
@@ -148,6 +141,18 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         if (stopAdapter.itemCount == 0) {
             val tripStopsTitle = view.findViewById<TextView>(R.id.tv_tripDetails_stops)
             tripStopsTitle.visibility = View.GONE
+        }
+
+        btnProfile.isVisible = trip.owner?.id != model.getCurrentUser().value?.uid
+
+        if(btnProfile.isVisible) {
+            btnProfile.setOnClickListener {
+                val action = TripDetailsFragmentDirections.actionNavTripDetailsToNavShowProfile(
+                    trip.owner?.id!!
+                )
+
+                findNavController().navigate(action)
+            }
         }
 
     }
