@@ -1,6 +1,8 @@
 package com.mad.carpooling.ui.trip_list
 
 import android.annotation.SuppressLint
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,10 +10,8 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.ContextCompat
 import android.view.*
-import android.widget.CheckBox
-import android.widget.ImageView
-import android.widget.RelativeLayout
-import android.widget.TextView
+import android.widget.*
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -31,10 +32,13 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.android.material.slider.RangeSlider
+import com.google.android.material.textfield.TextInputEditText
 import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.data.Trip
 import com.mad.carpooling.ui.SharedViewModel
+import java.util.*
+import kotlin.collections.ArrayList
 
 private lateinit var auth: FirebaseAuth
 
@@ -43,6 +47,11 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
     private lateinit var appBarLayout: AppBarLayout
     private lateinit var sliderPrice: RangeSlider
     private lateinit var tvSliderPrice: TextView
+    private lateinit var btnSearch: MaterialButton
+    private lateinit var etSearchDeparture: TextInputEditText
+    private lateinit var etSearchArrival: TextInputEditText
+    private lateinit var etSearchDate: TextInputEditText
+    private lateinit var etSearchTime: TextInputEditText
     private var tripMap: HashMap<String, Trip>? = null
     private val model: SharedViewModel by activityViewModels()
 
@@ -58,14 +67,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        sliderPrice = (activity as MainActivity).findViewById(R.id.range_slider)
-        tvSliderPrice = (activity as MainActivity).findViewById(R.id.tv_price_slider)
-        sliderPrice.values = mutableListOf(10f, 50f)
-        sliderPrice.addOnChangeListener { slider, value, fromUser ->
-            tvSliderPrice.text = "${slider.values[0]} - ${slider.values[1]} €"
-        }
-        appBarLayout = (activity as MainActivity).findViewById(R.id.appbar_layout) as AppBarLayout
-        appBarLayout.setExpanded(false) //TODO disable expansion in other fragments
+
         model.getCurrentUser().observe(viewLifecycleOwner, Observer { currentUser ->
             // update after login/logout
             model.getOthersTrips().observe(viewLifecycleOwner, Observer { newTripsMap ->
@@ -84,6 +86,9 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
 
         val tripAdapter = OthersTripAdapter(ArrayList((tripsMap.values)))
         rv.adapter = tripAdapter
+
+
+        initSearch(tripsMap, tripAdapter)
 
         //TODO check on tripList size instead
         val emptyView = view.findViewById<TextView>(R.id.no_trips_available)
@@ -115,7 +120,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
 
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.main, menu)
+        inflater.inflate(R.menu.menu_others_trip, menu)
         // optionsMenu = menu
         super.onCreateOptionsMenu(menu, inflater)
     }
@@ -123,9 +128,15 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_search -> {
-                appBarLayout.setExpanded((appBarLayout.height - appBarLayout.bottom) != 0, true)
-                if ((appBarLayout.height - appBarLayout.bottom) == 0)
-                    initSearch()
+                val isExpanded = (appBarLayout.height - appBarLayout.bottom) != 0
+                appBarLayout.setExpanded(isExpanded, true)
+                if (isExpanded) {
+                    item.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_close)
+                    item.iconTintList = ColorStateList.valueOf(Color.WHITE)
+                } else {
+                    item.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_search)
+                    item.iconTintList = ColorStateList.valueOf(Color.WHITE)
+                }
                 true
             }
             else -> item.onNavDestinationSelected(findNavController()) || super.onOptionsItemSelected(
@@ -134,12 +145,46 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
         }
     }
 
-    private fun initSearch() {
+    private fun initSearch(tripsMap: HashMap<String, Trip>, tripAdapter: OthersTripAdapter) {
+        sliderPrice = (activity as MainActivity).findViewById(R.id.range_slider)
+        tvSliderPrice = (activity as MainActivity).findViewById(R.id.tv_price_slider)
+        btnSearch = (activity as MainActivity).findViewById(R.id.btn_search)
+        etSearchDeparture = (activity as MainActivity).findViewById(R.id.et_search_departure)
+        etSearchArrival = (activity as MainActivity).findViewById(R.id.et_search_arrival)
+        etSearchDate = (activity as MainActivity).findViewById(R.id.et_search_date)
+        etSearchTime = (activity as MainActivity).findViewById(R.id.et_search_time)
 
+
+        sliderPrice.valueFrom = tripsMap.minByOrNull { it.value.price }?.value?.price ?: 0f
+        sliderPrice.valueTo = tripsMap.maxByOrNull { it.value.price }?.value?.price ?: 0f
+        sliderPrice.values = mutableListOf(sliderPrice.valueFrom, sliderPrice.valueTo)
+        tvSliderPrice.text =
+            "${("%.2f".format(sliderPrice.valueFrom))} - ${("%.2f".format(sliderPrice.valueTo))} €"
+        sliderPrice.addOnChangeListener { slider, value, fromUser ->
+            tvSliderPrice.text =
+                "${("%.2f".format(slider.values[0]))} - ${("%.2f".format(slider.values[1]))} €"
+        }
+
+        appBarLayout = (activity as MainActivity).findViewById(R.id.appbar_layout) as AppBarLayout
+        appBarLayout.setExpanded(false) //TODO disable expansion in other fragments
+        btnSearch.setOnClickListener {
+            tripAdapter.filterTrips(
+                etSearchDeparture.text?.trim().toString(),
+                etSearchArrival.text?.trim().toString(),
+                etSearchDate.text?.trim().toString(),
+                etSearchTime.text?.trim().toString(),
+                sliderPrice.values
+            )
+        }
     }
 
     class OthersTripAdapter(private val tripList: ArrayList<Trip>) :
         RecyclerView.Adapter<OthersTripAdapter.TripViewHolder>() {
+        var tripFilterList = ArrayList<Trip>()
+
+        init {
+            tripFilterList = tripList
+        }
 
         class TripViewHolder(v: View) : RecyclerView.ViewHolder(v) {
 
@@ -173,10 +218,10 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
         }
 
         override fun onBindViewHolder(holder: TripViewHolder, position: Int) {
-            val trip = tripList[position]
-            val db = Firebase.firestore
+            val trip = tripFilterList[position]
             auth = Firebase.auth
             val user = auth.currentUser
+            val db = Firebase.firestore
             trip.let { holder.bind(it) }
             holder.tripRL.setOnClickListener {
                 val action =
@@ -214,9 +259,35 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
         }
 
         override fun getItemCount(): Int {
-            return tripList.size
+            return tripFilterList.size
+        }
+
+        fun filterTrips(
+            departure: String,
+            arrival: String,
+            date: String,
+            time: String,
+            prices: MutableList<Float>
+        ) {
+
+            val resultList = ArrayList<Trip>()
+            for (trip in tripList) {
+                if (trip.departure.toLowerCase(Locale.ROOT)
+                        .contains(departure.toLowerCase(Locale.ROOT))
+                    && trip.arrival.toLowerCase(Locale.ROOT)
+                        .contains(arrival.toLowerCase(Locale.ROOT))
+
+                    && trip.price >= prices[0] && trip.price <= prices[1]
+                ) {
+                    resultList.add(trip)
+                }
+            }
+            tripFilterList = resultList
+
+            notifyDataSetChanged()
         }
 
     }
 }
+
 
