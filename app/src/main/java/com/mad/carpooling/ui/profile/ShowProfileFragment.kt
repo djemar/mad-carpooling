@@ -19,12 +19,14 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.onNavDestinationSelected
 import com.bumptech.glide.Glide
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.data.User
 import com.mad.carpooling.ui.SharedViewModel
@@ -54,6 +56,9 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
         tvEmail = view.findViewById(R.id.tv_email)
         tvLocation = view.findViewById(R.id.tv_location)
         ivProfilePic = view.findViewById(R.id.iv_profile_pic)
+
+        val fab = (activity as MainActivity).findViewById<FloatingActionButton>(R.id.fab)
+        fab.hide()
 
         if (args.uid == "uid") {
             model.getCurrentUser().observe(viewLifecycleOwner, Observer { currentUser ->

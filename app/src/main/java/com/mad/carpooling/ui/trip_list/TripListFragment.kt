@@ -64,6 +64,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
             emptyView.isVisible = true
 
         val fab = (activity as MainActivity).findViewById<FloatingActionButton>(R.id.fab)
+        fab.show()
         fab.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.ic_baseline_add))
         var navController: NavController?
         fab.setOnClickListener {
