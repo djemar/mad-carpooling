@@ -5,10 +5,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckBox
-import android.widget.ImageView
-import android.widget.RelativeLayout
-import android.widget.TextView
+import android.widget.*
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -19,10 +17,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.data.Trip
 import com.mad.carpooling.ui.SharedViewModel
 
+private lateinit var auth: FirebaseAuth
 class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
     private lateinit var rv: RecyclerView
     private var tripMap: HashMap<String, Trip>? = null
@@ -60,14 +65,15 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
         if (tripAdapter.itemCount == 0) //from getItemCount
             emptyView.isVisible = true
 
-        val fab = view.findViewById<FloatingActionButton>(R.id.trip_add)
+        val fab = (activity as MainActivity).findViewById<FloatingActionButton>(R.id.fab)
+        fab.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.ic_baseline_add))
         var navController: NavController?
         fab.setOnClickListener {
-            val action = TripListFragmentDirections.actionNavTripListToNavTripEdit(
+            val action = OthersTripListFragmentDirections.actionNavOthersTripListToNavTripEdit(
                 "",
                 isNew = true
             )
-            navController = Navigation.findNavController(fab)
+            navController = Navigation.findNavController(view)
             navController!!.navigate(action) //a new one from scratch
         }
         rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {

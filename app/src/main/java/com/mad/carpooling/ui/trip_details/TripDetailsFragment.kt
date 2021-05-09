@@ -8,6 +8,7 @@ import android.view.*
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -18,8 +19,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.data.Trip
 import com.mad.carpooling.ui.SharedViewModel
@@ -49,6 +52,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private lateinit var tvNickname: TextView
     private lateinit var tripMap: HashMap<String, Trip>
     private lateinit var btnProfile: MaterialButton
+    private lateinit var fab : FloatingActionButton
     private var chattiness = false
     private var smoking = false
     private var pets = false
@@ -78,6 +82,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         ibtnMusic = view.findViewById(R.id.btn_tripDetails_music)
         tvNickname = view.findViewById(R.id.tv_tripDetails_fullName)
         btnProfile = view.findViewById(R.id.btn_showProfile)
+        fab = (activity as MainActivity).findViewById(R.id.fab)
 
         model.getTrips().observe(viewLifecycleOwner, { newTripsMap ->
             // Update the UI
@@ -154,6 +159,8 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                 findNavController().navigate(action)
             }
         }
+
+        fab.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.sl_favourite))
 
     }
 
