@@ -20,7 +20,6 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.onNavDestinationSelected
@@ -79,18 +78,17 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        chipSearchResults = view.findViewById(R.id.chip_search_results)
+        val emptyView = view.findViewById<TextView>(R.id.no_trips_available)
         rv = view.findViewById<RecyclerView>(R.id.triplist_rv)
         rv.layoutManager = LinearLayoutManager(context)
         rv.isNestedScrollingEnabled = false; //prevent toolbar to expand on scroll
 
         val tripAdapter = OthersTripAdapter()
         rv.adapter = tripAdapter
-        //TODO check on tripList size instead
-        val emptyView = view.findViewById<TextView>(R.id.no_trips_available)
-        if (tripAdapter.itemCount == 0) //from getItemCount
-            emptyView.isVisible = true
 
-        updateTripList(view)
+        initFab(view)
+
         model.getCurrentUser().observe(viewLifecycleOwner, Observer { currentUser ->
             // update after login/logout
             model.getOthersTrips().observe(viewLifecycleOwner, Observer { newTripsMap ->
@@ -106,11 +104,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
     }
 
 
-    private fun updateTripList(view: View) {
-
-
-        chipSearchResults = view.findViewById(R.id.chip_search_results)
-
+    private fun initFab(view: View) {
 
         val fab = (activity as MainActivity).findViewById<FloatingActionButton>(R.id.fab)
         fab.show()
@@ -120,14 +114,14 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
                 R.drawable.ic_baseline_add
             )
         )
-        var navController: NavController?
+
         fab.setOnClickListener {
             val action = OthersTripListFragmentDirections.actionNavOthersTripListToNavTripEdit(
                 "",
                 isNew = true
             )
-            navController = Navigation.findNavController(view)
-            navController!!.navigate(action) //a new one from scratch
+            val navController = Navigation.findNavController(view)
+            navController.navigate(action) //a new one from scratch
         }
         rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
