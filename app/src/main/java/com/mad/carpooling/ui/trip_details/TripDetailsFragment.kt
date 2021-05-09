@@ -7,6 +7,7 @@ import android.util.TypedValue
 import android.view.*
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -190,6 +191,14 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                     )
                 }
             }
+        }
+
+        val scrollView = view.findViewById<ScrollView>(R.id.sv_tridDetails)
+        scrollView.setOnScrollChangeListener { scrollView, scrollX, scrollY, oldScrollX, oldScrollY ->
+            if( scrollY > oldScrollY && fab.visibility == View.VISIBLE)
+                fab.hide()
+            else if( scrollY < oldScrollY && fab.visibility != View.VISIBLE )
+                fab.show()
         }
 
     }
