@@ -28,13 +28,14 @@ import com.mad.carpooling.data.Trip
 import com.mad.carpooling.ui.SharedViewModel
 
 private lateinit var auth: FirebaseAuth
+
 class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
     private lateinit var rv: RecyclerView
     private var tripMap: HashMap<String, Trip>? = null
+    private val model: SharedViewModel by activityViewModels()
 
     // Use the 'by activityViewModels()' Kotlin property delegate
     // from the fragment-ktx artifact
-    private val model: SharedViewModel by activityViewModels()
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -94,7 +95,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
         class TripViewHolder(v: View) : RecyclerView.ViewHolder(v) {
 
             val tripRL: RelativeLayout = v.findViewById<RelativeLayout>(R.id.trip_rl)
-            val btnStar: CheckBox = v.findViewById<CheckBox>(R.id.trip_star)
+            val btnStar: CheckBox = v.findViewById(R.id.trip_star)
             private val ivCar = v.findViewById<ImageView>(R.id.trip_car)
             private val location = v.findViewById<TextView>(R.id.trip_from_to)
             private val duration = v.findViewById<TextView>(R.id.trip_duration)
@@ -104,12 +105,15 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
 
             @SuppressLint("SetTextI18n")
             fun bind(trip: Trip) {
+                auth = Firebase.auth
+                val user = auth.currentUser
                 location.text = "${trip.departure} - ${trip.arrival}"
                 duration.text = "Duration: ${trip.duration}"
                 price.text = "Price: ${("%.2f".format(trip.price))} €"
                 if (trip.imageCarURL != "") {
                     Glide.with(this.itemView).load(trip.imageCarURL).into(ivCar)
                 }
+                btnStar.isChecked = trip.interestedPeople?.contains(user?.uid) == true
             }
         }
 
@@ -121,18 +125,36 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
 
         override fun onBindViewHolder(holder: TripViewHolder, position: Int) {
             val trip = tripList[position]
+            val db = Firebase.firestore
+            auth = Firebase.auth
+            val user = auth.currentUser
             trip.let { holder.bind(it) }
             holder.tripRL.setOnClickListener {
-                val action = OthersTripListFragmentDirections.actionNavOthersTripListToNavTripDetails(
-                    trip.id,
-                )
+                val action =
+                    OthersTripListFragmentDirections.actionNavOthersTripListToNavTripDetails(
+                        trip.id,
+                    )
                 Navigation.findNavController(holder.tripRL).navigate(action)
             }
             holder.btnStar.visibility = View.VISIBLE
-            holder.btnStar.setOnClickListener {
-                val action = OthersTripListFragmentDirections.actionNavOthersTripListToNavTripDetails(
-                    trip.id,
-                )
+            holder.btnStar.setOnCheckedChangeListener { it, isChecked ->
+                if (isChecked) {
+                    db.collection("trips").document(trip.id).update(
+                        "interestedPeople", FieldValue.arrayUnion(user.uid)
+                    ).addOnSuccessListener {
+                        db.collection("users").document(user?.uid!!).update(
+                            "favTrips", FieldValue.arrayUnion(trip.id)
+                        )
+                    }
+                } else {
+                    db.collection("trips").document(trip.id).update(
+                        "interestedPeople", FieldValue.arrayRemove(user.uid)
+                    ).addOnSuccessListener {
+                        db.collection("users").document(user?.uid!!).update(
+                            "favTrips", FieldValue.arrayRemove(trip.id)
+                        )
+                    }
+                }
             }
 
         }

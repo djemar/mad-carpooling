@@ -19,6 +19,7 @@ data class Trip(
     var music: Boolean = false,
     var description: String = "",
     var stops: ArrayList<String>? = java.util.ArrayList<String>(),
-    var imageCarURL: String? = null //TODO change also in DB to imageCarRef
+    var imageCarURL: String? = null, //TODO change also in DB to imageCarRef
+    var interestedPeople: ArrayList<String>? = java.util.ArrayList<String>()
 ) {
 }
