@@ -24,7 +24,9 @@ import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.onNavDestinationSelected
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.appbar.AppBarLayout
@@ -50,6 +52,7 @@ private lateinit var auth: FirebaseAuth
 
 class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
     private lateinit var rv: RecyclerView
+    private lateinit var tripMap: HashMap<String, Trip>
     private lateinit var optionsMenu: Menu
     private lateinit var appBarLayout: AppBarLayout
     private lateinit var sliderPrice: RangeSlider
@@ -61,8 +64,8 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
     private lateinit var etSearchDate: EditText
     private lateinit var etSearchTime: EditText
     private lateinit var chipSearchResults: Chip
-    var searchIsValid : Boolean = false
-    private var tripMap: HashMap<String, Trip>? = null
+    var searchIsValid: Boolean = false
+
     private val model: SharedViewModel by activityViewModels()
 
     // Use the 'by activityViewModels()' Kotlin property delegate
@@ -76,33 +79,38 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        rv = view.findViewById<RecyclerView>(R.id.triplist_rv)
+        rv.layoutManager = LinearLayoutManager(context)
+        rv.isNestedScrollingEnabled = false; //prevent toolbar to expand on scroll
 
+        val tripAdapter = OthersTripAdapter()
+        rv.adapter = tripAdapter
+        //TODO check on tripList size instead
+        val emptyView = view.findViewById<TextView>(R.id.no_trips_available)
+        if (tripAdapter.itemCount == 0) //from getItemCount
+            emptyView.isVisible = true
+
+        updateTripList(view)
         model.getCurrentUser().observe(viewLifecycleOwner, Observer { currentUser ->
             // update after login/logout
             model.getOthersTrips().observe(viewLifecycleOwner, Observer { newTripsMap ->
                 // Update the UI
-                updateTripList(newTripsMap, view)
+
+                tripAdapter.submitList(newTripsMap.values.toList())
+                tripMap = newTripsMap
+                emptyView.isVisible = newTripsMap.isEmpty()
+                initSearch(newTripsMap, tripAdapter)
             })
         })
 
     }
 
 
-    private fun updateTripList(tripsMap: HashMap<String, Trip>, view: View) {
-        rv = view.findViewById<RecyclerView>(R.id.triplist_rv)
-        rv.layoutManager = LinearLayoutManager(context)
-        rv.isNestedScrollingEnabled = false; //prevent toolbar to expand on scroll
+    private fun updateTripList(view: View) {
 
-        val tripAdapter = OthersTripAdapter(ArrayList((tripsMap.values)))
-        rv.adapter = tripAdapter
 
         chipSearchResults = view.findViewById(R.id.chip_search_results)
-        initSearch(tripsMap, tripAdapter)
 
-        //TODO check on tripList size instead
-        val emptyView = view.findViewById<TextView>(R.id.no_trips_available)
-        if (tripAdapter.itemCount == 0) //from getItemCount
-            emptyView.isVisible = true
 
         val fab = (activity as MainActivity).findViewById<FloatingActionButton>(R.id.fab)
         fab.setImageDrawable(
@@ -186,11 +194,16 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
         sliderPrice.addOnChangeListener { slider, value, fromUser ->
             tvSliderPrice.text =
                 "${("%.2f".format(slider.values[0]))} - ${("%.2f".format(slider.values[1]))} €"
-            btnSearch.isEnabled = slider.values[0] != slider.valueFrom || slider.values[1] != slider.valueTo || searchIsValid
+            btnSearch.isEnabled =
+                slider.values[0] != slider.valueFrom || slider.values[1] != slider.valueTo || searchIsValid
         }
         appBarLayout = (activity as MainActivity).findViewById(R.id.appbar_layout) as AppBarLayout
 
-        findNavController().addOnDestinationChangedListener { _, _, _ ->  appBarLayout.setExpanded(false)}
+        findNavController().addOnDestinationChangedListener { _, _, _ ->
+            appBarLayout.setExpanded(
+                false
+            )
+        }
 
         validateSearch()
         btnSearch.setOnClickListener {
@@ -199,19 +212,20 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
                 etSearchArrival.text?.trim().toString(),
                 etSearchDate.text?.trim().toString(),
                 etSearchTime.text?.trim().toString(),
-                sliderPrice.values
+                sliderPrice.values,
+                tripsMap.values
             )
             val searchItem = optionsMenu.findItem(R.id.action_search)
             searchItem.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_search)
             searchItem.iconTintList = ColorStateList.valueOf(Color.WHITE)
             appBarLayout.setExpanded(false)
-            rv.setPadding(0,(40f * Resources.getSystem().displayMetrics.density).toInt(),0,0)
+            rv.setPadding(0, (40f * Resources.getSystem().displayMetrics.density).toInt(), 0, 0)
 
             chipSearchResults.visibility = View.VISIBLE
             chipSearchResults.setOnCloseIconClickListener {
                 clearSearch(tripAdapter)
                 chipSearchResults.visibility = View.GONE
-                rv.setPadding(0,0,0,0)
+                rv.setPadding(0, 0, 0, 0)
             }
         }
         btnClear.setOnClickListener {
@@ -225,13 +239,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
         etSearchDate.text?.clear()
         etSearchTime.text?.clear()
         sliderPrice.values = mutableListOf(sliderPrice.valueFrom, sliderPrice.valueTo)
-        tripAdapter.filterTrips(
-            etSearchDeparture.text?.trim().toString(),
-            etSearchArrival.text?.trim().toString(),
-            etSearchDate.text?.trim().toString(),
-            etSearchTime.text?.trim().toString(),
-            sliderPrice.values
-        )
+        tripAdapter.submitList(tripMap.values.toList())
     }
 
     private fun validateSearch() {
@@ -246,10 +254,11 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
                         .isNotEmpty() || etSearchDate.text.trim()
                         .isNotEmpty() || etSearchTime.text.trim()
                         .isNotEmpty()
-                searchIsValid = etSearchDeparture.text.trim().isNotEmpty() || etSearchArrival.text.trim()
-                    .isNotEmpty() || etSearchDate.text.trim()
-                    .isNotEmpty() || etSearchTime.text.trim()
-                    .isNotEmpty()
+                searchIsValid =
+                    etSearchDeparture.text.trim().isNotEmpty() || etSearchArrival.text.trim()
+                        .isNotEmpty() || etSearchDate.text.trim()
+                        .isNotEmpty() || etSearchTime.text.trim()
+                        .isNotEmpty()
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -263,12 +272,18 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
         etSearchTime.addTextChangedListener(textWatcher)
     }
 
-    class OthersTripAdapter(private val tripList: ArrayList<Trip>) :
-        RecyclerView.Adapter<OthersTripAdapter.TripViewHolder>() {
-        var tripFilterList = ArrayList<Trip>()
+    class OthersTripAdapter() :
+        ListAdapter<Trip, OthersTripAdapter.TripViewHolder>(TaskDiffCallback()) {
 
-        init {
-            tripFilterList = tripList
+        class TaskDiffCallback : DiffUtil.ItemCallback<Trip>() {
+
+            override fun areItemsTheSame(oldItem: Trip, newItem: Trip): Boolean {
+                return oldItem.id == newItem.id
+            }
+
+            override fun areContentsTheSame(oldItem: Trip, newItem: Trip): Boolean {
+                return oldItem == newItem
+            }
         }
 
         class TripViewHolder(v: View) : RecyclerView.ViewHolder(v) {
@@ -301,15 +316,14 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
         }
 
         override fun onBindViewHolder(holder: TripViewHolder, position: Int) {
-            val trip = tripFilterList[position]
             auth = Firebase.auth
             val user = auth.currentUser
             val db = Firebase.firestore
-            trip.let { holder.bind(it) }
+            holder.bind(getItem(position))
             holder.tripRL.setOnClickListener {
                 val action =
                     OthersTripListFragmentDirections.actionNavOthersTripListToNavTripDetails(
-                        trip.id,
+                        getItem(position).id,
                     )
                 Navigation.findNavController(holder.tripRL).navigate(action)
             }
@@ -317,23 +331,23 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
             holder.btnStar.setOnClickListener {
                 val action =
                     OthersTripListFragmentDirections.actionNavOthersTripListToNavTripDetails(
-                        trip.id,
+                        getItem(position).id,
                     )
                 holder.btnStar.setOnCheckedChangeListener { it, isChecked ->
                     if (isChecked) {
-                        db.collection("trips").document(trip.id).update(
+                        db.collection("trips").document(getItem(position).id).update(
                             "interestedPeople", FieldValue.arrayUnion(user.uid)
                         ).addOnSuccessListener {
                             db.collection("users").document(user?.uid!!).update(
-                                "favTrips", FieldValue.arrayUnion(trip.id)
+                                "favTrips", FieldValue.arrayUnion(getItem(position).id)
                             )
                         }
                     } else {
-                        db.collection("trips").document(trip.id).update(
+                        db.collection("trips").document(getItem(position).id).update(
                             "interestedPeople", FieldValue.arrayRemove(user.uid)
                         ).addOnSuccessListener {
                             db.collection("users").document(user?.uid!!).update(
-                                "favTrips", FieldValue.arrayRemove(trip.id)
+                                "favTrips", FieldValue.arrayRemove(getItem(position).id)
                             )
                         }
                     }
@@ -342,16 +356,13 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
             }
         }
 
-        override fun getItemCount(): Int {
-            return tripFilterList.size
-        }
-
         fun filterTrips(
             departure: String,
             arrival: String,
             date: String,
             time: String,
-            prices: MutableList<Float>
+            prices: MutableList<Float>,
+            tripList: MutableCollection<Trip>
         ) {
             var formattedDate: String = ""
             var formattedTime: String = ""
@@ -391,9 +402,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
                     resultList.add(trip)
                 }
             }
-            tripFilterList = resultList
-
-            notifyDataSetChanged()
+            submitList(resultList)
         }
 
 
