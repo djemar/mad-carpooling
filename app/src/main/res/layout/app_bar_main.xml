@@ -9,16 +9,16 @@
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbar_layout"
         android:layout_width="match_parent"
-        android:layout_height="240dp"
+        android:layout_height="295dp"
         android:elevation="8dp"
         android:fitsSystemWindows="true"
-        android:theme="@style/Theme.Carpooling.AppBarOverlay">
+        android:theme="@style/Theme.Carpooling.AppBarOverlay"
+        app:expanded="true">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:id="@+id/collapsing_toolbar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:contentScrim="?attr/colorPrimary"
             app:layout_scrollFlags="enterAlwaysCollapsed|scroll|exitUntilCollapsed|snap"
             app:scrimAnimationDuration="10"
             app:titleEnabled="false">
@@ -29,7 +29,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="56dp"
                 android:layout_marginEnd="16dp"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="8dp">
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/textInput_search_departure"
@@ -39,9 +39,9 @@
                     android:layout_marginEnd="4dp"
                     android:layout_weight="1"
                     android:hint="@string/departure"
-                    app:endIconMode="clear_text"
                     android:textColorHint="?attr/colorOnPrimary"
                     app:boxStrokeColor="@color/outlined_box_search"
+                    app:endIconMode="clear_text"
                     app:hintTextColor="?attr/colorOnPrimary"
                     app:layout_constraintEnd_toStartOf="@+id/textInput_search_arrival"
                     app:layout_constraintStart_toStartOf="parent"
@@ -85,7 +85,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="8dp"
-                    android:stepSize="10.0"
+                    android:stepSize="5.0"
                     android:valueFrom="0.0"
                     android:valueTo="100.0"
                     app:layout_constraintEnd_toEndOf="@+id/textInput_search_departure"
@@ -101,7 +101,6 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/overpass"
                     android:text="Price"
-                    android:textAllCaps="true"
                     android:textColor="?attr/colorOnPrimary"
                     android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="@+id/tv_price_slider"
@@ -179,6 +178,33 @@
 
 
                 </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_clear"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:text="clear"
+                    android:textColor="?attr/colorOnPrimary"
+                    app:cornerRadius="16dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/btn_search"
+                    app:rippleColor="?attr/colorSecondary"
+                    app:strokeColor="?attr/colorOnPrimary" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_search"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Search"
+                    android:textColor="?attr/colorSecondary"
+                    app:cornerRadius="16dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:rippleColor="?attr/colorSecondary"
+                    app:strokeColor="?attr/colorSecondary" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
