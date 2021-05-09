@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clipToPadding="false"
+    android:orientation="vertical"
     android:paddingStart="16dp"
     android:paddingTop="8dp"
     android:paddingEnd="16dp">
@@ -73,7 +74,6 @@
 
             <ImageButton
                 android:id="@+id/trip_edit"
-                android:visibility="gone"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_alignParentEnd="true"
@@ -82,18 +82,19 @@
                 android:background="@drawable/shape_round"
                 android:clickable="true"
                 android:src="@drawable/ic_baseline_edit"
-                android:tint="?attr/colorPrimary" />
+                android:tint="?attr/colorPrimary"
+                android:visibility="gone" />
 
             <CheckBox
                 android:id="@+id/trip_star"
-                android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:button="@drawable/sl_favourite"
                 android:buttonTint="?attr/colorSecondary"
-                android:clickable="true" />
+                android:clickable="true"
+                android:visibility="gone" />
 
 
         </RelativeLayout>
