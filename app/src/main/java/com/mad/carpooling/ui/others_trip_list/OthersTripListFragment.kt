@@ -1,9 +1,14 @@
 package com.mad.carpooling.ui.trip_list
 
 import android.annotation.SuppressLint
+import android.app.DatePickerDialog
+import android.app.Dialog
+import android.app.TimePickerDialog
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.icu.util.Calendar
 import android.os.Bundle
+import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +18,7 @@ import android.view.*
 import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
@@ -37,6 +43,7 @@ import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.data.Trip
 import com.mad.carpooling.ui.SharedViewModel
+import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -44,10 +51,12 @@ private lateinit var auth: FirebaseAuth
 
 class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
     private lateinit var rv: RecyclerView
+    private lateinit var optionsMenu: Menu
     private lateinit var appBarLayout: AppBarLayout
     private lateinit var sliderPrice: RangeSlider
     private lateinit var tvSliderPrice: TextView
     private lateinit var btnSearch: MaterialButton
+    private lateinit var btnClear: MaterialButton
     private lateinit var etSearchDeparture: TextInputEditText
     private lateinit var etSearchArrival: TextInputEditText
     private lateinit var etSearchDate: TextInputEditText
@@ -121,7 +130,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_others_trip, menu)
-        // optionsMenu = menu
+        optionsMenu = menu
         super.onCreateOptionsMenu(menu, inflater)
     }
 
@@ -149,10 +158,19 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
         sliderPrice = (activity as MainActivity).findViewById(R.id.range_slider)
         tvSliderPrice = (activity as MainActivity).findViewById(R.id.tv_price_slider)
         btnSearch = (activity as MainActivity).findViewById(R.id.btn_search)
+        btnClear = (activity as MainActivity).findViewById(R.id.btn_clear)
         etSearchDeparture = (activity as MainActivity).findViewById(R.id.et_search_departure)
         etSearchArrival = (activity as MainActivity).findViewById(R.id.et_search_arrival)
         etSearchDate = (activity as MainActivity).findViewById(R.id.et_search_date)
         etSearchTime = (activity as MainActivity).findViewById(R.id.et_search_time)
+
+        etSearchDate.setOnClickListener {
+            showDatePickerDialog()
+        }
+
+        etSearchTime.setOnClickListener {
+            showTimePickerDialog()
+        }
 
 
         sliderPrice.valueFrom = tripsMap.minByOrNull { it.value.price }?.value?.price ?: 0f
@@ -168,6 +186,24 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
         appBarLayout = (activity as MainActivity).findViewById(R.id.appbar_layout) as AppBarLayout
         appBarLayout.setExpanded(false) //TODO disable expansion in other fragments
         btnSearch.setOnClickListener {
+            tripAdapter.filterTrips(
+                etSearchDeparture.text?.trim().toString(),
+                etSearchArrival.text?.trim().toString(),
+                etSearchDate.text?.trim().toString(),
+                etSearchTime.text?.trim().toString(),
+                sliderPrice.values
+            )
+            val searchItem = optionsMenu.findItem(R.id.action_search)
+            searchItem.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_search)
+            searchItem.iconTintList = ColorStateList.valueOf(Color.WHITE)
+            appBarLayout.setExpanded(false)
+        }
+        btnClear.setOnClickListener {
+            etSearchDeparture.text?.clear()
+            etSearchArrival.text?.clear()
+            etSearchDate.text?.clear()
+            etSearchTime.text?.clear()
+            sliderPrice.values = mutableListOf(sliderPrice.valueFrom, sliderPrice.valueTo)
             tripAdapter.filterTrips(
                 etSearchDeparture.text?.trim().toString(),
                 etSearchArrival.text?.trim().toString(),
@@ -269,15 +305,36 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
             time: String,
             prices: MutableList<Float>
         ) {
-
+            var formattedDate: String = ""
+            var formattedTime: String = ""
+            if (date != "") {
+                val tmpDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse(date)
+                formattedDate =
+                    SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(tmpDate).toString()
+            }
+            if (time != "") {
+                val tmpTime = SimpleDateFormat("HH:mm", Locale.getDefault()).parse(time)
+                formattedTime =
+                    SimpleDateFormat("HH:mm", Locale.getDefault()).format(tmpTime).toString()
+            }
             val resultList = ArrayList<Trip>()
             for (trip in tripList) {
+                val tripDate = SimpleDateFormat(
+                    "dd/MM/yyyy",
+                    Locale.getDefault()
+                ).format(trip.timestamp.toDate())
+                    .toString()
+                val tripTime =
+                    SimpleDateFormat("HH:mm", Locale.getDefault()).format(trip.timestamp.toDate())
+                        .toString()
+
                 if (trip.departure.toLowerCase(Locale.ROOT)
                         .contains(departure.toLowerCase(Locale.ROOT))
                     && trip.arrival.toLowerCase(Locale.ROOT)
                         .contains(arrival.toLowerCase(Locale.ROOT))
-
                     && trip.price >= prices[0] && trip.price <= prices[1]
+                    && tripDate.contains(formattedDate)
+                    && tripTime.contains(formattedTime) //TODO this seems useless, better use a range slider for time too
                 ) {
                     resultList.add(trip)
                 }
@@ -288,6 +345,71 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
         }
 
     }
+
+    class DatePickerFragment(tvDate: TextView) : DialogFragment(),
+        DatePickerDialog.OnDateSetListener {
+
+        private val tvDate = tvDate
+
+        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+            // Use the current date as the default date in the picker
+            val c = Calendar.getInstance()
+            val year = c.get(Calendar.YEAR)
+            val month = c.get(Calendar.MONTH)
+            val day = c.get(Calendar.DAY_OF_MONTH)
+
+            // Create a new instance of DatePickerDialog and return it
+            return DatePickerDialog(requireContext(), this, year, month, day)
+        }
+
+        @SuppressLint("SetTextI18n")
+        override fun onDateSet(view: DatePicker, year: Int, month: Int, day: Int) {
+            tvDate.text = "${day}/${(month + 1)}/${year}"
+        }
+
+    }
+
+    private fun showDatePickerDialog() {
+        val dateFragment = DatePickerFragment(etSearchDate)
+        dateFragment.show(requireActivity().supportFragmentManager, "datePicker")
+    }
+
+    class TimePickerFragment(tvTime: TextView) : DialogFragment(),
+        TimePickerDialog.OnTimeSetListener {
+
+        private val tvTime = tvTime
+
+        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+            // Use the current time as the default values for the picker
+            val c = Calendar.getInstance()
+            val hour = c.get(Calendar.HOUR_OF_DAY)
+            val minute = c.get(Calendar.MINUTE)
+
+            // Create a new instance of TimePickerDialog and return it
+            return TimePickerDialog(
+                activity,
+                this,
+                hour,
+                minute,
+                DateFormat.is24HourFormat(activity)
+            )
+        }
+
+        @SuppressLint("SetTextI18n")
+        override fun onTimeSet(view: TimePicker, hourOfDay: Int, minute: Int) {
+            if (minute < 10) {
+                tvTime.text = "$hourOfDay:0$minute"
+            } else {
+                tvTime.text = "$hourOfDay:$minute"
+            }
+        }
+    }
+
+    private fun showTimePickerDialog() {
+        val timeFragment = TimePickerFragment(etSearchTime)
+        timeFragment.show(requireActivity().supportFragmentManager, "timePicker")
+    }
+
 }
 
 
