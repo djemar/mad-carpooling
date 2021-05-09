@@ -186,7 +186,8 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
         }
 
         appBarLayout = (activity as MainActivity).findViewById(R.id.appbar_layout) as AppBarLayout
-        appBarLayout.setExpanded(false) //TODO disable expansion in other fragments
+
+        findNavController().addOnDestinationChangedListener { _, _, _ ->  appBarLayout.setExpanded(false)}
         btnSearch.setOnClickListener {
             tripAdapter.filterTrips(
                 etSearchDeparture.text?.trim().toString(),
