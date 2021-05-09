@@ -31,6 +31,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.chip.Chip
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -61,6 +62,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
     private lateinit var etSearchArrival: TextInputEditText
     private lateinit var etSearchDate: TextInputEditText
     private lateinit var etSearchTime: TextInputEditText
+    private lateinit var chipSearchResults: Chip
     private var tripMap: HashMap<String, Trip>? = null
     private val model: SharedViewModel by activityViewModels()
 
@@ -96,7 +98,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
         val tripAdapter = OthersTripAdapter(ArrayList((tripsMap.values)))
         rv.adapter = tripAdapter
 
-
+        chipSearchResults = view.findViewById(R.id.chip_search_results)
         initSearch(tripsMap, tripAdapter)
 
         //TODO check on tripList size instead
@@ -197,6 +199,14 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
             searchItem.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_search)
             searchItem.iconTintList = ColorStateList.valueOf(Color.WHITE)
             appBarLayout.setExpanded(false)
+            rv.setPadding(0,(40f * Resources.getSystem().displayMetrics.density).toInt(),0,0)
+
+            chipSearchResults.visibility = View.VISIBLE
+            chipSearchResults.setOnCloseIconClickListener {
+                clearSearch(tripAdapter)
+                chipSearchResults.visibility = View.GONE
+                rv.setPadding(0,0,0,0)
+            }
         }
         btnClear.setOnClickListener {
             etSearchDeparture.text?.clear()
