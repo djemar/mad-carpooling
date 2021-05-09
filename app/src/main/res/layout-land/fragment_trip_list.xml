@@ -1,15 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:clipToPadding="false"
     android:orientation="vertical"
     tools:context=".ui.trip_list.TripListFragment">
+
+    <com.google.android.material.chip.Chip
+        android:id="@+id/chip_search_results"
+        style="@style/Widget.MaterialComponents.Chip.Entry"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center"
+        android:checkable="false"
+        android:elevation="4dp"
+        android:text="Search Results"
+        android:visibility="gone" />
 
     <!-- problem with FAB when there are many trips -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/triplist_rv"
+        android:clipToPadding="false"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

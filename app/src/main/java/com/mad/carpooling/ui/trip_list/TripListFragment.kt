@@ -16,6 +16,7 @@ import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
@@ -53,7 +54,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
     private fun updateTripList(tripsMap: HashMap<String, Trip>, view: View) {
         rv = view.findViewById<RecyclerView>(R.id.triplist_rv)
         rv.layoutManager = LinearLayoutManager(context)
-        //just an example, real trips needed
+        rv.isNestedScrollingEnabled = false; //prevent toolbar to expand on scroll
 
         val tripAdapter = TripAdapter(ArrayList((tripsMap.values)))
         rv.adapter = tripAdapter
