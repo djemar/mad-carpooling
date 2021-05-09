@@ -13,7 +13,7 @@
         android:elevation="8dp"
         android:fitsSystemWindows="true"
         android:theme="@style/Theme.Carpooling.AppBarOverlay"
-        app:expanded="true">
+        app:expanded="false">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:id="@+id/collapsing_toolbar"
@@ -148,6 +148,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="text"
+                        android:focusable="false"
                         android:selectAllOnFocus="true" />
 
                 </com.google.android.material.textfield.TextInputLayout>
@@ -174,6 +175,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="text"
+                        android:focusable="false"
                         android:selectAllOnFocus="true" />
 
 
