@@ -12,11 +12,6 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.text.format.DateFormat
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.*
-import androidx.core.content.ContextCompat
 import android.view.*
 import android.widget.*
 import androidx.core.content.ContextCompat
@@ -82,7 +77,6 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
         model.getCurrentUser().observe(viewLifecycleOwner, Observer { currentUser ->
             // update after login/logout
             model.getOthersTrips().observe(viewLifecycleOwner, Observer { newTripsMap ->
@@ -111,7 +105,12 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
             emptyView.isVisible = true
 
         val fab = (activity as MainActivity).findViewById<FloatingActionButton>(R.id.fab)
-        fab.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.ic_baseline_add))
+        fab.setImageDrawable(
+            ContextCompat.getDrawable(
+                requireContext(),
+                R.drawable.ic_baseline_add
+            )
+        )
         var navController: NavController?
         fab.setOnClickListener {
             val action = OthersTripListFragmentDirections.actionNavOthersTripListToNavTripEdit(
@@ -281,8 +280,6 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
             private val duration = v.findViewById<TextView>(R.id.trip_duration)
             private val price = v.findViewById<TextView>(R.id.trip_price)
 
-            private var navController: NavController? = null
-
             @SuppressLint("SetTextI18n")
             fun bind(trip: Trip) {
                 auth = Firebase.auth
@@ -322,26 +319,27 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
                     OthersTripListFragmentDirections.actionNavOthersTripListToNavTripDetails(
                         trip.id,
                     )
-            holder.btnStar.setOnCheckedChangeListener { it, isChecked ->
-                if (isChecked) {
-                    db.collection("trips").document(trip.id).update(
-                        "interestedPeople", FieldValue.arrayUnion(user.uid)
-                    ).addOnSuccessListener {
-                        db.collection("users").document(user?.uid!!).update(
-                            "favTrips", FieldValue.arrayUnion(trip.id)
-                        )
-                    }
-                } else {
-                    db.collection("trips").document(trip.id).update(
-                        "interestedPeople", FieldValue.arrayRemove(user.uid)
-                    ).addOnSuccessListener {
-                        db.collection("users").document(user?.uid!!).update(
-                            "favTrips", FieldValue.arrayRemove(trip.id)
-                        )
+                holder.btnStar.setOnCheckedChangeListener { it, isChecked ->
+                    if (isChecked) {
+                        db.collection("trips").document(trip.id).update(
+                            "interestedPeople", FieldValue.arrayUnion(user.uid)
+                        ).addOnSuccessListener {
+                            db.collection("users").document(user?.uid!!).update(
+                                "favTrips", FieldValue.arrayUnion(trip.id)
+                            )
+                        }
+                    } else {
+                        db.collection("trips").document(trip.id).update(
+                            "interestedPeople", FieldValue.arrayRemove(user.uid)
+                        ).addOnSuccessListener {
+                            db.collection("users").document(user?.uid!!).update(
+                                "favTrips", FieldValue.arrayRemove(trip.id)
+                            )
+                        }
                     }
                 }
-            }
 
+            }
         }
 
         override fun getItemCount(): Int {
@@ -360,7 +358,8 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
             if (date != "") {
                 val tmpDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse(date)
                 formattedDate =
-                    SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(tmpDate).toString()
+                    SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(tmpDate)
+                        .toString()
             }
             if (time != "") {
                 val tmpTime = SimpleDateFormat("HH:mm", Locale.getDefault()).parse(time)
@@ -375,7 +374,10 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
                 ).format(trip.timestamp.toDate())
                     .toString()
                 val tripTime =
-                    SimpleDateFormat("HH:mm", Locale.getDefault()).format(trip.timestamp.toDate())
+                    SimpleDateFormat(
+                        "HH:mm",
+                        Locale.getDefault()
+                    ).format(trip.timestamp.toDate())
                         .toString()
 
                 if (trip.departure.toLowerCase(Locale.ROOT)
@@ -393,6 +395,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
 
             notifyDataSetChanged()
         }
+
 
     }
 
@@ -416,8 +419,8 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
         override fun onDateSet(view: DatePicker, year: Int, month: Int, day: Int) {
             tvDate.text = "${day}/${(month + 1)}/${year}"
         }
-
     }
+
 
     private fun showDatePickerDialog() {
         val dateFragment = DatePickerFragment(etSearchDate)
