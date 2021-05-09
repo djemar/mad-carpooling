@@ -5,9 +5,12 @@ import android.app.DatePickerDialog
 import android.app.Dialog
 import android.app.TimePickerDialog
 import android.content.res.ColorStateList
+import android.content.res.Resources
 import android.graphics.Color
 import android.icu.util.Calendar
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
@@ -33,13 +36,12 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.slider.RangeSlider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.google.android.material.slider.RangeSlider
-import com.google.android.material.textfield.TextInputEditText
 import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.data.Trip
@@ -47,6 +49,7 @@ import com.mad.carpooling.ui.SharedViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
+
 
 private lateinit var auth: FirebaseAuth
 
@@ -58,11 +61,12 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
     private lateinit var tvSliderPrice: TextView
     private lateinit var btnSearch: MaterialButton
     private lateinit var btnClear: MaterialButton
-    private lateinit var etSearchDeparture: TextInputEditText
-    private lateinit var etSearchArrival: TextInputEditText
-    private lateinit var etSearchDate: TextInputEditText
-    private lateinit var etSearchTime: TextInputEditText
+    private lateinit var etSearchDeparture: EditText
+    private lateinit var etSearchArrival: EditText
+    private lateinit var etSearchDate: EditText
+    private lateinit var etSearchTime: EditText
     private lateinit var chipSearchResults: Chip
+    var searchIsValid : Boolean = false
     private var tripMap: HashMap<String, Trip>? = null
     private val model: SharedViewModel by activityViewModels()
 
@@ -183,11 +187,13 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
         sliderPrice.addOnChangeListener { slider, value, fromUser ->
             tvSliderPrice.text =
                 "${("%.2f".format(slider.values[0]))} - ${("%.2f".format(slider.values[1]))} €"
+            btnSearch.isEnabled = slider.values[0] != slider.valueFrom || slider.values[1] != slider.valueTo || searchIsValid
         }
-
         appBarLayout = (activity as MainActivity).findViewById(R.id.appbar_layout) as AppBarLayout
 
         findNavController().addOnDestinationChangedListener { _, _, _ ->  appBarLayout.setExpanded(false)}
+
+        validateSearch()
         btnSearch.setOnClickListener {
             tripAdapter.filterTrips(
                 etSearchDeparture.text?.trim().toString(),
@@ -210,19 +216,52 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
             }
         }
         btnClear.setOnClickListener {
-            etSearchDeparture.text?.clear()
-            etSearchArrival.text?.clear()
-            etSearchDate.text?.clear()
-            etSearchTime.text?.clear()
-            sliderPrice.values = mutableListOf(sliderPrice.valueFrom, sliderPrice.valueTo)
-            tripAdapter.filterTrips(
-                etSearchDeparture.text?.trim().toString(),
-                etSearchArrival.text?.trim().toString(),
-                etSearchDate.text?.trim().toString(),
-                etSearchTime.text?.trim().toString(),
-                sliderPrice.values
-            )
+            clearSearch(tripAdapter)
         }
+    }
+
+    private fun clearSearch(tripAdapter: OthersTripAdapter) {
+        etSearchDeparture.text?.clear()
+        etSearchArrival.text?.clear()
+        etSearchDate.text?.clear()
+        etSearchTime.text?.clear()
+        sliderPrice.values = mutableListOf(sliderPrice.valueFrom, sliderPrice.valueTo)
+        tripAdapter.filterTrips(
+            etSearchDeparture.text?.trim().toString(),
+            etSearchArrival.text?.trim().toString(),
+            etSearchDate.text?.trim().toString(),
+            etSearchTime.text?.trim().toString(),
+            sliderPrice.values
+        )
+    }
+
+    private fun validateSearch() {
+
+        val textWatcher = object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                btnSearch.isEnabled =
+                    etSearchDeparture.text.trim().isNotEmpty() || etSearchArrival.text.trim()
+                        .isNotEmpty() || etSearchDate.text.trim()
+                        .isNotEmpty() || etSearchTime.text.trim()
+                        .isNotEmpty()
+                searchIsValid = etSearchDeparture.text.trim().isNotEmpty() || etSearchArrival.text.trim()
+                    .isNotEmpty() || etSearchDate.text.trim()
+                    .isNotEmpty() || etSearchTime.text.trim()
+                    .isNotEmpty()
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+            }
+
+        }
+
+        etSearchDeparture.addTextChangedListener(textWatcher)
+        etSearchArrival.addTextChangedListener(textWatcher)
+        etSearchDate.addTextChangedListener(textWatcher)
+        etSearchTime.addTextChangedListener(textWatcher)
     }
 
     class OthersTripAdapter(private val tripList: ArrayList<Trip>) :
