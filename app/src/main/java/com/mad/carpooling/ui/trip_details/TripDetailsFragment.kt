@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.MainActivity
@@ -160,7 +161,36 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             }
         }
 
-        fab.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.sl_favourite))
+        if(trip.interestedPeople?.contains(model.getCurrentUser().value?.uid) == true)
+            fab.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.ic_baseline_fullstar))
+        else
+            fab.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.sl_favourite))
+
+        if( trip.owner!!.id == model.getCurrentUser().value?.uid )
+            fab.hide()
+
+        fab.setOnClickListener{
+            if(trip.interestedPeople?.contains(model.getCurrentUser().value?.uid) == true) {
+                fab.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.sl_favourite))
+                db.collection("trips").document(trip.id).update(
+                    "interestedPeople", FieldValue.arrayRemove(model.getCurrentUser().value?.uid)
+                ).addOnSuccessListener {
+                    db.collection("users").document(model.getCurrentUser().value?.uid!!).update(
+                        "favTrips", FieldValue.arrayRemove(trip.id)
+                    )
+                }
+            }
+            else {
+                fab.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.ic_baseline_fullstar))
+                db.collection("trips").document(trip.id).update(
+                    "interestedPeople", FieldValue.arrayUnion(model.getCurrentUser().value?.uid)
+                ).addOnSuccessListener {
+                    db.collection("users").document(model.getCurrentUser().value?.uid!!).update(
+                        "favTrips", FieldValue.arrayUnion(trip.id)
+                    )
+                }
+            }
+        }
 
     }
 
