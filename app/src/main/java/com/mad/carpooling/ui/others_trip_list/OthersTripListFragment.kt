@@ -31,6 +31,7 @@ import com.bumptech.glide.Glide
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.slider.RangeSlider
 import com.google.firebase.auth.FirebaseAuth
@@ -106,14 +107,10 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
 
     private fun initFab(view: View) {
 
-        val fab = (activity as MainActivity).findViewById<FloatingActionButton>(R.id.fab)
+        val fab = (activity as MainActivity).findViewById<ExtendedFloatingActionButton>(R.id.fab)
+        fab.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_add)
+        fab.shrink()
         fab.show()
-        fab.setImageDrawable(
-            ContextCompat.getDrawable(
-                requireContext(),
-                R.drawable.ic_baseline_add
-            )
-        )
 
         fab.setOnClickListener {
             val action = OthersTripListFragmentDirections.actionNavOthersTripListToNavTripEdit(

@@ -36,6 +36,7 @@ import androidx.navigation.ui.onNavDestinationSelected
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Timestamp
@@ -102,6 +103,9 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         ibtnSmoking = view.findViewById(R.id.btn_edit_smoking)
         ibtnPets = view.findViewById(R.id.btn_edit_pets)
         ibtnMusic = view.findViewById(R.id.btn_edit_music)
+
+        val fab = (activity as MainActivity).findViewById<ExtendedFloatingActionButton>(R.id.fab)
+        fab.hide()
 
         initTrip(view, viewModel, savedInstanceState)
 

@@ -30,11 +30,13 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.onNavDestinationSelected
 import com.bumptech.glide.Glide
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
+import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.data.User
 import com.mad.carpooling.ui.SharedViewModel
@@ -78,6 +80,9 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
         etEmail = view.findViewById<EditText>(R.id.et_email)
         etLocation = view.findViewById<EditText>(R.id.et_location)
         ivEditProfilePic = view.findViewById<ImageView>(R.id.et_profile_pic)
+
+        val fab = (activity as MainActivity).findViewById<ExtendedFloatingActionButton>(R.id.fab)
+        fab.hide()
 
         initProfile(model.getCurrentUser().value!!, viewModel, savedInstanceState)
 

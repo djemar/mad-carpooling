@@ -19,6 +19,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.onNavDestinationSelected
 import com.bumptech.glide.Glide
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.ktx.auth
@@ -57,7 +58,7 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
         tvLocation = view.findViewById(R.id.tv_location)
         ivProfilePic = view.findViewById(R.id.iv_profile_pic)
 
-        val fab = (activity as MainActivity).findViewById<FloatingActionButton>(R.id.fab)
+        val fab = (activity as MainActivity).findViewById<ExtendedFloatingActionButton>(R.id.fab)
         fab.hide()
 
         if (args.uid == "uid") {

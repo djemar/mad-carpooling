@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
@@ -52,7 +53,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private lateinit var tvNickname: TextView
     private lateinit var tripMap: HashMap<String, Trip>
     private lateinit var profileLayout: ConstraintLayout
-    private lateinit var fab : FloatingActionButton
+    private lateinit var fab: ExtendedFloatingActionButton
     private var chattiness = false
     private var smoking = false
     private var pets = false
