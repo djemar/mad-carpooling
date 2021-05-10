@@ -320,31 +320,24 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
                 Navigation.findNavController(holder.tripRL).navigate(action)
             }
             holder.btnStar.visibility = View.VISIBLE
-            holder.btnStar.setOnClickListener {
-                val action =
-                    OthersTripListFragmentDirections.actionNavOthersTripListToNavTripDetails(
-                        getItem(position).id,
-                    )
-                holder.btnStar.setOnCheckedChangeListener { it, isChecked ->
-                    if (isChecked) {
-                        db.collection("trips").document(getItem(position).id).update(
-                            "interestedPeople", FieldValue.arrayUnion(user.uid)
-                        ).addOnSuccessListener {
-                            db.collection("users").document(user?.uid!!).update(
-                                "favTrips", FieldValue.arrayUnion(getItem(position).id)
-                            )
-                        }
-                    } else {
-                        db.collection("trips").document(getItem(position).id).update(
-                            "interestedPeople", FieldValue.arrayRemove(user.uid)
-                        ).addOnSuccessListener {
-                            db.collection("users").document(user?.uid!!).update(
-                                "favTrips", FieldValue.arrayRemove(getItem(position).id)
-                            )
-                        }
+            holder.btnStar.setOnCheckedChangeListener { it, isChecked ->
+                if (isChecked) {
+                    db.collection("trips").document(getItem(position).id).update(
+                        "interestedPeople", FieldValue.arrayUnion(user?.uid)
+                    ).addOnSuccessListener {
+                        db.collection("users").document(user?.uid!!).update(
+                            "favTrips", FieldValue.arrayUnion(getItem(position).id)
+                        )
+                    }
+                } else {
+                    db.collection("trips").document(getItem(position).id).update(
+                        "interestedPeople", FieldValue.arrayRemove(user?.uid)
+                    ).addOnSuccessListener {
+                        db.collection("users").document(user?.uid!!).update(
+                            "favTrips", FieldValue.arrayRemove(getItem(position).id)
+                        )
                     }
                 }
-
             }
         }
 
