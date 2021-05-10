@@ -420,7 +420,8 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
 
         // TODO take username from login
-        val userRef = FirebaseFirestore.getInstance().document("users/${model.getCurrentUser().value?.uid}")
+        val userRef =
+            FirebaseFirestore.getInstance().document("users/${model.getCurrentUser().value?.uid}")
         val db = Firebase.firestore
         val newDocRef = db.collection("trips").document()
 
@@ -499,8 +500,11 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             val month = c.get(Calendar.MONTH)
             val day = c.get(Calendar.DAY_OF_MONTH)
 
+            val datePickerDialog = DatePickerDialog(requireContext(), this, year, month, day)
+            datePickerDialog.datePicker.minDate = System.currentTimeMillis() - 1000
+
             // Create a new instance of DatePickerDialog and return it
-            return DatePickerDialog(requireContext(), this, year, month, day)
+            return datePickerDialog
         }
 
         @SuppressLint("SetTextI18n")
@@ -538,10 +542,14 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
         @SuppressLint("SetTextI18n")
         override fun onTimeSet(view: TimePicker, hourOfDay: Int, minute: Int) {
-            if (minute < 10) {
-                tvTime.text = "$hourOfDay:0$minute"
+            if(hourOfDay >= Calendar.getInstance().get(Calendar.HOUR_OF_DAY) && minute >= Calendar.getInstance().get(Calendar.MINUTE)){
+                if (minute < 10) {
+                    tvTime.text = "$hourOfDay:0$minute"
+                } else {
+                    tvTime.text = "$hourOfDay:$minute"
+                }
             } else {
-                tvTime.text = "$hourOfDay:$minute"
+                Toast.makeText(requireContext(), "Select a valid time", Toast.LENGTH_SHORT).show()
             }
         }
     }
