@@ -391,10 +391,47 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
     }
 
+    private fun validateTripForm() {
+        val textWatcher = object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                validateSave()
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+            }
+
+        }
+
+        etDepartureLocation.addTextChangedListener(textWatcher)
+        etArrivalLocation.addTextChangedListener(textWatcher)
+        etDuration.addTextChangedListener(textWatcher)
+        etSeats.addTextChangedListener(textWatcher)
+        etPrice.addTextChangedListener(textWatcher)
+        etDescription.addTextChangedListener(textWatcher)
+    }
+
+    private fun validateSave() {
+        optionsMenu.findItem(R.id.save_trip).isEnabled =
+            etDepartureLocation.text.trim().isNotEmpty() && etArrivalLocation.text.trim()
+                .isNotEmpty() && etDuration.text.trim().isNotEmpty() && etSeats.text.trim()
+                .isNotEmpty() && etPrice.text.trim()
+                .isNotEmpty() && etDescription.text.trim()
+                .isNotEmpty() && ((isNew && currentPhotoPath != null) || !isNew)
+    }
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_trip_edit, menu)
         optionsMenu = menu
         super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        super.onPrepareOptionsMenu(menu)
+        validateSave()
+        validateTripForm()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -542,7 +579,10 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
         @SuppressLint("SetTextI18n")
         override fun onTimeSet(view: TimePicker, hourOfDay: Int, minute: Int) {
-            if(hourOfDay >= Calendar.getInstance().get(Calendar.HOUR_OF_DAY) && minute >= Calendar.getInstance().get(Calendar.MINUTE)){
+            if (hourOfDay >= Calendar.getInstance()
+                    .get(Calendar.HOUR_OF_DAY) && minute >= Calendar.getInstance()
+                    .get(Calendar.MINUTE)
+            ) {
                 if (minute < 10) {
                     tvTime.text = "$hourOfDay:0$minute"
                 } else {
