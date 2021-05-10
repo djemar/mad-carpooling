@@ -5,10 +5,8 @@ import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
 import android.view.*
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.ScrollView
-import android.widget.TextView
+import android.widget.*
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -53,7 +51,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private lateinit var optionsMenu: Menu
     private lateinit var tvNickname: TextView
     private lateinit var tripMap: HashMap<String, Trip>
-    private lateinit var btnProfile: MaterialButton
+    private lateinit var profileLayout: ConstraintLayout
     private lateinit var fab : FloatingActionButton
     private var chattiness = false
     private var smoking = false
@@ -83,7 +81,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         ibtnPets = view.findViewById(R.id.btn_tripDetails_pets)
         ibtnMusic = view.findViewById(R.id.btn_tripDetails_music)
         tvNickname = view.findViewById(R.id.tv_tripDetails_fullName)
-        btnProfile = view.findViewById(R.id.btn_showProfile)
+        profileLayout = view.findViewById(R.id.cl_tripDetails_profile)
         fab = (activity as MainActivity).findViewById(R.id.fab)
 
         model.getTrips().observe(viewLifecycleOwner, { newTripsMap ->
@@ -150,10 +148,8 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             tripStopsTitle.visibility = View.GONE
         }
 
-        btnProfile.isVisible = trip.owner?.id != model.getCurrentUser().value?.uid
-
-        if(btnProfile.isVisible) {
-            btnProfile.setOnClickListener {
+        if(trip.owner?.id != model.getCurrentUser().value?.uid) {
+            profileLayout.setOnClickListener {
                 val action = TripDetailsFragmentDirections.actionNavTripDetailsToNavShowProfile(
                     trip.owner?.id!!
                 )
