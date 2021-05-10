@@ -17,6 +17,7 @@ import androidx.navigation.ui.onNavDestinationSelected
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -54,6 +55,8 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private lateinit var tripMap: HashMap<String, Trip>
     private lateinit var profileLayout: ConstraintLayout
     private lateinit var fab: ExtendedFloatingActionButton
+    private lateinit var bottomSheet: ConstraintLayout
+    private lateinit var bsb: BottomSheetBehavior<ConstraintLayout>
     private var chattiness = false
     private var smoking = false
     private var pets = false
@@ -83,7 +86,9 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         ibtnMusic = view.findViewById(R.id.btn_tripDetails_music)
         tvNickname = view.findViewById(R.id.tv_tripDetails_fullName)
         profileLayout = view.findViewById(R.id.cl_tripDetails_profile)
+        bottomSheet = view.findViewById(R.id.bottom_sheet)
         fab = (activity as MainActivity).findViewById(R.id.fab)
+        bsb = BottomSheetBehavior.from(bottomSheet)
 
         model.getTrips().observe(viewLifecycleOwner, { newTripsMap ->
             // Update the UI
@@ -149,7 +154,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             tripStopsTitle.visibility = View.GONE
         }
 
-        if(trip.owner?.id != model.getCurrentUser().value?.uid) {
+        if (trip.owner?.id != model.getCurrentUser().value?.uid) {
             profileLayout.setOnClickListener {
                 val action = TripDetailsFragmentDirections.actionNavTripDetailsToNavShowProfile(
                     trip.owner?.id!!
@@ -159,42 +164,75 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             }
         }
 
-        if(trip.interestedPeople?.contains(model.getCurrentUser().value?.uid) == true)
-            fab.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.ic_baseline_fullstar))
-        else
-            fab.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.sl_favourite))
+        bsb.isHideable = true
+        bsb.isDraggable = true
+        bsb.state = BottomSheetBehavior.STATE_COLLAPSED
 
-        if( trip.owner!!.id == model.getCurrentUser().value?.uid )
-            fab.hide()
+        if (trip.owner!!.id != model.getCurrentUser().value?.uid) {
 
-        fab.setOnClickListener{
-            if(trip.interestedPeople?.contains(model.getCurrentUser().value?.uid) == true) {
-                fab.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.sl_favourite))
-                db.collection("trips").document(trip.id).update(
-                    "interestedPeople", FieldValue.arrayRemove(model.getCurrentUser().value?.uid)
-                ).addOnSuccessListener {
-                    db.collection("users").document(model.getCurrentUser().value?.uid!!).update(
-                        "favTrips", FieldValue.arrayRemove(trip.id)
+            fab.shrink()
+            fab.show()
+
+            if (trip.interestedPeople?.contains(model.getCurrentUser().value?.uid) == true) {
+                fab.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_fullstar)
+                fab.text = ""
+            } else {
+                fab.icon = ContextCompat.getDrawable(requireContext(), R.drawable.sl_favourite)
+                fab.text = ""
+            }
+
+            fab.setOnClickListener {
+                if (trip.interestedPeople?.contains(model.getCurrentUser().value?.uid) == true) {
+                    fab.icon = ContextCompat.getDrawable(
+                        requireContext(),
+                        R.drawable.sl_favourite
                     )
+                    db.collection("trips").document(trip.id).update(
+                        "interestedPeople",
+                        FieldValue.arrayRemove(model.getCurrentUser().value?.uid)
+                    ).addOnSuccessListener {
+                        db.collection("users").document(model.getCurrentUser().value?.uid!!).update(
+                            "favTrips", FieldValue.arrayRemove(trip.id)
+                        )
+                    }
+                } else {
+                    fab.icon = ContextCompat.getDrawable(
+                        requireContext(),
+                        R.drawable.ic_baseline_fullstar
+                    )
+
+                    db.collection("trips").document(trip.id).update(
+                        "interestedPeople", FieldValue.arrayUnion(model.getCurrentUser().value?.uid)
+                    ).addOnSuccessListener {
+                        db.collection("users").document(model.getCurrentUser().value?.uid!!).update(
+                            "favTrips", FieldValue.arrayUnion(trip.id)
+                        )
+                    }
                 }
             }
-            else {
-                fab.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.ic_baseline_fullstar))
-                db.collection("trips").document(trip.id).update(
-                    "interestedPeople", FieldValue.arrayUnion(model.getCurrentUser().value?.uid)
-                ).addOnSuccessListener {
-                    db.collection("users").document(model.getCurrentUser().value?.uid!!).update(
-                        "favTrips", FieldValue.arrayUnion(trip.id)
-                    )
-                }
+        } else {
+            fab.extend()
+            fab.show()
+
+            fab.icon = ContextCompat.getDrawable(
+                requireContext(),
+                R.drawable.sl_favourite
+            )
+            fab.text = "${trip.interestedPeople?.size.toString()} people"
+
+            fab.setOnClickListener {
+                if (bsb.state == BottomSheetBehavior.STATE_COLLAPSED)
+                    bsb.state = BottomSheetBehavior.STATE_EXPANDED
+                else if (bsb.state == BottomSheetBehavior.STATE_EXPANDED)
+                    bsb.state = BottomSheetBehavior.STATE_COLLAPSED
             }
         }
 
         val scrollView = view.findViewById<ScrollView>(R.id.sv_tridDetails)
         scrollView.setOnScrollChangeListener { scrollView, scrollX, scrollY, oldScrollX, oldScrollY ->
-            if( scrollY > oldScrollY && fab.visibility == View.VISIBLE)
+            if (scrollY > oldScrollY && fab.visibility == View.VISIBLE)
                 fab.hide()
-            else if( scrollY < oldScrollY && fab.visibility != View.VISIBLE )
+            else if (scrollY < oldScrollY && fab.visibility != View.VISIBLE)
                 fab.show()
         }
 
