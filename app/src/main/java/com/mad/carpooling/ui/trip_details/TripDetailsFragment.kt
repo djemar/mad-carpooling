@@ -9,6 +9,7 @@ import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.toColor
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.findNavController
@@ -340,15 +341,39 @@ class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip
         return BottomSheetViewHolder(layout)
     }
 
+    private fun changeButtonState(state: String, btn: MaterialButton, view: View) {
+        if (state.toLowerCase() == "accept") {
+            btn.text = "remove"
+            btn.setTextColor(ContextCompat.getColor(view.context, R.color.red_700))
+            btn.strokeColor = ContextCompat.getColorStateList(view.context, R.color.red_700)
+        } else {
+            btn.text = "accept"
+            btn.setTextColor(ContextCompat.getColor(view.context, R.color.green_700))
+            btn.strokeColor = ContextCompat.getColorStateList(view.context, R.color.green_700)
+        }
+    }
+
+    private fun initButtonState(state: String, btn: MaterialButton, view: View) {
+        if (state.toLowerCase() == "accept") {
+            btn.text = "accept"
+            btn.setTextColor(ContextCompat.getColor(view.context, R.color.green_700))
+            btn.strokeColor = ContextCompat.getColorStateList(view.context, R.color.green_700)
+        } else {
+            btn.text = "remove"
+            btn.setTextColor(ContextCompat.getColor(view.context, R.color.red_700))
+            btn.strokeColor = ContextCompat.getColorStateList(view.context, R.color.red_700)
+        }
+    }
+
     override fun onBindViewHolder(holder: BottomSheetViewHolder, position: Int) {
         val db = Firebase.firestore
         holder.bind(users?.get(position))
         holder.btnAccept.visibility = View.VISIBLE
 
         if (trip.acceptedPeople.contains(users?.get(position))) {
-            holder.btnAccept.text = "reject"
+            initButtonState("remove", holder.btnAccept, holder.itemView)
         } else {
-            holder.btnAccept.text = "accept"
+            initButtonState("accept", holder.btnAccept, holder.itemView)
             holder.btnAccept.isEnabled = trip.seats >= 1
         }
 
@@ -360,8 +385,7 @@ class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip
                 db.collection("trips").document(trip.id).update(
                     "seats", FieldValue.increment(-1)
                 )
-                holder.btnAccept.text = "reject"
-
+                changeButtonState("accept", holder.btnAccept, holder.itemView)
             } else {
                 db.collection("trips").document(trip.id).update(
                     "acceptedPeople", FieldValue.arrayRemove(users?.get(position))
@@ -369,7 +393,7 @@ class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip
                 db.collection("trips").document(trip.id).update(
                     "seats", FieldValue.increment(1)
                 )
-                holder.btnAccept.text = "accept"
+                changeButtonState("remove", holder.btnAccept, holder.itemView)
             }
         }
     }

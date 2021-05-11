@@ -52,16 +52,17 @@
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_bottom_sheet"
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-        android:layout_width="wrap_content"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:text="Accept"
-        android:textColor="#00FF00"
+        android:textColor="@color/green_700"
+        app:cornerRadius="50dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:rippleColor="?attr/colorPrimary"
-        app:strokeColor="#00FF00" />
+        app:strokeColor="@color/green_700" />
 
     <View
         android:id="@+id/dividerUser"
