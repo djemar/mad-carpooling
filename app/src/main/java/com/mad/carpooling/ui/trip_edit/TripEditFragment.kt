@@ -581,18 +581,10 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
         @SuppressLint("SetTextI18n")
         override fun onTimeSet(view: TimePicker, hourOfDay: Int, minute: Int) {
-            if (hourOfDay >= Calendar.getInstance()
-                    .get(Calendar.HOUR_OF_DAY) && minute >= Calendar.getInstance()
-                    .get(Calendar.MINUTE)
-            ) {
-                if (minute < 10) {
-                    tvTime.text = "$hourOfDay:0$minute"
-                } else {
-                    tvTime.text = "$hourOfDay:$minute"
-                }
-            } else {
-                Toast.makeText(requireContext(), "Select a valid time", Toast.LENGTH_SHORT).show()
-            }
+            if (minute < 10)
+                tvTime.text = "$hourOfDay:0$minute"
+            else
+                tvTime.text = "$hourOfDay:$minute"
         }
     }
 
