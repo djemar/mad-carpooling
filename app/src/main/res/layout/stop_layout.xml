@@ -23,7 +23,7 @@
             android:layout_height="40dp"
             app:cardCornerRadius="50dp"
             app:strokeColor="?attr/colorPrimary"
-            app:strokeWidth="4dp">
+            app:strokeWidth="2dp">
 
             <TextView
                 android:id="@+id/stopId"
@@ -31,7 +31,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="1"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textColor="?attr/colorPrimary"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
                 android:textStyle="bold" />
 
         </com.google.android.material.card.MaterialCardView>

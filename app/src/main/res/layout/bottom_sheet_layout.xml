@@ -29,6 +29,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center"
+                android:tint="?attr/colorPrimary"
                 android:src="@drawable/ic_baseline_person"
                 app:layout_constraintHorizontal_weight="1" />
 
