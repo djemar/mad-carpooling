@@ -7,10 +7,11 @@ import android.util.TypedValue
 import android.view.*
 import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.onNavDestinationSelected
@@ -20,8 +21,8 @@ import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.MainActivity
@@ -154,6 +155,12 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             tripStopsTitle.visibility = View.GONE
         }
 
+        val bsrv = view.findViewById<RecyclerView>(R.id.rv_bottom_sheet)
+        bsrv.layoutManager = LinearLayoutManager(context)
+        val bottomSheetAdapter = BottomSheetAdapter(trip.interestedPeople, trip)
+        bsrv.adapter = bottomSheetAdapter
+        Log.d("users:", bottomSheetAdapter.itemCount.toString())
+
         if (trip.owner?.id != model.getCurrentUser().value?.uid) {
             profileLayout.setOnClickListener {
                 val action = TripDetailsFragmentDirections.actionNavTripDetailsToNavShowProfile(
@@ -164,17 +171,32 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             }
         }
 
-        bsb.isHideable = true
-        bsb.isDraggable = true
         bsb.state = BottomSheetBehavior.STATE_COLLAPSED
 
+        initFab(db)
+
+        val scrollView = view.findViewById<ScrollView>(R.id.sv_tridDetails)
+        scrollView.setOnScrollChangeListener { scrollView, scrollX, scrollY, oldScrollX, oldScrollY ->
+            if (scrollY > oldScrollY && fab.visibility == View.VISIBLE && oldScrollY > 0) {
+                fab.hide()
+                if (bsb.state == BottomSheetBehavior.STATE_EXPANDED) {
+                    bsb.state = BottomSheetBehavior.STATE_COLLAPSED
+                }
+            } else if (scrollY < oldScrollY && fab.visibility != View.VISIBLE)
+                fab.show()
+        }
+
+    }
+
+    private fun initFab(db: FirebaseFirestore) {
         if (trip.owner!!.id != model.getCurrentUser().value?.uid) {
 
-            fab.shrink()
             fab.show()
+            fab.shrink()
 
             if (trip.interestedPeople?.contains(model.getCurrentUser().value?.uid) == true) {
-                fab.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_fullstar)
+                fab.icon =
+                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_fullstar)
                 fab.text = ""
             } else {
                 fab.icon = ContextCompat.getDrawable(requireContext(), R.drawable.sl_favourite)
@@ -211,14 +233,14 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                 }
             }
         } else {
-            fab.extend()
             fab.show()
+            fab.text = "${trip.interestedPeople?.size.toString()} people"
+            fab.extend()
 
             fab.icon = ContextCompat.getDrawable(
                 requireContext(),
                 R.drawable.sl_favourite
             )
-            fab.text = "${trip.interestedPeople?.size.toString()} people"
 
             fab.setOnClickListener {
                 if (bsb.state == BottomSheetBehavior.STATE_COLLAPSED)
@@ -227,15 +249,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                     bsb.state = BottomSheetBehavior.STATE_COLLAPSED
             }
         }
-
-        val scrollView = view.findViewById<ScrollView>(R.id.sv_tridDetails)
-        scrollView.setOnScrollChangeListener { scrollView, scrollX, scrollY, oldScrollX, oldScrollY ->
-            if (scrollY > oldScrollY && fab.visibility == View.VISIBLE)
-                fab.hide()
-            else if (scrollY < oldScrollY && fab.visibility != View.VISIBLE)
-                fab.show()
-        }
-
     }
 
     private fun editTrip() {
@@ -293,6 +306,76 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         inflater.inflate(R.menu.menu_trip_details, menu)
         optionsMenu = menu
         super.onCreateOptionsMenu(menu, inflater)
+    }
+
+}
+
+class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip: Trip) :
+    RecyclerView.Adapter<BottomSheetAdapter.BottomSheetViewHolder>() {
+
+    class BottomSheetViewHolder(v: View) : RecyclerView.ViewHolder(v) {
+        private var nickname: TextView = v.findViewById(R.id.tv_bottom_sheet_user)
+        private var profile: ConstraintLayout = v.findViewById(R.id.cl_bottom_sheet)
+        var btnAccept: MaterialButton = v.findViewById(R.id.btn_bottom_sheet)
+
+        fun bind(user: String?) {
+            val db = Firebase.firestore
+            if (user != null) {
+                db.collection("users").document(user).get().addOnSuccessListener {
+                    nickname.text = it.get("nickname").toString()
+                }
+                profile.setOnClickListener {
+                    val action = TripDetailsFragmentDirections.actionNavTripDetailsToNavShowProfile(
+                        user!!
+                    )
+                    it.findNavController().navigate(action)
+                }
+            }
+        }
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BottomSheetViewHolder {
+        val layout =
+            LayoutInflater.from(parent.context).inflate(R.layout.bottom_sheet_layout, parent, false)
+        return BottomSheetViewHolder(layout)
+    }
+
+    override fun onBindViewHolder(holder: BottomSheetViewHolder, position: Int) {
+        val db = Firebase.firestore
+        holder.bind(users?.get(position))
+        holder.btnAccept.visibility = View.VISIBLE
+
+        if (trip.acceptedPeople.contains(users?.get(position))) {
+            holder.btnAccept.text = "reject"
+        } else {
+            holder.btnAccept.text = "accept"
+            holder.btnAccept.isEnabled = trip.seats >= 1
+        }
+
+        holder.btnAccept.setOnClickListener {
+            if (holder.btnAccept.text.toString().toLowerCase() == "accept") {
+                db.collection("trips").document(trip.id).update(
+                    "acceptedPeople", FieldValue.arrayUnion(users?.get(position))
+                )
+                db.collection("trips").document(trip.id).update(
+                    "seats", FieldValue.increment(-1)
+                )
+                holder.btnAccept.text = "reject"
+
+            } else {
+                db.collection("trips").document(trip.id).update(
+                    "acceptedPeople", FieldValue.arrayRemove(users?.get(position))
+                )
+                db.collection("trips").document(trip.id).update(
+                    "seats", FieldValue.increment(1)
+                )
+                holder.btnAccept.text = "accept"
+            }
+        }
+    }
+
+    override fun getItemCount(): Int {
+        return users?.size ?: 0
     }
 
 }
