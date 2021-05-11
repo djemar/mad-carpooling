@@ -414,7 +414,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         etDuration.addTextChangedListener(textWatcher)
         etSeats.addTextChangedListener(textWatcher)
         etPrice.addTextChangedListener(textWatcher)
-        etDescription.addTextChangedListener(textWatcher)
     }
 
     private fun validateSave() {
@@ -422,7 +421,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             etDepartureLocation.text.trim().isNotEmpty() && etArrivalLocation.text.trim()
                 .isNotEmpty() && etDuration.text.trim().isNotEmpty() && etSeats.text.trim()
                 .isNotEmpty() && etPrice.text.trim()
-                .isNotEmpty() && etDescription.text.trim()
                 .isNotEmpty() && ((isNew && currentPhotoPath != null) || !isNew)
     }
 

@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -154,6 +155,13 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         if (stopAdapter.itemCount == 0) {
             val tripStopsTitle = view.findViewById<TextView>(R.id.tv_tripDetails_stops)
             tripStopsTitle.visibility = View.GONE
+        }
+
+        if(trip.description == ""){
+            val descTitle = view.findViewById<TextView>(R.id.tv_tripDetails_description)
+            val descMcv = view.findViewById<MaterialCardView>(R.id.mcv_tripDetails_description)
+            descTitle.visibility = View.GONE
+            descMcv.visibility = View.GONE
         }
 
         val bsrv = view.findViewById<RecyclerView>(R.id.rv_bottom_sheet)
