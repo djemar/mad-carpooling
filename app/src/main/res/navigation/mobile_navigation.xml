@@ -63,6 +63,16 @@
     </fragment>
 
     <fragment
+        android:id="@+id/nav_show_profile_others"
+        android:name="com.mad.carpooling.ui.profile.ShowProfileFragment"
+        android:label="@string/menu_show_profile"
+        tools:layout="@layout/fragment_show_profile">
+        <argument
+            android:name="uid"
+            android:defaultValue="uid"
+            app:argType="string" />
+    </fragment>
+    <fragment
         android:id="@+id/nav_edit_profile"
         android:name="com.mad.carpooling.ui.profile_edit.EditProfileFragment"
         android:label="@string/menu_edit_profile"
@@ -103,7 +113,7 @@
             android:defaultValue="@null" />
         <action
             android:id="@+id/action_nav_trip_details_to_nav_show_profile"
-            app:destination="@id/nav_show_profile"
+            app:destination="@id/nav_show_profile_others"
             app:popUpTo="@id/nav_trip_details" />
     </fragment>
 
