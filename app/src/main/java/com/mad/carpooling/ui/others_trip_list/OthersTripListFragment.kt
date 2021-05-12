@@ -105,6 +105,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
                 initSearch(newTripsMap, tripAdapter)
                 model.getOthersTrips().removeObservers(viewLifecycleOwner);
             })
+                model.getCurrentUser().removeObservers(viewLifecycleOwner);
         })
 
     }
