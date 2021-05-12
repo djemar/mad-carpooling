@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -19,6 +20,8 @@ import androidx.navigation.ui.setupWithNavController
 import com.bumptech.glide.Glide
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
+import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.appbar.AppBarLayout.Behavior.DragCallback
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
@@ -37,6 +40,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var auth: FirebaseAuth
     private lateinit var currentUser: User
+    private lateinit var appBarLayout: AppBarLayout
     private var userState: FirebaseUser? = null
     private val RC_SIGN_IN: Int = 1
     private val model: SharedViewModel by viewModels()
@@ -59,6 +63,18 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        appBarLayout = findViewById<AppBarLayout>(R.id.appbar_layout)
+        if (appBarLayout.layoutParams != null) {    // disable drag on toolbar
+            val layoutParams = appBarLayout.layoutParams as CoordinatorLayout.LayoutParams
+            val appBarLayoutBehaviour = AppBarLayout.Behavior()
+            appBarLayoutBehaviour.setDragCallback(object : DragCallback() {
+                override fun canDrag(appBarLayout: AppBarLayout): Boolean {
+                    return false
+                }
+            })
+            layoutParams.behavior = appBarLayoutBehaviour
+        }
         auth = Firebase.auth
         auth.addAuthStateListener { authState ->
             userState = authState.currentUser
