@@ -301,6 +301,9 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
                 if (trip.imageCarURL != "") {
                     Glide.with(this.itemView).load(trip.imageCarURL).into(ivCar)
                 }
+                // clear any listener to avoid recyclerview messing up with checkbox state,
+                // treating the checkbox as a brand new one every time
+                btnStar.setOnCheckedChangeListener(null)
                 btnStar.isChecked = trip.interestedPeople?.contains(user?.uid) == true
             }
         }
