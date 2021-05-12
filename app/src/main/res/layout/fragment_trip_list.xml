@@ -18,6 +18,11 @@
         android:text="Search Results"
         android:visibility="gone" />
 
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/swipeContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/triplist_rv"
         android:elevation="1dp"
@@ -26,7 +31,7 @@
         android:clickable="true"
         android:clipToPadding="false"
         android:focusable="true" />
-
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     <TextView
         android:id="@+id/no_trips_available"
         android:layout_width="match_parent"
