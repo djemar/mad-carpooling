@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -63,6 +64,11 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        navView.getMenu().findItem(R.id.nav_logout).setOnMenuItemClickListener({
+            logout()
+            true
+        })
 
         appBarLayout = findViewById<AppBarLayout>(R.id.appbar_layout)
         if (appBarLayout.layoutParams != null) {    // disable drag on toolbar
@@ -131,7 +137,6 @@ class MainActivity : AppCompatActivity() {
         val tvFullNameHeader: TextView = headerView.findViewById(R.id.nav_header_fullName)
         val tvNicknameHeader: TextView = headerView.findViewById(R.id.nav_header_nickname)
 
-
         if (auth.currentUser != null)
             model.getCurrentUser().observe(this, { currentUser ->
                 // Update the UI
@@ -139,13 +144,6 @@ class MainActivity : AppCompatActivity() {
                 tvNicknameHeader.text = currentUser.nickname
                 Glide.with(this).load(currentUser.imageUserRef).into(ivProfileHeader)
             })
-        //TODO logout button
-        ivProfileHeader.setOnLongClickListener {
-            logout()
-            true
-        }
-
-
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
