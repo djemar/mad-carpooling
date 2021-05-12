@@ -101,6 +101,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
                 tripMap = newTripsMap
                 emptyView.isVisible = newTripsMap.isEmpty()
                 initSearch(newTripsMap, tripAdapter)
+                model.getOthersTrips().removeObservers(viewLifecycleOwner);
             })
         })
 
