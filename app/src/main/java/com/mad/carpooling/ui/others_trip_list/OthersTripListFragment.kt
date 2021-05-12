@@ -46,6 +46,8 @@ import com.mad.carpooling.ui.SharedViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.abs
+import kotlin.math.ceil
 
 
 private lateinit var auth: FirebaseAuth
@@ -178,8 +180,10 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
         }
 
 
-        sliderPrice.valueFrom = tripsMap.minByOrNull { it.value.price }?.value?.price ?: 0f
-        sliderPrice.valueTo = tripsMap.maxByOrNull { it.value.price }?.value?.price ?: 0f
+        sliderPrice.valueFrom = 0f
+
+        val maxPrice = tripsMap.maxByOrNull { it.value.price }?.value?.price ?: 0f
+        sliderPrice.valueTo = (5*(ceil(abs(maxPrice/5).toDouble()))).toFloat();
         sliderPrice.values = mutableListOf(sliderPrice.valueFrom, sliderPrice.valueTo)
         tvSliderPrice.text =
             "${("%.2f".format(sliderPrice.valueFrom))} - ${("%.2f".format(sliderPrice.valueTo))} €"
