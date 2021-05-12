@@ -83,9 +83,10 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
         super.onViewCreated(view, savedInstanceState)
         rv = view.findViewById<RecyclerView>(R.id.triplist_rv)
         chipSearchResults = view.findViewById(R.id.chip_search_results)
-        swipeContainer = view.findViewById(R.id.swipeContainer);
+        swipeContainer = view.findViewById(R.id.swipeContainer)
+        swipeContainer.isEnabled = true
         rv.layoutManager = LinearLayoutManager(context)
-        rv.isNestedScrollingEnabled = false; //prevent toolbar to expand on scroll
+        rv.isNestedScrollingEnabled = false //prevent toolbar to expand on scroll
         val emptyView = view.findViewById<TextView>(R.id.no_trips_available)
         val tripAdapter = OthersTripAdapter()
         rv.adapter = tripAdapter
@@ -105,7 +106,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
                 initSearch(newTripsMap, tripAdapter)
                 model.getOthersTrips().removeObservers(viewLifecycleOwner);
             })
-                model.getCurrentUser().removeObservers(viewLifecycleOwner);
+            model.getCurrentUser().removeObservers(viewLifecycleOwner);
         })
 
     }
@@ -215,6 +216,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
             appBarLayout.setExpanded(
                 false
             )
+
         }
 
         validateSearch()
