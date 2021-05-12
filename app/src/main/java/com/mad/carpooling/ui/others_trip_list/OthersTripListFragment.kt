@@ -306,7 +306,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
             val btnStar: CheckBox = v.findViewById(R.id.trip_star)
             private val ivCar = v.findViewById<ImageView>(R.id.trip_car)
             private val location = v.findViewById<TextView>(R.id.trip_from_to)
-            private val duration = v.findViewById<TextView>(R.id.trip_duration)
+            private val timestamp = v.findViewById<TextView>(R.id.trip_timestamp)
             private val price = v.findViewById<TextView>(R.id.trip_price)
 
             @SuppressLint("SetTextI18n")
@@ -314,7 +314,8 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
                 auth = Firebase.auth
                 val user = auth.currentUser
                 location.text = "${trip.departure} - ${trip.arrival}"
-                duration.text = "Duration: ${trip.duration}"
+                val format = SimpleDateFormat.getDateTimeInstance()
+                timestamp.text = (SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.MEDIUM,SimpleDateFormat.SHORT)).format(trip.timestamp.toDate())
                 price.text = "Price: ${("%.2f".format(trip.price))} €"
                 if (trip.imageCarURL != "") {
                     Glide.with(this.itemView).load(trip.imageCarURL).into(ivCar)

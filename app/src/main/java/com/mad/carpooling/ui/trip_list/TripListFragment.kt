@@ -17,13 +17,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bumptech.glide.Glide
-import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.data.Trip
 import com.mad.carpooling.ui.SharedViewModel
+import java.text.SimpleDateFormat
 
 
 class TripListFragment : Fragment(R.layout.fragment_trip_list) {
@@ -97,7 +96,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
             val btnEdit: ImageButton = v.findViewById<ImageButton>(R.id.trip_edit)
             private val ivCar = v.findViewById<ImageView>(R.id.trip_car)
             private val location = v.findViewById<TextView>(R.id.trip_from_to)
-            private val duration = v.findViewById<TextView>(R.id.trip_duration)
+            private val timestamp = v.findViewById<TextView>(R.id.trip_timestamp)
             private val price = v.findViewById<TextView>(R.id.trip_price)
 
             private var navController: NavController? = null
@@ -105,7 +104,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
             @SuppressLint("SetTextI18n")
             fun bind(trip: Trip) {
                 location.text = "${trip.departure} - ${trip.arrival}"
-                duration.text = "Duration: ${trip.duration}"
+                timestamp.text = (SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.MEDIUM,SimpleDateFormat.SHORT)).format(trip.timestamp.toDate())
                 price.text = "Price: ${("%.2f".format(trip.price))} €"
                 if (trip.imageCarURL != "") {
                     Glide.with(this.itemView).load(trip.imageCarURL).into(ivCar)
