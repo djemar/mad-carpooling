@@ -56,6 +56,7 @@ class SharedViewModel : ViewModel() {
             FirebaseFirestore.getInstance().document("users/${currentUser.value?.uid}" )
 
         db.collection("trips").whereNotEqualTo("owner", currentUserRef)
+            .whereEqualTo("visibility", true)
             .addSnapshotListener { value, e ->
                 if (e != null) {
                     othersTrips.value = null

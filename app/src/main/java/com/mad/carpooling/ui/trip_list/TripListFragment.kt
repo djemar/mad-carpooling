@@ -1,11 +1,13 @@
 package com.mad.carpooling.ui.trip_list
 
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -98,11 +100,15 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
             private val location = v.findViewById<TextView>(R.id.trip_from_to)
             private val timestamp = v.findViewById<TextView>(R.id.trip_timestamp)
             private val price = v.findViewById<TextView>(R.id.trip_price)
+            val tripCV: CardView = v.findViewById<CardView>(R.id.triplist_card)
 
             private var navController: NavController? = null
 
             @SuppressLint("SetTextI18n")
             fun bind(trip: Trip) {
+                if(!trip.visibility) {
+                    //todo - set transparency
+                }
                 location.text = "${trip.departure} - ${trip.arrival}"
                 timestamp.text = (SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.MEDIUM,SimpleDateFormat.SHORT)).format(trip.timestamp.toDate())
                 price.text = "Price: ${("%.2f".format(trip.price))} €"
