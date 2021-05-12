@@ -36,9 +36,11 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val emptyView = view.findViewById<TextView>(R.id.no_trips_available)
 
         model.getMyTrips().observe(viewLifecycleOwner, Observer { newTripsMap ->
             // Update the UI
+            emptyView.isVisible = newTripsMap.isEmpty()
             updateTripList(newTripsMap, view)
         })
 
