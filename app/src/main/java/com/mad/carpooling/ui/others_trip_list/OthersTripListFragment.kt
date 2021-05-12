@@ -27,12 +27,12 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bumptech.glide.Glide
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.slider.RangeSlider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -66,8 +66,8 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
     private lateinit var etSearchDate: EditText
     private lateinit var etSearchTime: EditText
     private lateinit var chipSearchResults: Chip
-    var searchIsValid: Boolean = false
-
+    private lateinit var swipeContainer: SwipeRefreshLayout
+    private var searchIsValid: Boolean = false
     private val model: SharedViewModel by activityViewModels()
 
     // Use the 'by activityViewModels()' Kotlin property delegate
@@ -81,16 +81,18 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        chipSearchResults = view.findViewById(R.id.chip_search_results)
-        val emptyView = view.findViewById<TextView>(R.id.no_trips_available)
         rv = view.findViewById<RecyclerView>(R.id.triplist_rv)
+        chipSearchResults = view.findViewById(R.id.chip_search_results)
+        swipeContainer = view.findViewById(R.id.swipeContainer);
         rv.layoutManager = LinearLayoutManager(context)
         rv.isNestedScrollingEnabled = false; //prevent toolbar to expand on scroll
-
+        val emptyView = view.findViewById<TextView>(R.id.no_trips_available)
         val tripAdapter = OthersTripAdapter()
         rv.adapter = tripAdapter
 
         initFab(view)
+
+        initSwipeRefresh(swipeContainer, tripAdapter)
 
         model.getCurrentUser().observe(viewLifecycleOwner, Observer { currentUser ->
             // update after login/logout
@@ -105,6 +107,18 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
             })
         })
 
+    }
+
+    private fun initSwipeRefresh(
+        swipeContainer: SwipeRefreshLayout?,
+        tripAdapter: OthersTripAdapter
+    ) {
+        swipeContainer?.setOnRefreshListener {
+            tripMap = model.getOthersTrips().value!!
+            tripAdapter.submitList(tripMap.values.toList())
+            initSearch(tripMap, tripAdapter)
+            swipeContainer.isRefreshing = false;
+        }
     }
 
 
@@ -184,7 +198,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
         sliderPrice.valueFrom = 0f
 
         val maxPrice = tripsMap.maxByOrNull { it.value.price }?.value?.price ?: 0f
-        sliderPrice.valueTo = (5*(ceil(abs(maxPrice/5).toDouble()))).toFloat();
+        sliderPrice.valueTo = (5 * (ceil(abs(maxPrice / 5).toDouble()))).toFloat();
         sliderPrice.values = mutableListOf(sliderPrice.valueFrom, sliderPrice.valueTo)
         tvSliderPrice.text =
             "${("%.2f".format(sliderPrice.valueFrom))} - ${("%.2f".format(sliderPrice.valueTo))} €"
