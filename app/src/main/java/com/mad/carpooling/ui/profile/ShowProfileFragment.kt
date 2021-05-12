@@ -65,7 +65,7 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
             model.getCurrentUser().observe(viewLifecycleOwner, Observer { currentUser ->
                 // Update the UI
                 uid = currentUser.uid
-                initProfile(currentUser)
+                initProfile(currentUser, view)
             })
         } else {
             val db = Firebase.firestore
@@ -81,18 +81,18 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
                         uid = tmpUser.uid
                     }
                 }
-                initProfile(tmpUser)
+                initProfile(tmpUser, view)
             }
         }
     }
 
-    private fun initProfile(user: User) {
+    private fun initProfile(user: User, view: View) {
         this.user = user
         tvFullName.text = user.fullname
         tvNickname.text = user.nickname
         tvEmail.text = user.email
         tvLocation.text = user.location
-        Glide.with(this).load(user.imageUserRef).into(ivProfilePic)
+        Glide.with(view).load(user.imageUserRef).into(ivProfilePic)
         llEmail.isVisible = uid == model.getCurrentUser().value?.uid
     }
 
