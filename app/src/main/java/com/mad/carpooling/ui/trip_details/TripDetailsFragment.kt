@@ -7,9 +7,7 @@ import android.util.TypedValue
 import android.view.*
 import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.toColor
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.findNavController
@@ -92,7 +90,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         bottomSheet = view.findViewById(R.id.bottom_sheet)
         fab = (activity as MainActivity).findViewById(R.id.fab)
         bsb = BottomSheetBehavior.from(bottomSheet)
-
         model.getTrips().observe(viewLifecycleOwner, { newTripsMap ->
             // Update the UI
             initTripDetails(newTripsMap, view)
@@ -294,7 +291,19 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val db = Firebase.firestore
         return when (item.itemId) {
+            R.id.visibility_trip -> {
+                if(trip.visibility) {
+                    item.setIcon(R.drawable.ic_baseline_visibility_off);
+                    db.collection("trips").document(trip.id).update("visibility", false)
+                }
+                else {
+                    item.setIcon(R.drawable.ic_sharp_visibility);
+                    db.collection("trips").document(trip.id).update("visibility", true)
+                }
+                true
+            }
             R.id.edit_trip -> {
                 editTrip()
                 true
@@ -309,6 +318,15 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         super.onPrepareOptionsMenu(menu)
         optionsMenu.findItem(R.id.edit_trip).isVisible =
             trip.owner!!.id == model.getCurrentUser().value?.uid
+
+        optionsMenu.findItem(R.id.visibility_trip).isVisible =
+            trip.owner!!.id == model.getCurrentUser().value?.uid
+
+        if(trip.visibility){
+            optionsMenu.findItem(R.id.visibility_trip).setIcon(R.drawable.ic_sharp_visibility);
+        } else {
+            optionsMenu.findItem(R.id.visibility_trip).setIcon(R.drawable.ic_baseline_visibility_off);
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

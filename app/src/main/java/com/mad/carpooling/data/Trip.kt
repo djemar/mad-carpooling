@@ -21,6 +21,7 @@ data class Trip(
     var stops: ArrayList<String>? = java.util.ArrayList<String>(),
     var imageCarURL: String? = null, //TODO change also in DB to imageCarRef
     var interestedPeople: ArrayList<String>? = java.util.ArrayList<String>(),
-    var acceptedPeople: ArrayList<String> = java.util.ArrayList<String>()
+    var acceptedPeople: ArrayList<String> = java.util.ArrayList<String>(),
+    var visibility: Boolean = true
 ) {
 }
