@@ -15,6 +15,7 @@ import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bumptech.glide.Glide
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
@@ -38,21 +39,16 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
         super.onViewCreated(view, savedInstanceState)
         val emptyView = view.findViewById<TextView>(R.id.no_trips_available)
 
+        val swipeContainer = view.findViewById<SwipeRefreshLayout>(R.id.swipeContainer)
+        swipeContainer.isEnabled = false
+
         model.getMyTrips().observe(viewLifecycleOwner, Observer { newTripsMap ->
             // Update the UI
             emptyView.isVisible = newTripsMap.isEmpty()
             updateTripList(newTripsMap, view)
         })
 
-        // initTripList()
-
-
     }
-
-//    private fun initTripList() {
-//        currentUser = getCurrentUser()
-//        tripMap = model.getTrips().value
-//    }
 
     private fun updateTripList(tripsMap: HashMap<String, Trip>, view: View) {
         rv = view.findViewById<RecyclerView>(R.id.triplist_rv)
