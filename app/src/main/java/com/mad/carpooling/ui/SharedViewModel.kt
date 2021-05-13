@@ -40,7 +40,7 @@ class SharedViewModel : ViewModel() {
                 for (doc in value!!) {
                     tripsMap[doc.id] = doc.toObject(Trip::class.java)
                 }
-                myTrips.value = tripsMap
+                myTrips.postValue(tripsMap)
             }
     }
 
@@ -67,7 +67,7 @@ class SharedViewModel : ViewModel() {
                 for (doc in value!!) {
                     tripsMap[doc.id] = doc.toObject(Trip::class.java)
                 }
-                othersTrips.value = tripsMap
+                othersTrips.postValue(tripsMap)
             }
     }
 
@@ -91,7 +91,7 @@ class SharedViewModel : ViewModel() {
             for (doc in value!!) {
                 tripsMap[doc.id] = doc.toObject(Trip::class.java)
             }
-            trips.value = tripsMap
+            trips.postValue(tripsMap)
         }
     }
 
@@ -121,7 +121,7 @@ class SharedViewModel : ViewModel() {
                 if (doc.id == Firebase.auth.currentUser?.uid)
                     user = doc.toObject(User::class.java)
             }
-            currentUser.value = user
+            currentUser.postValue(user)
         }
 
     }
