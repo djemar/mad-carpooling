@@ -177,7 +177,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             }
         }
 
-        bsb.state = BottomSheetBehavior.STATE_COLLAPSED
+        bsb.state = BottomSheetBehavior.STATE_HIDDEN
 
         initFab(db)
 
@@ -186,7 +186,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             if (scrollY > oldScrollY && fab.visibility == View.VISIBLE && oldScrollY > 0) {
                 fab.hide()
                 if (bsb.state == BottomSheetBehavior.STATE_EXPANDED) {
-                    bsb.state = BottomSheetBehavior.STATE_COLLAPSED
+                    bsb.state = BottomSheetBehavior.STATE_HIDDEN
                 }
             } else if (scrollY < oldScrollY && fab.visibility != View.VISIBLE)
                 fab.show()
@@ -249,10 +249,10 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             )
 
             fab.setOnClickListener {
-                if (bsb.state == BottomSheetBehavior.STATE_COLLAPSED)
+                if (bsb.state == BottomSheetBehavior.STATE_HIDDEN)
                     bsb.state = BottomSheetBehavior.STATE_EXPANDED
                 else if (bsb.state == BottomSheetBehavior.STATE_EXPANDED)
-                    bsb.state = BottomSheetBehavior.STATE_COLLAPSED
+                    bsb.state = BottomSheetBehavior.STATE_HIDDEN
             }
         }
     }
