@@ -113,7 +113,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 //            }
 //        }
         if (trip.imageCarURL != "") {
-            Glide.with(requireContext()).load(trip.imageCarURL).into(ivCarPic)
+            Glide.with(view).load(trip.imageCarURL).into(ivCarPic)
         }
 
         val userDoc =
