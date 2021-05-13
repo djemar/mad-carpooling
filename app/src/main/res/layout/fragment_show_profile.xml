@@ -26,8 +26,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
-                android:scaleType="centerCrop"
-                android:src="@drawable/png_john" />
+                android:scaleType="centerCrop" />
 
         </androidx.cardview.widget.CardView>
     </FrameLayout>
@@ -43,7 +42,6 @@
             android:layout_height="wrap_content"
             android:freezesText="true"
             android:gravity="center"
-            android:text="@string/default_fullName"
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"
             android:textColor="?android:attr/textColorPrimary"
             app:layout_constraintBottom_toTopOf="@+id/divider1"
