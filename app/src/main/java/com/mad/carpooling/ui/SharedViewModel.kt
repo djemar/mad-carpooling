@@ -32,7 +32,7 @@ class SharedViewModel : ViewModel() {
         db.collection("trips").whereEqualTo("owner", currentUserRef)
             .addSnapshotListener { value, e ->
                 if (e != null) {
-                    myTrips.value = null
+                    myTrips.postValue(HashMap())
                     Log.e("loadTrips() exception => ", e.toString())
                     return@addSnapshotListener
                 }
@@ -59,7 +59,7 @@ class SharedViewModel : ViewModel() {
             .whereEqualTo("visibility", true)
             .addSnapshotListener { value, e ->
                 if (e != null) {
-                    othersTrips.value = null
+                    othersTrips.postValue(HashMap())
                     Log.e("loadTrips() exception => ", e.toString())
                     return@addSnapshotListener
                 }
@@ -83,7 +83,7 @@ class SharedViewModel : ViewModel() {
         val db = Firebase.firestore
         db.collection("trips").addSnapshotListener { value, e ->
             if (e != null) {
-                trips.value = null
+                trips.postValue(HashMap())
                 Log.e("loadTrips() exception => ", e.toString())
                 return@addSnapshotListener
             }
