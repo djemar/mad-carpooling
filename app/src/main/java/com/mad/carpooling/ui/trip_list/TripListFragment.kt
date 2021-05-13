@@ -107,14 +107,14 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
             private val location = v.findViewById<TextView>(R.id.trip_from_to)
             private val timestamp = v.findViewById<TextView>(R.id.trip_timestamp)
             private val price = v.findViewById<TextView>(R.id.trip_price)
-            val tripCV: CardView = v.findViewById<CardView>(R.id.triplist_card)
+            val tripCV: CardView = v.findViewById<CardView>(R.id.triplist_greycard)
 
             private var navController: NavController? = null
 
             @SuppressLint("SetTextI18n")
             fun bind(trip: Trip) {
                 if(!trip.visibility) {
-                    //todo - set transparency
+                    tripCV.setCardBackgroundColor(Color.parseColor("#88aaaaaa"))
                 }
                 location.text = "${trip.departure} - ${trip.arrival}"
                 timestamp.text = (SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.MEDIUM,SimpleDateFormat.SHORT)).format(trip.timestamp.toDate())
