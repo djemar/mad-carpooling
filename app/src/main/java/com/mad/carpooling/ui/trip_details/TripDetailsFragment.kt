@@ -287,31 +287,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val db = Firebase.firestore
         return when (item.itemId) {
-            R.id.visibility_trip -> {
-                if(trip.visibility) {
-                    item.setIcon(R.drawable.ic_baseline_visibility_off);
-                    db.collection("trips").document(trip.id).update("visibility", false)
-                    db.collection("trips").document(trip.id).update("seats", trip.seats + trip.acceptedPeople!!.size )
-                        .addOnSuccessListener {
-                            for( user in trip.interestedPeople!!) {
-                                db.collection("users").document(user).update(
-                                    "favTrips", FieldValue.arrayRemove(trip.id) )
-                                db.collection("trips").document(trip.id).update(
-                                    "interestedPeople", FieldValue.arrayRemove(user) )
-                                db.collection("trips").document(trip.id).update(
-                                    "acceptedPeople", FieldValue.arrayRemove(user) )
-                            }
-                        }
-
-                }
-                else {
-                    item.setIcon(R.drawable.ic_sharp_visibility);
-                    db.collection("trips").document(trip.id).update("visibility", true)
-                }
-                true
-            }
             R.id.edit_trip -> {
                 editTrip()
                 true

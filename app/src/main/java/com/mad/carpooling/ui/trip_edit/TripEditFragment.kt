@@ -1,11 +1,9 @@
 package com.mad.carpooling.ui.trip_edit
 
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.app.DatePickerDialog
-import android.app.Dialog
-import android.app.TimePickerDialog
+import android.app.*
 import android.content.ActivityNotFoundException
+import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -24,22 +22,24 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.widget.*
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toBitmap
+import androidx.fragment.app.*
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.onNavDestinationSelected
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -54,6 +54,7 @@ import java.io.IOException
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.*
+
 
 class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
@@ -104,10 +105,9 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         ibtnPets = view.findViewById(R.id.btn_edit_pets)
         ibtnMusic = view.findViewById(R.id.btn_edit_music)
 
-        val fab = (activity as MainActivity).findViewById<ExtendedFloatingActionButton>(R.id.fab)
-        fab.hide()
-
-        initTrip(view, viewModel, savedInstanceState)
+        model.getTrips().observe(viewLifecycleOwner, { newTripMap ->
+            initTrip(newTripMap, view, viewModel, savedInstanceState)
+        })
 
         ibtnChattiness.setOnClickListener {
             trip.chattiness = changeStatePreference(!trip.chattiness, ibtnChattiness)
@@ -133,7 +133,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         btnCamera.setOnClickListener { activity?.openContextMenu(btnCamera) }
     }
 
-    private fun initTrip(view: View, viewModel: TripEditViewModel, savedInstanceState: Bundle?) {
+    private fun initTrip(newTripMap : HashMap<String, Trip>, view: View, viewModel: TripEditViewModel, savedInstanceState: Bundle?) {
         val args: TripEditFragmentArgs by navArgs()
         val rv = view.findViewById<RecyclerView>(R.id.rv_tripEdit_stops)
         rv.layoutManager = LinearLayoutManager(context)
@@ -151,7 +151,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             currentPhotoPath = savedInstanceState.getString("state_currentPhotoPath")
         }
 
-        trip = viewModel.getTrip()
+        trip = newTripMap[args.id]!!
 
         if (currentPhotoPath != null) {
             BitmapFactory.decodeFile(currentPhotoPath)?.also { bitmap ->
@@ -186,6 +186,112 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             stopEditAdapter.addEmpty(",,", stops.size + 1)
         }
 
+        val fab = (activity as MainActivity).findViewById<ExtendedFloatingActionButton>(R.id.fab)
+        initFab(viewModel, fab)
+        val scrollView = view.findViewById<ScrollView>(R.id.sv_editTrip)
+        scrollView.setOnScrollChangeListener { scrollView, scrollX, scrollY, oldScrollX, oldScrollY ->
+            if (scrollY > oldScrollY && fab.visibility == View.VISIBLE && oldScrollY > 0) {
+                fab.hide()
+
+            } else if (scrollY < oldScrollY && fab.visibility != View.VISIBLE)
+                fab.show()
+        }
+
+    }
+
+    private fun initFab(viewModel: TripEditViewModel, fab : ExtendedFloatingActionButton ) {
+
+        fab.show()
+        fab.shrink()
+
+        fab.text = ""
+        if(trip.visibility){
+            fab.icon = ContextCompat.getDrawable(
+                requireContext(),
+                R.drawable.ic_sharp_visibility)
+            fab.setBackgroundColor( ContextCompat.getColor(requireContext(), R.color.green_700))
+        } else {
+            fab.icon = ContextCompat.getDrawable(
+                requireContext(),
+                R.drawable.ic_baseline_visibility_off)
+            fab.setBackgroundColor( ContextCompat.getColor(requireContext(), R.color.red_700))
+        }
+
+        fab.setOnClickListener{
+            if(trip.visibility){
+                var hideVis = HideDialogFragment(viewModel)
+                hideVis.show(requireActivity().supportFragmentManager, "visibilityDialog")
+                /* val alertDialog: AlertDialog? = activity?.let {
+                    val builder = AlertDialog.Builder(it)
+                    builder.apply {
+
+                        setPositiveButton("Confirm",
+                            DialogInterface.OnClickListener {
+                                // User clicked confirm button
+                            })
+                        setNegativeButton("Cancel",
+                            DialogInterface.OnClickListener {
+                                // User cancelled the dialog
+                            })
+                    }
+                    // Set other dialog properties
+                    // Create the AlertDialog
+                    builder.create()
+                } */
+            } else {
+                var showVis = ShowDialogFragment(viewModel)
+                showVis.show(requireActivity().supportFragmentManager, "visibilityDialog")
+            }
+
+        }
+    }
+
+    class HideDialogFragment(viewModel: TripEditViewModel) : DialogFragment() {
+        var trip = viewModel.getTrip()
+        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+            // Use the Builder class for convenient dialog construction
+            val builder: AlertDialog.Builder = AlertDialog.Builder(activity)
+            val db = Firebase.firestore
+            builder.setMessage("Do you want to hide the trip?")
+                .setPositiveButton("Confirm", DialogInterface.OnClickListener { dialog, id ->
+                    // hide the trip
+                    db.collection("trips").document(trip.id).update("visibility", false)
+                    db.collection("trips").document(trip.id).update("seats", trip.seats + trip.acceptedPeople!!.size )
+                        .addOnSuccessListener {
+                            for( user in trip.interestedPeople!!) {
+                                db.collection("users").document(user).update(
+                                    "favTrips", FieldValue.arrayRemove(trip.id) )
+                                db.collection("trips").document(trip.id).update(
+                                    "interestedPeople", FieldValue.arrayRemove(user) )
+                                db.collection("trips").document(trip.id).update(
+                                    "acceptedPeople", FieldValue.arrayRemove(user) )
+                            }
+                        }
+                })
+                .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, id ->
+                    // User cancelled the dialog
+
+                })
+            // Create the AlertDialog object and return it
+            return builder.create()
+        }
+    }
+
+    class ShowDialogFragment(viewModel: TripEditViewModel) : DialogFragment() {
+        var trip = viewModel.getTrip()
+        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+            // Use the Builder class for convenient dialog construction
+            val builder: AlertDialog.Builder = AlertDialog.Builder(activity)
+            val db = Firebase.firestore
+            builder.setMessage("Do you want to show the trip?")
+                .setPositiveButton("Confirm", DialogInterface.OnClickListener { dialog, id ->
+                    db.collection("trips").document(trip.id).update("visibility", true)
+                })
+                .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, id ->
+                })
+            // Create the AlertDialog object and return it
+            return builder.create()
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
