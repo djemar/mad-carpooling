@@ -315,7 +315,6 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
                 auth = Firebase.auth
                 val user = auth.currentUser
                 location.text = "${trip.departure} - ${trip.arrival}"
-                val format = SimpleDateFormat.getDateTimeInstance()
                 timestamp.text = (SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.MEDIUM,SimpleDateFormat.SHORT)).format(trip.timestamp.toDate())
                 price.text = "Price: ${("%.2f".format(trip.price))} €"
                 if (trip.imageCarURL != "") {
