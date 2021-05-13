@@ -200,8 +200,8 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
 
         sliderPrice.valueFrom = 0f
 
-        val maxPrice = tripsMap.maxByOrNull { it.value.price }?.value?.price ?: 0f
-        sliderPrice.valueTo = (5 * (ceil(abs(maxPrice / 5).toDouble()))).toFloat();
+        val maxPrice = tripsMap.maxByOrNull { it.value.price }?.value?.price ?: 1f
+        sliderPrice.valueTo = (5 * (ceil(abs(maxPrice / 5).toDouble()))).toFloat()
         sliderPrice.values = mutableListOf(sliderPrice.valueFrom, sliderPrice.valueTo)
         tvSliderPrice.text =
             "${("%.2f".format(sliderPrice.valueFrom))} - ${("%.2f".format(sliderPrice.valueTo))} €"
