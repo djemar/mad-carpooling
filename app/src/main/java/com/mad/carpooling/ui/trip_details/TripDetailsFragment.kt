@@ -128,12 +128,8 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             }
         tvDepartureLocation.text = trip.departure
         tvArrivalLocation.text = trip.arrival
-        tvDepartureDate.text =
-            SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(trip.timestamp.toDate())
-                .toString()
-        tvDepartureTime.text =
-            SimpleDateFormat("HH:mm", Locale.getDefault()).format(trip.timestamp.toDate())
-                .toString()
+        tvDepartureDate.text =(SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM)).format(trip.timestamp.toDate())
+        tvDepartureTime.text =(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT)).format(trip.timestamp.toDate())
         tvDuration.text = trip.duration
         tvSeats.text = trip.seats.toString()
         tvPrice.text = "%.2f".format(trip.price)
