@@ -104,7 +104,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
         trip = newTripsMap[args.id]!!
 
-        Log.e("INFO", trip.owner!!.id)
+        Log.d("INFO", trip.owner!!.id)
 
         // ivCarPic to be init from remote resource
 //        if (trip.imageCarURL != null) {
