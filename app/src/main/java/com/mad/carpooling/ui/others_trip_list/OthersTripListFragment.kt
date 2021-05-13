@@ -67,6 +67,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
     private lateinit var etSearchTime: EditText
     private lateinit var chipSearchResults: Chip
     private lateinit var swipeContainer: SwipeRefreshLayout
+    private lateinit var emptyView : TextView
     private var searchIsValid: Boolean = false
     private val model: SharedViewModel by activityViewModels()
 
@@ -87,7 +88,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
         swipeContainer.isEnabled = true
         rv.layoutManager = LinearLayoutManager(context)
         rv.isNestedScrollingEnabled = false //prevent toolbar to expand on scroll
-        val emptyView = view.findViewById<TextView>(R.id.no_trips_available)
+        emptyView = view.findViewById<TextView>(R.id.no_trips_available)
         val tripAdapter = OthersTripAdapter()
         rv.adapter = tripAdapter
 
@@ -99,12 +100,11 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
             // update after login/logout
             model.getOthersTrips().observe(viewLifecycleOwner, Observer { newTripsMap ->
                 // Update the UI
-
-                tripAdapter.submitList(newTripsMap.values.toList())
-                tripMap = newTripsMap
-                emptyView.isVisible = newTripsMap.isEmpty()
-                initSearch(newTripsMap, tripAdapter)
-                model.getOthersTrips().removeObservers(viewLifecycleOwner);
+                    emptyView.isVisible = newTripsMap.isEmpty()
+                    tripAdapter.submitList(newTripsMap.values.toList())
+                    tripMap = newTripsMap
+                    initSearch(newTripsMap, tripAdapter)
+                    model.getOthersTrips().removeObservers(viewLifecycleOwner);
             })
             model.getCurrentUser().removeObservers(viewLifecycleOwner);
         })
@@ -117,6 +117,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
     ) {
         swipeContainer?.setOnRefreshListener {
             tripMap = model.getOthersTrips().value!!
+            emptyView.isVisible = tripMap.isEmpty()
             tripAdapter.submitList(tripMap.values.toList())
             initSearch(tripMap, tripAdapter)
             swipeContainer.isRefreshing = false;
