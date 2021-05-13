@@ -105,9 +105,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         ibtnPets = view.findViewById(R.id.btn_edit_pets)
         ibtnMusic = view.findViewById(R.id.btn_edit_music)
 
-        model.getTrips().observe(viewLifecycleOwner, { newTripMap ->
-            initTrip(newTripMap, view, viewModel, savedInstanceState)
-        })
+        initTrip(view, viewModel, savedInstanceState)
 
         ibtnChattiness.setOnClickListener {
             trip.chattiness = changeStatePreference(!trip.chattiness, ibtnChattiness)
@@ -133,7 +131,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         btnCamera.setOnClickListener { activity?.openContextMenu(btnCamera) }
     }
 
-    private fun initTrip(newTripMap : HashMap<String, Trip>, view: View, viewModel: TripEditViewModel, savedInstanceState: Bundle?) {
+    private fun initTrip(view: View, viewModel: TripEditViewModel, savedInstanceState: Bundle?) {
         val args: TripEditFragmentArgs by navArgs()
         val rv = view.findViewById<RecyclerView>(R.id.rv_tripEdit_stops)
         rv.layoutManager = LinearLayoutManager(context)
@@ -151,7 +149,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             currentPhotoPath = savedInstanceState.getString("state_currentPhotoPath")
         }
 
-        trip = newTripMap[args.id]!!
+        trip = viewModel.getTrip()
 
         if (currentPhotoPath != null) {
             BitmapFactory.decodeFile(currentPhotoPath)?.also { bitmap ->
@@ -187,39 +185,49 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         }
 
         val fab = (activity as MainActivity).findViewById<ExtendedFloatingActionButton>(R.id.fab)
-        initFab(viewModel, fab)
-        val scrollView = view.findViewById<ScrollView>(R.id.sv_editTrip)
-        scrollView.setOnScrollChangeListener { scrollView, scrollX, scrollY, oldScrollX, oldScrollY ->
-            if (scrollY > oldScrollY && fab.visibility == View.VISIBLE && oldScrollY > 0) {
-                fab.hide()
+        if (!isNew) {
+            initFab(viewModel, fab)
 
-            } else if (scrollY < oldScrollY && fab.visibility != View.VISIBLE)
-                fab.show()
+            val scrollView = view.findViewById<ScrollView>(R.id.sv_editTrip)
+            scrollView.setOnScrollChangeListener { scrollView, scrollX, scrollY, oldScrollX, oldScrollY ->
+                if (scrollY > oldScrollY && fab.visibility == View.VISIBLE && oldScrollY > 0) {
+                    fab.hide()
+
+                } else if (scrollY < oldScrollY && fab.visibility != View.VISIBLE)
+                    fab.show()
+            }
+        } else {
+            fab.hide()
         }
 
     }
 
-    private fun initFab(viewModel: TripEditViewModel, fab : ExtendedFloatingActionButton ) {
+    private fun changeStateFab(fab: ExtendedFloatingActionButton) {
+        if (trip.visibility) {
+            fab.icon = ContextCompat.getDrawable(
+                requireContext(),
+                R.drawable.ic_sharp_visibility
+            )
+            fab.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.green_700))
+        } else {
+            fab.icon = ContextCompat.getDrawable(
+                requireContext(),
+                R.drawable.ic_baseline_visibility_off
+            )
+            fab.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red_700))
+        }
+    }
+
+    private fun initFab(viewModel: TripEditViewModel, fab: ExtendedFloatingActionButton) {
 
         fab.show()
         fab.shrink()
 
-        fab.text = ""
-        if(trip.visibility){
-            fab.icon = ContextCompat.getDrawable(
-                requireContext(),
-                R.drawable.ic_sharp_visibility)
-            fab.setBackgroundColor( ContextCompat.getColor(requireContext(), R.color.green_700))
-        } else {
-            fab.icon = ContextCompat.getDrawable(
-                requireContext(),
-                R.drawable.ic_baseline_visibility_off)
-            fab.setBackgroundColor( ContextCompat.getColor(requireContext(), R.color.red_700))
-        }
+        changeStateFab(fab)
 
-        fab.setOnClickListener{
-            if(trip.visibility){
-                var hideVis = HideDialogFragment(viewModel)
+        fab.setOnClickListener {
+            if (trip.visibility) {
+                var hideVis = HideDialogFragment(viewModel, fab)
                 hideVis.show(requireActivity().supportFragmentManager, "visibilityDialog")
                 /* val alertDialog: AlertDialog? = activity?.let {
                     val builder = AlertDialog.Builder(it)
@@ -239,15 +247,35 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                     builder.create()
                 } */
             } else {
-                var showVis = ShowDialogFragment(viewModel)
+                var showVis = ShowDialogFragment(viewModel, fab)
                 showVis.show(requireActivity().supportFragmentManager, "visibilityDialog")
             }
 
         }
     }
 
-    class HideDialogFragment(viewModel: TripEditViewModel) : DialogFragment() {
+    class HideDialogFragment(viewModel: TripEditViewModel, fab: ExtendedFloatingActionButton) :
+        DialogFragment() {
         var trip = viewModel.getTrip()
+        var vm = viewModel
+        var efab = fab
+
+        private fun changeStateFab(fab: ExtendedFloatingActionButton) {
+            if (trip.visibility) {
+                fab.icon = ContextCompat.getDrawable(
+                    requireContext(),
+                    R.drawable.ic_sharp_visibility
+                )
+                fab.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.green_700))
+            } else {
+                fab.icon = ContextCompat.getDrawable(
+                    requireContext(),
+                    R.drawable.ic_baseline_visibility_off
+                )
+                fab.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red_700))
+            }
+        }
+
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
             // Use the Builder class for convenient dialog construction
             val builder: AlertDialog.Builder = AlertDialog.Builder(activity)
@@ -256,17 +284,24 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                 .setPositiveButton("Confirm", DialogInterface.OnClickListener { dialog, id ->
                     // hide the trip
                     db.collection("trips").document(trip.id).update("visibility", false)
-                    db.collection("trips").document(trip.id).update("seats", trip.seats + trip.acceptedPeople!!.size )
+                    db.collection("trips").document(trip.id)
+                        .update("seats", trip.seats + trip.acceptedPeople!!.size)
                         .addOnSuccessListener {
-                            for( user in trip.interestedPeople!!) {
+                            for (user in trip.interestedPeople!!) {
                                 db.collection("users").document(user).update(
-                                    "favTrips", FieldValue.arrayRemove(trip.id) )
+                                    "favTrips", FieldValue.arrayRemove(trip.id)
+                                )
                                 db.collection("trips").document(trip.id).update(
-                                    "interestedPeople", FieldValue.arrayRemove(user) )
+                                    "interestedPeople", FieldValue.arrayRemove(user)
+                                )
                                 db.collection("trips").document(trip.id).update(
-                                    "acceptedPeople", FieldValue.arrayRemove(user) )
+                                    "acceptedPeople", FieldValue.arrayRemove(user)
+                                )
                             }
                         }
+                    trip.visibility = false
+                    vm.setTrip(trip)
+                    changeStateFab(efab)
                 })
                 .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, id ->
                     // User cancelled the dialog
@@ -277,8 +312,28 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         }
     }
 
-    class ShowDialogFragment(viewModel: TripEditViewModel) : DialogFragment() {
+    class ShowDialogFragment(viewModel: TripEditViewModel, fab: ExtendedFloatingActionButton) :
+        DialogFragment() {
         var trip = viewModel.getTrip()
+        var vm = viewModel
+        var efab = fab
+
+        private fun changeStateFab(fab: ExtendedFloatingActionButton) {
+            if (trip.visibility) {
+                fab.icon = ContextCompat.getDrawable(
+                    requireContext(),
+                    R.drawable.ic_sharp_visibility
+                )
+                fab.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.green_700))
+            } else {
+                fab.icon = ContextCompat.getDrawable(
+                    requireContext(),
+                    R.drawable.ic_baseline_visibility_off
+                )
+                fab.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red_700))
+            }
+        }
+
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
             // Use the Builder class for convenient dialog construction
             val builder: AlertDialog.Builder = AlertDialog.Builder(activity)
@@ -286,6 +341,9 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             builder.setMessage("Do you want to show the trip?")
                 .setPositiveButton("Confirm", DialogInterface.OnClickListener { dialog, id ->
                     db.collection("trips").document(trip.id).update("visibility", true)
+                    trip.visibility = true
+                    vm.setTrip(trip)
+                    changeStateFab(efab)
                 })
                 .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, id ->
                 })
