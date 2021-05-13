@@ -363,6 +363,18 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
                             "favTrips", FieldValue.arrayRemove(getItem(position).id)
                         )
                     }
+                    db.collection("trips").document(getItem(position).id).get().addOnSuccessListener {
+                        val tmpArray = it.get("acceptedPeople") as java.util.ArrayList<String>
+                        if (tmpArray.contains(user?.uid!!)) {
+                            db.collection("trips").document(getItem(position).id).update(
+                                "acceptedPeople", FieldValue.arrayRemove(user?.uid)
+                            ).addOnSuccessListener {
+                                db.collection("trips").document(getItem(position).id).update(
+                                    "seats", FieldValue.increment(1)
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }

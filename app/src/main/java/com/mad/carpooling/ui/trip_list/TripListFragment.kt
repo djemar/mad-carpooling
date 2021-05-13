@@ -1,12 +1,16 @@
 package com.mad.carpooling.ui.trip_list
 
 import android.annotation.SuppressLint
-import android.graphics.Color
+import android.content.Context
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.RelativeLayout
+import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -51,6 +55,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
 
     }
 
+    @SuppressLint("ResourceType")
     private fun updateTripList(tripsMap: HashMap<String, Trip>, view: View) {
         rv = view.findViewById<RecyclerView>(R.id.triplist_rv)
         rv.layoutManager = LinearLayoutManager(context)
@@ -66,8 +71,10 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
 
         val fab = (activity as MainActivity).findViewById<ExtendedFloatingActionButton>(R.id.fab)
         fab.icon = ContextCompat.getDrawable(requireContext(),R.drawable.ic_baseline_add)
+        fab.setBackgroundColor( ContextCompat.getColor( requireContext(), R.color.amber_500))
         fab.shrink()
         fab.show()
+
         var navController: NavController?
         fab.setOnClickListener {
             val action = TripListFragmentDirections.actionNavTripListToNavTripEdit(

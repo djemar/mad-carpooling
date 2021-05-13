@@ -193,8 +193,10 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private fun initFab(db: FirebaseFirestore) {
         if (trip.owner!!.id != model.getCurrentUser().value?.uid) {
 
+            fab.setBackgroundColor( ContextCompat.getColor( requireContext(), R.color.amber_500))
             fab.show()
             fab.shrink()
+
 
             if (trip.interestedPeople?.contains(model.getCurrentUser().value?.uid) == true) {
                 fab.icon =
@@ -219,6 +221,14 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                             "favTrips", FieldValue.arrayRemove(trip.id)
                         )
                     }
+                    if(trip.acceptedPeople.contains(model.getCurrentUser().value?.uid!!)) {
+                        db.collection("trips").document(trip.id).update(
+                            "acceptedPeople", FieldValue.arrayRemove(model.getCurrentUser().value?.uid!!)
+                        ).addOnSuccessListener {
+                            db.collection("trips").document(trip.id).update(
+                                "seats", FieldValue.increment(1))
+                        }
+                    }
                 } else {
                     fab.icon = ContextCompat.getDrawable(
                         requireContext(),
@@ -235,9 +245,14 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                 }
             }
         } else {
+            fab.setBackgroundColor( ContextCompat.getColor( requireContext(), R.color.amber_500))
             fab.show()
-            fab.text = "${trip.interestedPeople?.size.toString()} people"
-            fab.extend()
+            if(trip.interestedPeople?.size==0) {
+                fab.shrink()
+            } else {
+                fab.text = "${trip.interestedPeople?.size.toString()} people"
+                fab.extend()
+            }
 
             fab.icon = ContextCompat.getDrawable(
                 requireContext(),
@@ -305,6 +320,8 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
         optionsMenu.findItem(R.id.visibility_trip).isVisible =
             trip.owner!!.id == model.getCurrentUser().value?.uid
+
+
 
         if(trip.visibility){
             optionsMenu.findItem(R.id.visibility_trip).setIcon(R.drawable.ic_sharp_visibility);
