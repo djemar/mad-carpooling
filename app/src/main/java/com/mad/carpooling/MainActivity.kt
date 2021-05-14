@@ -23,6 +23,7 @@ import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.AppBarLayout.Behavior.DragCallback
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
@@ -65,11 +66,6 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
-        navView.getMenu().findItem(R.id.nav_logout).setOnMenuItemClickListener({
-            logout()
-            true
-        })
-
         appBarLayout = findViewById<AppBarLayout>(R.id.appbar_layout)
         if (appBarLayout.layoutParams != null) {    // disable drag on toolbar
             val layoutParams = appBarLayout.layoutParams as CoordinatorLayout.LayoutParams
@@ -90,6 +86,29 @@ class MainActivity : AppCompatActivity() {
                 model.getTrips()
                 initDrawerHeader(navView)
             }
+        }
+
+        var log = findViewById<TextView>(R.id.tv_log)
+
+        val currentUser = auth.currentUser
+        if(currentUser != null) {
+            log.setText("Logout")
+            log.setOnClickListener {
+                logout()
+            }
+            var prof = navView.getMenu().findItem(R.id.nav_show_profile)
+            prof.setVisible(true)
+            var myTrips = navView.getMenu().findItem(R.id.nav_trip_list)
+            myTrips.setVisible(true)
+        } else {
+            log.setText("Login")
+            log.setOnClickListener {
+                login()
+            }
+            var prof = navView.getMenu().findItem(R.id.nav_show_profile)
+            prof.setVisible(false)
+            var myTrips = navView.getMenu().findItem(R.id.nav_trip_list)
+            myTrips.setVisible(false)
         }
     }
 
