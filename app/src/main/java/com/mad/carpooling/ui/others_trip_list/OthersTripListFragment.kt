@@ -126,30 +126,36 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
 
 
     private fun initFab(view: View) {
-
         val fab = (activity as MainActivity).findViewById<ExtendedFloatingActionButton>(R.id.fab)
-        fab.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_add)
-        fab.shrink()
-        fab.show()
 
-        fab.setOnClickListener {
-            val action = OthersTripListFragmentDirections.actionNavOthersTripListToNavTripEdit(
-                "",
-                isNew = true
-            )
-            val navController = Navigation.findNavController(view)
-            navController.navigate(action) //a new one from scratch
-        }
-        rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                if (dy > 0 && fab.visibility == View.VISIBLE) {
-                    fab.hide()
-                } else if (dy < 0 && fab.visibility != View.VISIBLE) {
-                    fab.show()
-                }
+        auth = Firebase.auth
+        val currentUser = auth.currentUser
+        if(currentUser == null) {
+            fab.hide()
+        } else {
+            fab.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_add)
+            fab.shrink()
+            fab.show()
+
+            fab.setOnClickListener {
+                val action = OthersTripListFragmentDirections.actionNavOthersTripListToNavTripEdit(
+                 "",
+                    isNew = true
+                )
+                val navController = Navigation.findNavController(view)
+                navController.navigate(action) //a new one from scratch
             }
-        })
+            rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    if (dy > 0 && fab.visibility == View.VISIBLE) {
+                        fab.hide()
+                    } else if (dy < 0 && fab.visibility != View.VISIBLE) {
+                        fab.show()
+                    }
+                }
+            })
+        }
     }
 
 
@@ -322,8 +328,14 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
                 }
                 // clear any listener to avoid recyclerview messing up with checkbox state,
                 // treating the checkbox as a brand new one every time
-                btnStar.setOnCheckedChangeListener(null)
-                btnStar.isChecked = trip.interestedPeople?.contains(user?.uid) == true
+                var auth = Firebase.auth
+                val currentUser = auth.currentUser
+                if(currentUser == null) {
+                    btnStar.visibility=View.GONE;
+                } else {
+                    btnStar.setOnCheckedChangeListener(null)
+                    btnStar.isChecked = trip.interestedPeople?.contains(user?.uid) == true
+                }
             }
         }
 
@@ -335,45 +347,63 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
 
         override fun onBindViewHolder(holder: TripViewHolder, position: Int) {
             auth = Firebase.auth
+            var auth = Firebase.auth
+            val currentUser = auth.currentUser
             val user = auth.currentUser
             val db = Firebase.firestore
             holder.bind(getItem(position))
+
+
+
             holder.tripRL.setOnClickListener {
-                val action =
-                    OthersTripListFragmentDirections.actionNavOthersTripListToNavTripDetails(
-                        getItem(position).id,
-                    )
-                Navigation.findNavController(holder.tripRL).navigate(action)
-            }
-            holder.btnStar.visibility = View.VISIBLE
-            holder.btnStar.setOnCheckedChangeListener { it, isChecked ->
-                if (isChecked) {
-                    db.collection("trips").document(getItem(position).id).update(
-                        "interestedPeople", FieldValue.arrayUnion(user?.uid)
-                    ).addOnSuccessListener {
-                        db.collection("users").document(user?.uid!!).update(
-                            "favTrips", FieldValue.arrayUnion(getItem(position).id)
-                        )
-                    }
+                if(currentUser == null) {
+                    Toast.makeText(holder.itemView.context, "You must be logged to see details", Toast.LENGTH_SHORT).show()
                 } else {
-                    db.collection("trips").document(getItem(position).id).update(
-                        "interestedPeople", FieldValue.arrayRemove(user?.uid)
-                    ).addOnSuccessListener {
-                        db.collection("users").document(user?.uid!!).update(
-                            "favTrips", FieldValue.arrayRemove(getItem(position).id)
+                    val action =
+                        OthersTripListFragmentDirections.actionNavOthersTripListToNavTripDetails(
+                            getItem(position).id,
                         )
-                    }
-                    db.collection("trips").document(getItem(position).id).get().addOnSuccessListener {
-                        val tmpArray = it.get("acceptedPeople") as java.util.ArrayList<String>
-                        if (tmpArray.contains(user?.uid!!)) {
-                            db.collection("trips").document(getItem(position).id).update(
-                                "acceptedPeople", FieldValue.arrayRemove(user?.uid)
-                            ).addOnSuccessListener {
-                                db.collection("trips").document(getItem(position).id).update(
-                                    "seats", FieldValue.increment(1)
-                                )
-                            }
+                    Navigation.findNavController(holder.tripRL).navigate(action)
+                }
+            }
+
+
+            if(currentUser == null) {
+                holder.btnStar.visibility=View.GONE;
+            } else {
+                holder.btnStar.visibility = View.VISIBLE
+                holder.btnStar.setOnCheckedChangeListener { it, isChecked ->
+                    if (isChecked) {
+                        db.collection("trips").document(getItem(position).id).update(
+                            "interestedPeople", FieldValue.arrayUnion(user?.uid)
+                        ).addOnSuccessListener {
+                            db.collection("users").document(user?.uid!!).update(
+                                "favTrips", FieldValue.arrayUnion(getItem(position).id)
+                            )
                         }
+                    } else {
+                        db.collection("trips").document(getItem(position).id).update(
+                            "interestedPeople", FieldValue.arrayRemove(user?.uid)
+                        ).addOnSuccessListener {
+                            db.collection("users").document(user?.uid!!).update(
+                                "favTrips", FieldValue.arrayRemove(getItem(position).id)
+                            )
+                        }
+                        db.collection("trips").document(getItem(position).id).get()
+                            .addOnSuccessListener {
+                                val tmpArray =
+                                    it.get("acceptedPeople") as java.util.ArrayList<String>
+                                if (tmpArray.contains(user?.uid!!)) {
+                                    db.collection("trips").document(getItem(position).id).update(
+                                        "acceptedPeople", FieldValue.arrayRemove(user?.uid)
+                                    ).addOnSuccessListener {
+                                        db.collection("trips").document(getItem(position).id)
+                                            .update(
+                                                "seats", FieldValue.increment(1)
+                                            )
+                                    }
+                                }
+                            }
                     }
                 }
             }
