@@ -1,7 +1,6 @@
 package com.mad.carpooling.ui.trip_list
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.util.TypedValue
@@ -56,7 +55,6 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
 
     }
 
-    @SuppressLint("ResourceType")
     private fun updateTripList(tripsMap: HashMap<String, Trip>, view: View) {
         rv = view.findViewById<RecyclerView>(R.id.triplist_rv)
         rv.layoutManager = LinearLayoutManager(context)
@@ -72,7 +70,11 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
 
         val fab = (activity as MainActivity).findViewById<ExtendedFloatingActionButton>(R.id.fab)
         fab.icon = ContextCompat.getDrawable(requireContext(),R.drawable.ic_baseline_add)
-        fab.setBackgroundColor( ContextCompat.getColor( requireContext(), R.color.amber_500))
+
+        val value = TypedValue()
+        view.context.theme.resolveAttribute(R.attr.colorSecondary, value, true)
+        fab.setBackgroundColor(value.data)
+
         fab.shrink()
         fab.show()
 

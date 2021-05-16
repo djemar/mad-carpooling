@@ -128,8 +128,10 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             }
         tvDepartureLocation.text = trip.departure
         tvArrivalLocation.text = trip.arrival
-        tvDepartureDate.text =(SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM)).format(trip.timestamp.toDate())
-        tvDepartureTime.text =(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT)).format(trip.timestamp.toDate())
+        tvDepartureDate.text =
+            (SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM)).format(trip.timestamp.toDate())
+        tvDepartureTime.text =
+            (SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT)).format(trip.timestamp.toDate())
         tvDuration.text = trip.duration
         tvSeats.text = trip.seats.toString()
         tvPrice.text = "%.2f".format(trip.price)
@@ -150,7 +152,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             tripStopsTitle.visibility = View.GONE
         }
 
-        if(trip.description == ""){
+        if (trip.description == "") {
             val descTitle = view.findViewById<TextView>(R.id.tv_tripDetails_description)
             val descMcv = view.findViewById<MaterialCardView>(R.id.mcv_tripDetails_description)
             descTitle.visibility = View.GONE
@@ -175,7 +177,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
         bsb.state = BottomSheetBehavior.STATE_HIDDEN
 
-        initFab(db)
+        initFab(db, view)
 
         val scrollView = view.findViewById<ScrollView>(R.id.sv_tridDetails)
         scrollView.setOnScrollChangeListener { scrollView, scrollX, scrollY, oldScrollX, oldScrollY ->
@@ -190,12 +192,10 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
     }
 
-    private fun initFab(db: FirebaseFirestore) {
-        if (trip.owner!!.id != model.getCurrentUser().value?.uid) {
-
-            fab.setBackgroundColor( ContextCompat.getColor( requireContext(), R.color.amber_500))
-            fab.show()
-            fab.shrink()
+    private fun initFab(db: FirebaseFirestore, view: View) {
+        val value = TypedValue()
+        view.context.theme.resolveAttribute(R.attr.colorSecondary, value, true)
+        fab.setBackgroundColor(value.data)
 
 
             if (trip.interestedPeople?.contains(model.getCurrentUser().value?.uid) == true) {
