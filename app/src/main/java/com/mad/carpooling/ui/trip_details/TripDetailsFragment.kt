@@ -197,15 +197,25 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         view.context.theme.resolveAttribute(R.attr.colorSecondary, value, true)
         fab.setBackgroundColor(value.data)
 
+        if (trip.owner!!.id != model.getCurrentUser().value?.uid) {
 
-            if (trip.interestedPeople?.contains(model.getCurrentUser().value?.uid) == true) {
+            if (trip.interestedPeople?.contains(model.getCurrentUser().value?.uid)!!) {
                 fab.icon =
                     ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_fullstar)
                 fab.text = ""
+                if (trip.acceptedPeople?.contains(model.getCurrentUser().value?.uid)!!) {
+                    fab.text = "accepted"
+                    fab.extend()
+                } else {
+                    fab.text = ""
+                    fab.shrink()
+                }
             } else {
                 fab.icon = ContextCompat.getDrawable(requireContext(), R.drawable.sl_favourite)
                 fab.text = ""
             }
+
+            fab.show()
 
             fab.setOnClickListener {
                 if (trip.interestedPeople?.contains(model.getCurrentUser().value?.uid) == true) {
@@ -223,11 +233,15 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                     }
                     if (trip.acceptedPeople?.contains(model.getCurrentUser().value?.uid!!)!!) {
                         db.collection("trips").document(trip.id).update(
-                            "acceptedPeople", FieldValue.arrayRemove(model.getCurrentUser().value?.uid!!)
+                            "acceptedPeople",
+                            FieldValue.arrayRemove(model.getCurrentUser().value?.uid!!)
                         ).addOnSuccessListener {
                             db.collection("trips").document(trip.id).update(
-                                "seats", FieldValue.increment(1))
+                                "seats", FieldValue.increment(1)
+                            )
                         }
+                        fab.text = ""
+                        fab.shrink()
                     }
                 } else {
                     fab.icon = ContextCompat.getDrawable(
@@ -245,14 +259,14 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                 }
             }
         } else {
-            fab.setBackgroundColor( ContextCompat.getColor( requireContext(), R.color.amber_500))
-            fab.show()
-            if(trip.interestedPeople?.size==0) {
+            if (trip.interestedPeople?.size == 0) {
+                fab.text = ""
                 fab.shrink()
             } else {
                 fab.text = "${trip.interestedPeople?.size.toString()} people"
                 fab.extend()
             }
+            fab.show()
 
             fab.icon = ContextCompat.getDrawable(
                 requireContext(),
@@ -321,12 +335,11 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         optionsMenu.findItem(R.id.visibility_trip).isVisible =
             trip.owner!!.id == model.getCurrentUser().value?.uid
 
-
-
-        if(trip.visibility){
+        if (trip.visibility) {
             optionsMenu.findItem(R.id.visibility_trip).setIcon(R.drawable.ic_sharp_visibility);
         } else {
-            optionsMenu.findItem(R.id.visibility_trip).setIcon(R.drawable.ic_baseline_visibility_off);
+            optionsMenu.findItem(R.id.visibility_trip)
+                .setIcon(R.drawable.ic_baseline_visibility_off);
         }
     }
 
