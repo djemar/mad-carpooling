@@ -221,7 +221,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                             "favTrips", FieldValue.arrayRemove(trip.id)
                         )
                     }
-                    if(trip.acceptedPeople.contains(model.getCurrentUser().value?.uid!!)) {
+                    if (trip.acceptedPeople?.contains(model.getCurrentUser().value?.uid!!)!!) {
                         db.collection("trips").document(trip.id).update(
                             "acceptedPeople", FieldValue.arrayRemove(model.getCurrentUser().value?.uid!!)
                         ).addOnSuccessListener {
@@ -397,7 +397,7 @@ class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip
         holder.bind(users?.get(position))
         holder.btnAccept.visibility = View.VISIBLE
 
-        if (trip.acceptedPeople.contains(users?.get(position))) {
+        if (trip.acceptedPeople?.contains(users?.get(position))!!) {
             initButtonState("remove", holder.btnAccept, holder.itemView)
         } else {
             initButtonState("accept", holder.btnAccept, holder.itemView)
