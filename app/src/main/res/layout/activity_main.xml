@@ -46,15 +46,18 @@
 
             <TextView
                 android:id="@+id/tv_log"
-                android:textColor="?colorOnSecondary"
-                android:drawableTint="?colorOnSecondary"
+                android:textColor="?attr/menuItem"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingLeft="8dp"
-                android:gravity="start"
-                android:drawableLeft="@drawable/ic_logout"
+                android:paddingStart="8dp"
+                android:gravity="center"
                 android:drawablePadding="16dp"
-                android:text="Logout" />
+                android:text="Logout"
+                android:layout_gravity="start"
+                android:textSize="14sp"
+                style="@style/TextAppearance.AppCompat.Title"
+                app:drawableLeftCompat="@drawable/ic_logout"
+                app:drawableTint="?attr/menuItem" />
 
         </LinearLayout>
 

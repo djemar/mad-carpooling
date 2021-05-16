@@ -1,5 +1,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
+
+    <attr name="menuItem"/>
     <style name="Theme.Carpooling" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/blue_700</item>
@@ -14,6 +16,7 @@
         <!-- Customize your theme here. -->
         <item name="toolbarStyle">@style/MyToolbarStyle</item>
         <item name="colorControlNormal">@color/gray_dark</item>
+        <item name="menuItem">@color/black</item>
     </style>
 
     <style name="MyToolbarStyle" parent="Widget.MaterialComponents.Toolbar.PrimarySurface">
