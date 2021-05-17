@@ -16,15 +16,6 @@
         android:layout_marginBottom="8dp"
         app:cardCornerRadius="16dp">
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/triplist_greycard"
-            android:layout_width="match_parent"
-            android:layout_height="110dp"
-            android:layout_marginBottom="8dp"
-            app:cardCornerRadius="16dp"
-            app:cardBackgroundColor="@color/fui_transparent"
-            app:cardElevation="0dp">
-
         <RelativeLayout
             android:id="@+id/trip_rl"
             android:layout_width="match_parent"
@@ -105,10 +96,7 @@
                 android:clickable="true"
                 android:visibility="gone" />
 
-
         </RelativeLayout>
-
-    </androidx.cardview.widget.CardView>
 
     </androidx.cardview.widget.CardView>
 
