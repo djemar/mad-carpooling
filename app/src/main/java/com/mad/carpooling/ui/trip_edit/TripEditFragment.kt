@@ -257,7 +257,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     class HideDialogFragment(viewModel: TripEditViewModel, fab: ExtendedFloatingActionButton) :
         DialogFragment() {
         var trip = viewModel.getTrip()
-        var vm = viewModel
         var efab = fab
 
         private fun changeStateFab(fab: ExtendedFloatingActionButton) {
@@ -279,28 +278,10 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
             // Use the Builder class for convenient dialog construction
             val builder: AlertDialog.Builder = AlertDialog.Builder(activity)
-            val db = Firebase.firestore
             builder.setMessage("Do you want to hide the trip?")
                 .setPositiveButton("Confirm", DialogInterface.OnClickListener { dialog, id ->
                     // hide the trip
-                    db.collection("trips").document(trip.id).update("visibility", false)
-                    db.collection("trips").document(trip.id)
-                        .update("seats", trip.seats + trip.acceptedPeople!!.size)
-                        .addOnSuccessListener {
-                            for (user in trip.interestedPeople!!) {
-                                db.collection("users").document(user).update(
-                                    "favTrips", FieldValue.arrayRemove(trip.id)
-                                )
-                                db.collection("trips").document(trip.id).update(
-                                    "interestedPeople", FieldValue.arrayRemove(user)
-                                )
-                                db.collection("trips").document(trip.id).update(
-                                    "acceptedPeople", FieldValue.arrayRemove(user)
-                                )
-                            }
-                        }
                     trip.visibility = false
-                    vm.setTrip(trip)
                     changeStateFab(efab)
                 })
                 .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, id ->
@@ -315,7 +296,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     class ShowDialogFragment(viewModel: TripEditViewModel, fab: ExtendedFloatingActionButton) :
         DialogFragment() {
         var trip = viewModel.getTrip()
-        var vm = viewModel
         var efab = fab
 
         private fun changeStateFab(fab: ExtendedFloatingActionButton) {
@@ -337,12 +317,9 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
             // Use the Builder class for convenient dialog construction
             val builder: AlertDialog.Builder = AlertDialog.Builder(activity)
-            val db = Firebase.firestore
             builder.setMessage("Do you want to show the trip?")
                 .setPositiveButton("Confirm", DialogInterface.OnClickListener { dialog, id ->
-                    db.collection("trips").document(trip.id).update("visibility", true)
                     trip.visibility = true
-                    vm.setTrip(trip)
                     changeStateFab(efab)
                 })
                 .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, id ->
@@ -650,6 +627,18 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                 navigateToTripDetails(trip.id)
             }
         } else {
+            if(!trip.visibility){
+                for (user in trip.interestedPeople!!) {
+                    if(trip.acceptedPeople?.contains(user)!!){
+                        trip.seats++
+                    }
+                    db.collection("users").document(user).update(
+                        "favTrips", FieldValue.arrayRemove(trip.id)
+                    )
+                }
+                trip.acceptedPeople = ArrayList<String>()
+                trip.interestedPeople = ArrayList<String>()
+            }
             db.collection("trips").document(trip.id).set(trip).addOnSuccessListener {
                 Snackbar.make(requireView(), "Trip updated", Snackbar.LENGTH_SHORT).show()
                 navigateToTripDetails(trip.id)
