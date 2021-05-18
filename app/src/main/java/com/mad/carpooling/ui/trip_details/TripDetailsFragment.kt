@@ -260,7 +260,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             }
         } else {
             if (trip.interestedPeople?.size == 0) {
-                fab.text = ""
                 fab.shrink()
             } else {
                 fab.text = "${trip.interestedPeople?.size.toString()} people"
