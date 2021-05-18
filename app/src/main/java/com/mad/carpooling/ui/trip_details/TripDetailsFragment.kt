@@ -414,7 +414,14 @@ class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip
             initButtonState("remove", holder.btnAccept, holder.itemView)
         } else {
             initButtonState("accept", holder.btnAccept, holder.itemView)
-            holder.btnAccept.isEnabled = trip.seats >= 1
+            if(trip.seats>=1){
+                holder.btnAccept.isEnabled = true
+                holder.btnAccept.alpha = 1f
+            }
+            else {
+                holder.btnAccept.isEnabled = false
+                holder.btnAccept.alpha = 0.5f
+            }
         }
 
         holder.btnAccept.setOnClickListener {
