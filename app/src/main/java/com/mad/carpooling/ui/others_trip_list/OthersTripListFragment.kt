@@ -94,7 +94,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
 
         initFab(view)
 
-        initSwipeRefresh(swipeContainer, tripAdapter)
+        //initSwipeRefresh(swipeContainer, tripAdapter)
 
         model.getCurrentUser().observe(viewLifecycleOwner, Observer { currentUser ->
             // update after login/logout
@@ -104,9 +104,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
                     tripAdapter.submitList(newTripsMap.values.toList())
                     tripMap = newTripsMap
                     initSearch(newTripsMap, tripAdapter)
-                    model.getOthersTrips().removeObservers(viewLifecycleOwner);
             })
-            model.getCurrentUser().removeObservers(viewLifecycleOwner);
         })
 
     }
