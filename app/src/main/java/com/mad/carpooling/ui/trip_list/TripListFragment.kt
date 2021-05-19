@@ -44,8 +44,8 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
         super.onViewCreated(view, savedInstanceState)
         val emptyView = view.findViewById<TextView>(R.id.no_trips_available)
 
-        val swipeContainer = view.findViewById<SwipeRefreshLayout>(R.id.swipeContainer)
-        swipeContainer.isEnabled = false
+        //val swipeContainer = view.findViewById<SwipeRefreshLayout>(R.id.swipeContainer)
+        //swipeContainer.isEnabled = false
 
         model.getMyTrips().observe(viewLifecycleOwner, Observer { newTripsMap ->
             // Update the UI
