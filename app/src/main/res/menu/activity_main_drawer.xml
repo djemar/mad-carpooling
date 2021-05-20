@@ -26,6 +26,11 @@
             android:id="@+id/nav_others_trip_list"
             android:icon="@drawable/ic_baseline_car"
             android:title="@string/menu_others_trips" />
+
+        <item
+            android:id="@+id/nav_map"
+            android:icon="@drawable/ic_launcher_foreground"
+            android:title="Mappazzone" />
     </group>
 
 </menu>
