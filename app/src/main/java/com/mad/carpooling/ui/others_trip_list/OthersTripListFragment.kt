@@ -67,7 +67,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
     private lateinit var etSearchTime: EditText
     private lateinit var chipSearchResults: Chip
     private lateinit var swipeContainer: SwipeRefreshLayout
-    private lateinit var emptyView : TextView
+    private lateinit var emptyView: TextView
     private var searchIsValid: Boolean = false
     private val model: SharedViewModel by activityViewModels()
 
@@ -100,10 +100,10 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
             // update after login/logout
             model.getOthersTrips().observe(viewLifecycleOwner, Observer { newTripsMap ->
                 // Update the UI
-                    emptyView.isVisible = newTripsMap.isEmpty()
-                    tripAdapter.submitList(newTripsMap.values.toList())
-                    tripMap = newTripsMap
-                    initSearch(newTripsMap, tripAdapter)
+                emptyView.isVisible = newTripsMap.isEmpty()
+                tripAdapter.submitList(newTripsMap.values.toList())
+                tripMap = newTripsMap
+                initSearch(newTripsMap, tripAdapter)
             })
         })
 
@@ -128,7 +128,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
 
         auth = Firebase.auth
         val currentUser = auth.currentUser
-        if(currentUser == null) {
+        if (currentUser == null) {
             fab.hide()
         } else {
             fab.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_add)
@@ -137,7 +137,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
 
             fab.setOnClickListener {
                 val action = OthersTripListFragmentDirections.actionNavOthersTripListToNavTripEdit(
-                 "",
+                    "",
                     isNew = true
                 )
                 val navController = Navigation.findNavController(view)
@@ -319,7 +319,10 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
                 auth = Firebase.auth
                 val user = auth.currentUser
                 location.text = "${trip.departure} - ${trip.arrival}"
-                timestamp.text = (SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.MEDIUM,SimpleDateFormat.SHORT)).format(trip.timestamp.toDate())
+                timestamp.text = (SimpleDateFormat.getDateTimeInstance(
+                    SimpleDateFormat.MEDIUM,
+                    SimpleDateFormat.SHORT
+                )).format(trip.timestamp.toDate())
                 price.text = "Price: ${("%.2f".format(trip.price))} €"
                 if (trip.imageCarURL != "") {
                     Glide.with(this.itemView).load(trip.imageCarURL).into(ivCar)
@@ -328,8 +331,8 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
                 // treating the checkbox as a brand new one every time
                 var auth = Firebase.auth
                 val currentUser = auth.currentUser
-                if(currentUser == null) {
-                    btnStar.visibility=View.GONE;
+                if (currentUser == null) {
+                    btnStar.visibility = View.GONE;
                 } else {
                     btnStar.setOnCheckedChangeListener(null)
                     btnStar.isChecked = trip.interestedPeople?.contains(user?.uid) == true
@@ -354,8 +357,12 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
 
 
             holder.tripRL.setOnClickListener {
-                if(currentUser == null) {
-                    Toast.makeText(holder.itemView.context, "You must be logged to see details", Toast.LENGTH_SHORT).show()
+                if (currentUser == null) {
+                    Toast.makeText(
+                        holder.itemView.context,
+                        "You must be logged to see details",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 } else {
                     val action =
                         OthersTripListFragmentDirections.actionNavOthersTripListToNavTripDetails(
@@ -366,8 +373,8 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
             }
 
 
-            if(currentUser == null) {
-                holder.btnStar.visibility=View.GONE;
+            if (currentUser == null) {
+                holder.btnStar.visibility = View.GONE;
             } else {
                 holder.btnStar.visibility = View.VISIBLE
                 holder.btnStar.setOnCheckedChangeListener { it, isChecked ->

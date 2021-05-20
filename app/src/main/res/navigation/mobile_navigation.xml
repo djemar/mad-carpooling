@@ -144,5 +144,15 @@
             app:nullable="true"
             android:defaultValue="@null" />
     </fragment>
+    <fragment
+        android:id="@+id/nav_bought_trips"
+        android:name="com.mad.carpooling.ui.bought_trips.BoughtTripsListFragment"
+        android:label="Bought Trips"
+        tools:layout="@layout/fragment_trip_list">
+        <action
+            android:id="@+id/action_nav_bought_trips_to_nav_trip_details"
+            app:destination="@id/nav_trip_details"
+            app:popUpTo="@id/nav_bought_trips" />
+    </fragment>
 
 </navigation>

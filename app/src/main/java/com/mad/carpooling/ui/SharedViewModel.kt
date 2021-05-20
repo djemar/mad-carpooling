@@ -25,6 +25,36 @@ class SharedViewModel : ViewModel() {
         }
     }
 
+    private val boughtTrips: MutableLiveData<HashMap<String, Trip>> by lazy {
+        MutableLiveData<HashMap<String, Trip>>().also {
+            loadBoughtTrips()
+        }
+    }
+
+    private val interestTrips: MutableLiveData<HashMap<String, Trip>> by lazy {
+        MutableLiveData<HashMap<String, Trip>>().also {
+            loadBoughtTrips()
+        }
+    }
+
+    private fun loadBoughtTrips() {
+        val db = Firebase.firestore
+
+        db.collection("trips").whereArrayContains("acceptedPeople", currentUser.value?.uid!!)
+            .addSnapshotListener { value, e ->
+                if (e != null) {
+                    boughtTrips.postValue(HashMap())
+                    Log.e("loadBoughtTrips() exception => ", e.toString())
+                    return@addSnapshotListener
+                }
+                val tripsMap: HashMap<String, Trip> = HashMap()
+                for (doc in value!!) {
+                    tripsMap[doc.id] = doc.toObject(Trip::class.java)
+                }
+                boughtTrips.postValue(tripsMap)
+            }
+    }
+
     private fun loadMyTrips() {
         val db = Firebase.firestore
         val currentUserRef =
@@ -33,7 +63,7 @@ class SharedViewModel : ViewModel() {
             .addSnapshotListener { value, e ->
                 if (e != null) {
                     myTrips.postValue(HashMap())
-                    Log.e("loadTrips() exception => ", e.toString())
+                    Log.e("loadMyTrips() exception => ", e.toString())
                     return@addSnapshotListener
                 }
                 val tripsMap: HashMap<String, Trip> = HashMap()
@@ -101,6 +131,9 @@ class SharedViewModel : ViewModel() {
 
     fun getMyTrips(): LiveData<HashMap<String, Trip>> {
         return myTrips
+    }
+    fun getBoughtTrips(): LiveData<HashMap<String, Trip>> {
+        return boughtTrips
     }
 
     fun getOthersTrips(): LiveData<HashMap<String, Trip>> {
