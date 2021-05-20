@@ -13,6 +13,11 @@
             android:icon="@drawable/ic_menu_list"
             android:title="@string/menu_trip_list" />
         <item
+            android:id="@+id/nav_interest_trips"
+            android:icon="@drawable/ic_baseline_fullstar"
+            android:title="Trips You Like" />
+
+        <item
             android:id="@+id/nav_bought_trips"
             android:icon="@drawable/ic_price"
             android:title="Bought Trips" />
