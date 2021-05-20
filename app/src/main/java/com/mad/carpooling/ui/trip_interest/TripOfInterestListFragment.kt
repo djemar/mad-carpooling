@@ -52,7 +52,7 @@ class TripOfInterestListFragment : Fragment(R.layout.fragment_trip_list) {
         rv = view.findViewById<RecyclerView>(R.id.triplist_rv)
         rv.layoutManager = LinearLayoutManager(context)
         rv.isNestedScrollingEnabled = false; //prevent toolbar to expand on scroll
-        val tripAdapter = BoughtTripAdapter()
+        val tripAdapter = InterestedTripAdapter()
         rv.adapter = tripAdapter
 
         //val swipeContainer = view.findViewById<SwipeRefreshLayout>(R.id.swipeContainer)
@@ -101,8 +101,8 @@ class TripOfInterestListFragment : Fragment(R.layout.fragment_trip_list) {
         })
     }
 
-    class BoughtTripAdapter() :
-        ListAdapter<Trip, BoughtTripAdapter.TripViewHolder>(TaskDiffCallback()) {
+    class InterestedTripAdapter() :
+        ListAdapter<Trip, InterestedTripAdapter.TripViewHolder>(TaskDiffCallback()) {
 
         class TaskDiffCallback : DiffUtil.ItemCallback<Trip>() {
 
@@ -140,6 +140,8 @@ class TripOfInterestListFragment : Fragment(R.layout.fragment_trip_list) {
                 if (trip.imageCarURL != "") {
                     Glide.with(this.itemView).load(trip.imageCarURL).into(ivCar)
                 }
+                btnStar.setOnCheckedChangeListener(null)
+                btnStar.isChecked = trip.interestedPeople?.contains(user?.uid) == true
             }
         }
 
@@ -158,46 +160,43 @@ class TripOfInterestListFragment : Fragment(R.layout.fragment_trip_list) {
 
             trip.let { holder.bind(it) }
             holder.tripRL.setOnClickListener {
-                val action = TripOfInterestListFragmentDirections.actionNavInterestTripsToNavTripDetails(
-                    trip.id,
-                )
+                val action =
+                    TripOfInterestListFragmentDirections.actionNavInterestTripsToNavTripDetails(
+                        trip.id,
+                    )
                 Navigation.findNavController(holder.tripRL).navigate(action)
             }
-/*            holder.btnStar.visibility = View.VISIBLE
+            holder.btnStar.visibility = View.VISIBLE
             holder.btnStar.setOnCheckedChangeListener { it, isChecked ->
-                if (isChecked) {
-                    db.collection("trips").document(getItem(position).id).update(
-                        "interestedPeople", FieldValue.arrayUnion(user?.uid)
-                    ).addOnSuccessListener {
-                        db.collection("users").document(user?.uid!!).update(
-                            "favTrips", FieldValue.arrayUnion(getItem(position).id)
-                        )
-                    }
-                } else {
-                    db.collection("trips").document(getItem(position).id).update(
-                        "interestedPeople", FieldValue.arrayRemove(user?.uid)
-                    ).addOnSuccessListener {
-                        db.collection("users").document(user?.uid!!).update(
-                            "favTrips", FieldValue.arrayRemove(getItem(position).id)
-                        )
-                    }
-                    db.collection("trips").document(getItem(position).id).get()
+                if (!isChecked) {
+                    db.collection("trips").document(getItem(holder.adapterPosition).id).get()
                         .addOnSuccessListener {
                             val tmpArray =
                                 it.get("acceptedPeople") as java.util.ArrayList<String>
                             if (tmpArray.contains(user?.uid!!)) {
-                                db.collection("trips").document(getItem(position).id).update(
-                                    "acceptedPeople", FieldValue.arrayRemove(user?.uid)
-                                ).addOnSuccessListener {
-                                    db.collection("trips").document(getItem(position).id)
+                                db.collection("trips").document(getItem(holder.adapterPosition).id)
+                                    .update(
+                                        "acceptedPeople", FieldValue.arrayRemove(user?.uid)
+                                    ).addOnSuccessListener {
+                                    db.collection("trips")
+                                        .document(getItem(holder.adapterPosition).id)
                                         .update(
                                             "seats", FieldValue.increment(1)
                                         )
                                 }
                             }
+                            db.collection("users").document(user?.uid!!).update(
+                                "favTrips",
+                                FieldValue.arrayRemove(getItem(holder.adapterPosition).id)
+                            ).addOnSuccessListener {
+                                db.collection("trips").document(getItem(holder.adapterPosition).id)
+                                    .update(
+                                        "interestedPeople", FieldValue.arrayRemove(user?.uid)
+                                    )
+                            }
                         }
                 }
-            }*/
+            }
         }
     }
 }
