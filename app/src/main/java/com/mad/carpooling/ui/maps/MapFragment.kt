@@ -1,6 +1,7 @@
 package com.mad.carpooling.ui.maps
 
 import android.Manifest
+import android.location.Geocoder
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.view.LayoutInflater
@@ -12,12 +13,19 @@ import com.mad.carpooling.R
 import com.vmadalin.easypermissions.EasyPermissions
 import com.vmadalin.easypermissions.dialogs.SettingsDialog
 import org.osmdroid.config.Configuration.getInstance
+import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.MapEventsOverlay
+import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.OverlayItem
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import java.util.*
+import kotlin.collections.ArrayList
+
 
 class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionCallbacks {
     private lateinit var map: MapView;
@@ -56,6 +64,43 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         map.setMultiTouchControls(true);
         map.overlays.add(rotationGestureOverlay);
 
+        //your items
+        val items = ArrayList<OverlayItem>()
+        items.add(
+            OverlayItem(
+                "Marcu", "Pacco", GeoPoint(
+                    45.0580, 7.6482
+                )
+            )
+        )
+
+        var markerStart: Marker? = null
+
+        val mapEventsReceiver: MapEventsReceiver = object : MapEventsReceiver {
+            override fun singleTapConfirmedHelper(p: GeoPoint): Boolean {
+                //do whatever you need here
+                return false
+            }
+
+            override fun longPressHelper(p: GeoPoint): Boolean {
+                //do whatever you need here
+                val geocoder = Geocoder(requireContext(), Locale.getDefault())
+                val address = geocoder.getFromLocation(p.latitude, p.longitude, 1)
+                if (markerStart != null) {
+                    (markerStart as Marker).closeInfoWindow()
+                    map.overlays.remove(markerStart)
+                }
+                markerStart = Marker(map)
+                markerStart!!.position = p
+                markerStart!!.title = address[0].getAddressLine(0)
+                map.overlays.add(markerStart)
+                map.invalidate()
+
+                return true
+            }
+        }
+        val evOverlay = MapEventsOverlay(mapEventsReceiver)
+        map.getOverlays().add(evOverlay)
 
         super.onViewCreated(view, savedInstanceState)
     }
