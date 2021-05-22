@@ -1,9 +1,11 @@
 package com.mad.carpooling.ui.maps
 
 import android.Manifest
+import android.location.Address
 import android.location.Geocoder
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +14,7 @@ import androidx.fragment.app.Fragment
 import com.mad.carpooling.R
 import com.vmadalin.easypermissions.EasyPermissions
 import com.vmadalin.easypermissions.dialogs.SettingsDialog
+import kotlinx.coroutines.*
 import org.osmdroid.config.Configuration.getInstance
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -23,6 +26,7 @@ import org.osmdroid.views.overlay.OverlayItem
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import java.io.IOException
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -84,25 +88,39 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
 
             override fun longPressHelper(p: GeoPoint): Boolean {
                 //do whatever you need here
-                val geocoder = Geocoder(requireContext(), Locale.getDefault())
-                val address = geocoder.getFromLocation(p.latitude, p.longitude, 1)
                 if (markerStart != null) {
                     (markerStart as Marker).closeInfoWindow()
                     map.overlays.remove(markerStart)
                 }
                 markerStart = Marker(map)
                 markerStart!!.position = p
-                markerStart!!.title = address[0].getAddressLine(0)
-                map.overlays.add(markerStart)
-                map.invalidate()
 
+                val asyncJob = MainScope().launch {
+                    val address = getFromLocation(p)
+                    markerStart!!.title = address.getAddressLine(0)
+                    markerStart!!.showInfoWindow()
+                    map.overlays.add(markerStart)
+                }
+                map.invalidate()
                 return true
             }
         }
         val evOverlay = MapEventsOverlay(mapEventsReceiver)
-        map.getOverlays().add(evOverlay)
+        map.overlays.add(evOverlay)
 
         super.onViewCreated(view, savedInstanceState)
+    }
+
+    suspend fun getFromLocation(p: GeoPoint): Address = withContext(Dispatchers.IO) {
+        val geocoder = Geocoder(requireContext(), Locale.getDefault())
+        var address = async { geocoder.getFromLocation(p.latitude, p.longitude, 1) }
+        try {
+            val a = address.await()
+            return@withContext a[0]
+        } catch (e: Throwable) {
+            Log.e("Marker Location", "Error ->" + e.message)
+            return@withContext Address(Locale.getDefault())
+        }
     }
 
     override fun onResume() {
