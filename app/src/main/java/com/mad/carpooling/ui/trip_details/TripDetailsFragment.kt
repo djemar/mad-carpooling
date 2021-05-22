@@ -356,13 +356,16 @@ class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip
     class BottomSheetViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         private var nickname: TextView = v.findViewById(R.id.tv_bottom_sheet_user)
         private var profile: ConstraintLayout = v.findViewById(R.id.cl_bottom_sheet)
+        private var profilePic: ImageView = v.findViewById(R.id.iv_bottomSheet_pic)
         var btnAccept: MaterialButton = v.findViewById(R.id.btn_bottom_sheet)
 
-        fun bind(user: String?) {
+        fun bind(user: String?, holder: BottomSheetViewHolder) {
             val db = Firebase.firestore
             if (user != null) {
                 db.collection("users").document(user).get().addOnSuccessListener {
                     nickname.text = it.get("nickname").toString()
+                    Glide.with(holder.itemView).load(it?.get("imageUserRef"))
+                        .into(profilePic!!)
                 }
                 profile.setOnClickListener {
                     val action = TripDetailsFragmentDirections.actionNavTripDetailsToNavShowProfile(
@@ -406,7 +409,7 @@ class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip
 
     override fun onBindViewHolder(holder: BottomSheetViewHolder, position: Int) {
         val db = Firebase.firestore
-        holder.bind(users?.get(position))
+        holder.bind(users?.get(position), holder)
         holder.btnAccept.visibility = View.VISIBLE
 
         if (trip.acceptedPeople?.contains(users?.get(position))!!) {
