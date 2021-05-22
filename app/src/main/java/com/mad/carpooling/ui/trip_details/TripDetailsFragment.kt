@@ -1,13 +1,18 @@
 package com.mad.carpooling.ui.trip_details
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.app.Dialog
+import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.widget.*
+import android.widget.LinearLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.findNavController
@@ -165,8 +170,10 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         bsrv.adapter = bottomSheetAdapter
         Log.d("users:", bottomSheetAdapter.itemCount.toString())
 
+        val profileInfo = view.findViewById<TextView>(R.id.tv_tripDetails_fullName)
+
         if (trip.owner?.id != model.getCurrentUser().value?.uid) {
-            profileLayout.setOnClickListener {
+            profileInfo.setOnClickListener {
                 val action = TripDetailsFragmentDirections.actionNavTripDetailsToNavShowProfile(
                     trip.owner?.id!!
                 )
@@ -174,6 +181,18 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                 findNavController().navigate(action)
             }
         }
+
+        val ratingBar = view.findViewById<RatingBar>(R.id.rb_tripDetails_driver)
+
+        ratingBar.setOnTouchListener(View.OnTouchListener { v, event ->
+            if (event.action == MotionEvent.ACTION_UP) {
+                // TODO perform your action here
+                Log.d("ratingBar", "inside on click listener")
+                var reviewDial = ReviewDialogFragment(trip, view)
+                reviewDial.show(requireActivity().supportFragmentManager, "driverReviewDialog")
+            }
+            return@OnTouchListener true
+        })
 
         bsb.state = BottomSheetBehavior.STATE_HIDDEN
 
@@ -190,6 +209,49 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                 fab.show()
         }
 
+    }
+
+    // Review Dialog
+    class ReviewDialogFragment(trip : Trip, view: View) :
+        DialogFragment() {
+        var tripReview = trip
+        var viewReview = view
+        var reviewNickname : TextView? = null
+        var reviewProfilePic : ImageView? = null
+
+        override fun onStart() {
+            super.onStart()
+            reviewProfilePic = dialog?.findViewById<ImageView>(R.id.iv_review_profile_pic) as ImageView
+            reviewNickname = dialog?.findViewById<TextView>(R.id.tv_review_nickname) as TextView
+        }
+
+        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+            // Use the Builder class for convenient dialog construction
+
+            val db = Firebase.firestore
+            val builder: AlertDialog.Builder = AlertDialog.Builder(activity)
+            builder.setView(R.layout.review_layout)
+
+            db.collection("users").document(tripReview.owner!!.id).addSnapshotListener { value, e ->
+                if (e != null) {
+                    Log.e("userDoc exception => ", e.toString())
+                    return@addSnapshotListener
+                }
+                reviewNickname?.text = value?.get("nickname").toString()
+                Glide.with(viewReview).load(value?.get("imageUserRef"))
+                    .into(reviewProfilePic!!)
+            }
+
+
+            builder.setTitle("Add a review")
+                .setPositiveButton("Confirm", DialogInterface.OnClickListener { dialog, id ->
+
+                })
+                .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, id ->
+                })
+            // Create the AlertDialog object and return it
+            return builder.create()
+        }
     }
 
     private fun initFab(db: FirebaseFirestore, view: View) {
