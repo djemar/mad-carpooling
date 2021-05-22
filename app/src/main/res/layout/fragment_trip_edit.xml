@@ -469,7 +469,7 @@
                     android:hint="@string/description"
                     android:padding="4dp"
                     app:counterEnabled="true"
-                    app:counterMaxLength="40"
+                    app:counterMaxLength="120"
                     app:endIconMode="clear_text"
                     app:layout_constraintBottom_toTopOf="@id/tv_tripEdit_stops"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -480,7 +480,9 @@
                         android:id="@+id/et_description"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="text"
+                        android:gravity="top|left"
+                        android:minLines="4"
+                        android:inputType="text|textMultiLine"
                         android:selectAllOnFocus="true"
                         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
