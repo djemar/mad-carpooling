@@ -1,20 +1,21 @@
 package com.mad.carpooling.ui.maps
 
 import android.Manifest
+import android.content.Context
 import android.location.Address
-import android.location.Geocoder
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.mad.carpooling.BuildConfig
 import com.mad.carpooling.R
 import com.vmadalin.easypermissions.EasyPermissions
 import com.vmadalin.easypermissions.dialogs.SettingsDialog
 import kotlinx.coroutines.*
+import org.osmdroid.bonuspack.location.GeocoderNominatim
 import org.osmdroid.config.Configuration.getInstance
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -26,7 +27,6 @@ import org.osmdroid.views.overlay.OverlayItem
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
-import java.io.IOException
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -45,7 +45,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
     ): View? {
         getInstance().load(
             requireContext(),
-            PreferenceManager.getDefaultSharedPreferences(requireContext())
+            context?.getSharedPreferences("mad.carpooling.map", Context.MODE_PRIVATE)
         );
         return super.onCreateView(inflater, container, savedInstanceState)
     }
@@ -97,7 +97,15 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
 
                 val asyncJob = MainScope().launch {
                     val address = getFromLocation(p)
-                    markerStart!!.title = address.getAddressLine(0)
+                    val strAddress= arrayListOf(
+                        address.thoroughfare,
+                        address.subThoroughfare,
+                        address.postalCode,
+                        address.locality,
+                        address.countryName
+                    ).filterNotNull()
+                    markerStart!!.title = "Departure"
+                    markerStart!!.snippet = strAddress.joinToString(", ")
                     markerStart!!.showInfoWindow()
                     map.overlays.add(markerStart)
                 }
@@ -112,7 +120,11 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
     }
 
     suspend fun getFromLocation(p: GeoPoint): Address = withContext(Dispatchers.IO) {
-        val geocoder = Geocoder(requireContext(), Locale.getDefault())
+        //val geocoder = Geocoder(requireContext(), Locale.getDefault())    // grpc failed error
+        val geocoder = GeocoderNominatim(
+            Locale.getDefault(),
+            BuildConfig.APPLICATION_ID
+        )   // osm implementation
         var address = async { geocoder.getFromLocation(p.latitude, p.longitude, 1) }
         try {
             val a = address.await()
@@ -129,6 +141,10 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         //if you make changes to the configuration, use
         //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         //Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
+        getInstance().load(
+            requireContext(),
+            context?.getSharedPreferences("mad.carpooling.map", Context.MODE_PRIVATE)
+        );
         map.onResume(); //needed for compass, my location overlays, v6.0.0 and up
     }
 
@@ -138,6 +154,10 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         //if you make changes to the configuration, use
         //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         //Configuration.getInstance().save(this, prefs);
+        getInstance().save(
+            requireContext(),
+            context?.getSharedPreferences("mad.carpooling.map", Context.MODE_PRIVATE)
+        );
         map.onPause();  //needed for compass, my location overlays, v6.0.0 and up
     }
 
