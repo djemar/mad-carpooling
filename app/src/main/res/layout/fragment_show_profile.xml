@@ -57,10 +57,69 @@
             android:layout_marginTop="16dp"
             android:alpha="0.3"
             android:background="#aaaaaa"
-            app:layout_constraintBottom_toTopOf="@+id/title_nickname"
+            app:layout_constraintBottom_toTopOf="@+id/ll_rating_driver"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_fullName" />
+
+        <LinearLayout
+            android:id="@+id/ll_rating_driver"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            app:layout_constraintTop_toBottomOf="@id/divider1"
+            app:layout_constraintBottom_toTopOf="@id/ll_rating_passenger">
+
+            <RatingBar
+                android:id="@+id/rb_showProfile_driver"
+                style="?android:attr/ratingBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:isIndicator="true"
+                android:numStars="5"
+                android:rating="3"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="as driver"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_rating_passenger"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            app:layout_constraintTop_toBottomOf="@id/ll_rating_driver"
+            app:layout_constraintBottom_toTopOf="@id/divider2">
+
+            <RatingBar
+                android:id="@+id/rb_showProfile_passenger"
+                style="?android:attr/ratingBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:isIndicator="true"
+                android:numStars="5"
+                android:rating="4.5"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="as passenger"/>
+
+        </LinearLayout>
+
+        <View
+            android:id="@+id/divider2"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:alpha="0.3"
+            android:background="#aaaaaa"
+            app:layout_constraintBottom_toTopOf="@+id/title_nickname"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/ll_rating_passenger" />
 
         <LinearLayout
             android:id="@+id/title_nickname"
@@ -68,10 +127,10 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp"
-            app:layout_constraintBottom_toTopOf="@+id/divider2"
+            app:layout_constraintBottom_toTopOf="@+id/divider3"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/divider1">
+            app:layout_constraintTop_toBottomOf="@+id/divider2">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -93,7 +152,7 @@
         </LinearLayout>
 
         <View
-            android:id="@+id/divider2"
+            android:id="@+id/divider3"
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:alpha="0.3"
@@ -109,10 +168,10 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp"
-            app:layout_constraintBottom_toTopOf="@+id/divider3"
+            app:layout_constraintBottom_toTopOf="@+id/divider4"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/divider2">
+            app:layout_constraintTop_toBottomOf="@+id/divider3">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -136,7 +195,7 @@
 
 
         <View
-            android:id="@+id/divider3"
+            android:id="@+id/divider4"
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:alpha="0.3"
@@ -154,7 +213,7 @@
             android:padding="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/divider3">
+            app:layout_constraintTop_toBottomOf="@+id/divider4">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -174,6 +233,7 @@
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 android:textColor="?android:attr/textColorPrimary" />
         </LinearLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </LinearLayout>
