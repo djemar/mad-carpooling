@@ -78,7 +78,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
             )
         )
 
-        var markerStart: Marker? = null
+        val waypoints = arrayListOf<Marker>()
 
         val mapEventsReceiver: MapEventsReceiver = object : MapEventsReceiver {
             override fun singleTapConfirmedHelper(p: GeoPoint): Boolean {
@@ -88,12 +88,8 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
 
             override fun longPressHelper(p: GeoPoint): Boolean {
                 //do whatever you need here
-                if (markerStart != null) {
-                    (markerStart as Marker).closeInfoWindow()
-                    map.overlays.remove(markerStart)
-                }
-                markerStart = Marker(map)
-                markerStart!!.position = p
+                val marker = Marker(map)
+                marker.position = p
 
                 val asyncJob = MainScope().launch {
                     val address = getFromLocation(p)
@@ -104,10 +100,12 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
                         address.locality,
                         address.countryName
                     ).filterNotNull()
-                    markerStart!!.title = "Departure"
-                    markerStart!!.snippet = strAddress.joinToString(", ")
-                    markerStart!!.showInfoWindow()
-                    map.overlays.add(markerStart)
+                    marker.title = "Departure"
+                    marker.snippet = strAddress.joinToString(", ")
+                    marker.showInfoWindow()
+                    waypoints.add(marker)
+                    marker.icon = MapUtils.getNumMarker(waypoints.size.toString(), requireContext())
+                    map.overlays.add(marker)
                 }
                 map.invalidate()
                 return true
