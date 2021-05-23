@@ -83,12 +83,15 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         )
 
         val waypoints = arrayListOf<Marker>()
+        var routeOverlay : Polyline = Polyline()
 
         val mapEventsReceiver: MapEventsReceiver = object : MapEventsReceiver {
             override fun singleTapConfirmedHelper(p: GeoPoint): Boolean {
                 //do whatever you need here
                 val asyncJob = MainScope().launch {
-                    map.overlays.add(getRoute(waypoints))
+                    map.overlays.remove(routeOverlay)
+                    routeOverlay = getRoute(waypoints)
+                    map.overlays.add(routeOverlay)
                 }
                 map.invalidate()
                 return false
@@ -113,6 +116,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
                     marker.showInfoWindow()
                     waypoints.add(marker)
                     marker.icon = MapUtils.getNumMarker(waypoints.size.toString(), requireContext())
+                    marker.isDraggable = true
                     map.overlays.add(marker)
                 }
                 map.invalidate()
