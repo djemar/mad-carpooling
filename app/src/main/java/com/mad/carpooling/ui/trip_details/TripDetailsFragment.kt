@@ -4,13 +4,11 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
-import android.media.Rating
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.widget.*
-import android.widget.LinearLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
@@ -23,11 +21,12 @@ import androidx.navigation.ui.onNavDestinationSelected
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-import com.google.firebase.firestore.FieldPath
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -186,20 +185,25 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         }
 
         val ratingBar = view.findViewById<RatingBar>(R.id.rb_tripDetails_driver)
+
         db.collection("ratings").document(trip.owner?.id!!).get()
             .addOnSuccessListener {
                     res ->
-                val  mapRatingDriver : Map<String,ArrayList<Any>> = res.get("driverRatings") as Map<String, ArrayList<Any>>
-                var vote: Float = 0f
-                for(array in mapRatingDriver.values)
-                    vote = vote + array[0].toString().toFloat()
-
-                ratingBar.rating = (vote)/(mapRatingDriver.size.toFloat())
+                if(res.exists()) {
+                    val mapRatingDriver: Map<String, ArrayList<Any>> =
+                        res.get("driverRatings") as Map<String, ArrayList<Any>>
+                    var vote: Float = 0f
+                    for (array in mapRatingDriver.values)
+                        vote = vote + array[0].toString().toFloat()
+                    ratingBar.rating = (vote) / (mapRatingDriver.size.toFloat())
+                } else {
+                    ratingBar.rating = 0f;
+                }
             }
+
         ratingBar.setOnTouchListener(View.OnTouchListener { v, event ->
             if (event.action == MotionEvent.ACTION_UP) {
                 // TODO perform your action here
-                Log.d("ratingBar", "inside on click listener")
                 var reviewDial = ReviewDialogFragment(trip, view)
                 reviewDial.show(requireActivity().supportFragmentManager, "driverReviewDialog")
             }

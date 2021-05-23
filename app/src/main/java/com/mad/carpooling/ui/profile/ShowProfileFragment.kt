@@ -101,32 +101,58 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
         tvLocation.text = user.location
         Glide.with(view).load(user.imageUserRef).into(ivProfilePic)
         llEmail.isVisible = uid == model.getCurrentUser().value?.uid
+
         val db = Firebase.firestore
+
         db.collection("ratings").document(user.uid).get()
             .addOnSuccessListener {
                 res ->
-                val  mapRatingDriver : Map<String,ArrayList<Any>> = res.get("driverRatings") as Map<String, ArrayList<Any>>
-                var vote: Float = 0f
-                for(array in mapRatingDriver.values)
-                    vote += array[0].toString().toFloat()
-
-                rbDriver.rating = (vote)/(mapRatingDriver.size.toFloat())
-                numStarsDriver.text = "${rbDriver.rating}/5"
-                numReviewsDriver.text = "${mapRatingDriver.size} reviews"
+                    if(res.exists()) {
+                    val mapRatingDriver: Map<String, ArrayList<Any>> =
+                        res.get("driverRatings") as Map<String, ArrayList<Any>>
+                    if( mapRatingDriver.size>0 ) {
+                        var vote: Float = 0f
+                        for (array in mapRatingDriver.values)
+                            vote += array[0].toString().toFloat()
+                        rbDriver.rating = (vote) / (mapRatingDriver.size.toFloat())
+                        numStarsDriver.text = "${rbDriver.rating}/5"
+                        numReviewsDriver.text = "${mapRatingDriver.size} reviews"
+                    } else {
+                        rbDriver.rating = 0f;
+                        numStarsDriver.text = "-/5"
+                        numReviewsDriver.text = "0 reviews"
+                    }
+                    } else {
+                        rbDriver.rating = 0f;
+                        numStarsDriver.text = "-/5"
+                        numReviewsDriver.text = "0 reviews"
+                    }
         }
         db.collection("ratings").document(user.uid).get()
             .addOnSuccessListener {
                     res ->
-                val  mapRatingPassenger : Map<String,ArrayList<Any>> = res.get("passengerRatings") as Map<String, ArrayList<Any>>
-                var vote: Float = 0f
-                for(array in mapRatingPassenger.values)
-                    vote = vote + array[0].toString().toFloat()
-                rbPassenger.rating = (vote)/(mapRatingPassenger.size.toFloat())
-                numStarsPassenger.text = "${rbPassenger.rating}/5"
-                numReviewsPassenger.text = "${mapRatingPassenger.size} reviews"
-            }
+                if( res.exists() ) {
+                    val mapRatingPassenger: Map<String, ArrayList<Any>> =
+                            res.get("passengerRatings") as Map<String, ArrayList<Any>>
+                    if( mapRatingPassenger.size>0) {
+                        var vote: Float = 0f
+                        for (array in mapRatingPassenger.values)
+                            vote = vote + array[0].toString().toFloat()
+                        rbPassenger.rating = (vote) / (mapRatingPassenger.size.toFloat())
+                        numStarsPassenger.text = "${rbPassenger.rating}/5"
+                        numReviewsPassenger.text = "${mapRatingPassenger.size} reviews"
+                    } else {
+                        rbPassenger.rating = 0f;
+                        numStarsPassenger.text = "-/5"
+                        numReviewsPassenger.text = "0 reviews"
+                    }
+                } else {
+                    rbPassenger.rating = 0f;
+                    numStarsPassenger.text = "-/5"
+                    numReviewsPassenger.text = "0 reviews"
+                }
+                }
         //TODO: show ratings and comments of other users after clicking on ratebar
-
     }
 
     private fun editProfile() {
