@@ -16,6 +16,8 @@ import com.vmadalin.easypermissions.EasyPermissions
 import com.vmadalin.easypermissions.dialogs.SettingsDialog
 import kotlinx.coroutines.*
 import org.osmdroid.bonuspack.location.GeocoderNominatim
+import org.osmdroid.bonuspack.routing.OSRMRoadManager
+import org.osmdroid.bonuspack.routing.RoadManager
 import org.osmdroid.config.Configuration.getInstance
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -24,10 +26,12 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.OverlayItem
+import org.osmdroid.views.overlay.Polyline
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.util.*
+import java.util.stream.Collectors
 import kotlin.collections.ArrayList
 
 
@@ -83,6 +87,10 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         val mapEventsReceiver: MapEventsReceiver = object : MapEventsReceiver {
             override fun singleTapConfirmedHelper(p: GeoPoint): Boolean {
                 //do whatever you need here
+                val asyncJob = MainScope().launch {
+                    map.overlays.add(getRoute(waypoints))
+                }
+                map.invalidate()
                 return false
             }
 
@@ -93,7 +101,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
 
                 val asyncJob = MainScope().launch {
                     val address = getFromLocation(p)
-                    val strAddress= arrayListOf(
+                    val strAddress = arrayListOf(
                         address.thoroughfare,
                         address.subThoroughfare,
                         address.postalCode,
@@ -131,6 +139,15 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
             Log.e("Marker Location", "Error ->" + e.message)
             return@withContext Address(Locale.getDefault())
         }
+    }
+
+    suspend fun getRoute(waypoints: ArrayList<Marker>): Polyline = withContext(Dispatchers.IO) {
+        val roadManager: RoadManager = OSRMRoadManager(requireContext(), BuildConfig.APPLICATION_ID)
+        val gp = waypoints.stream().map(Marker::getPosition).collect(Collectors.toList()) as ArrayList<GeoPoint>
+        val road = async { roadManager.getRoad(gp) }
+        val r = road.await()
+        return@withContext RoadManager.buildRoadOverlay(r) as Polyline
+
     }
 
     override fun onResume() {
