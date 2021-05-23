@@ -83,13 +83,14 @@
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:layout_marginTop="2dp">
 
                 <TextView
                     android:id="@+id/tv_showProfile_numStars_driver"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="3/5"
+                    android:text="3.5/5"
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
                 <RatingBar
@@ -97,16 +98,18 @@
                     style="?android:attr/ratingBarStyleSmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:padding="4dp"
+                    android:layout_gravity="center"
                     android:isIndicator="true"
+                    android:layout_marginStart="4dp"
                     android:numStars="5"
-                    android:rating="3" />
+                    android:rating="3.5" />
             </LinearLayout>
 
             <TextView
                 android:id="@+id/tv_showProfile_numReviews_driver"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
                 android:text="7 reviews" />
 
         </LinearLayout>
@@ -131,7 +134,8 @@
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:layout_marginTop="2dp">
 
                 <TextView
                     android:id="@+id/tv_showProfile_numStars_passenger"
@@ -147,7 +151,8 @@
                     android:layout_height="wrap_content"
                     android:isIndicator="true"
                     android:numStars="5"
-                    android:padding="4dp"
+                    android:layout_marginStart="4dp"
+                    android:layout_gravity="center"
                     android:rating="4.5" />
             </LinearLayout>
 
@@ -155,7 +160,8 @@
                 android:id="@+id/tv_showProfile_numReviews_passenger"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="10 reviews" />
+                android:text="10 reviews"
+                android:layout_marginTop="2dp"/>
 
         </LinearLayout>
 
