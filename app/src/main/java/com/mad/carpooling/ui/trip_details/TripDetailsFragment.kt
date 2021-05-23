@@ -92,6 +92,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         ibtnMusic = view.findViewById(R.id.btn_tripDetails_music)
         tvNickname = view.findViewById(R.id.tv_tripDetails_fullName)
         profileLayout = view.findViewById(R.id.cl_tripDetails_profile)
+
         bottomSheet = view.findViewById(R.id.bottom_sheet)
         fab = (activity as MainActivity).findViewById(R.id.fab)
         bsb = BottomSheetBehavior.from(bottomSheet)
@@ -183,7 +184,16 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         }
 
         val ratingBar = view.findViewById<RatingBar>(R.id.rb_tripDetails_driver)
+        db.collection("ratings").document(trip.owner?.id!!).get()
+            .addOnSuccessListener {
+                    res ->
+                val  mapRatingDriver : Map<String,ArrayList<String>> = res.get("driverRatings") as Map<String, ArrayList<String>>
+                var vote: Int = 0
+                for(array in mapRatingDriver.values)
+                    vote = vote + array[0].toInt()
 
+                ratingBar.rating = (vote.toFloat())/(mapRatingDriver.size.toFloat())
+            }
         ratingBar.setOnTouchListener(View.OnTouchListener { v, event ->
             if (event.action == MotionEvent.ACTION_UP) {
                 // TODO perform your action here

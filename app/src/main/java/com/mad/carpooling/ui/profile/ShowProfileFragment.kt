@@ -8,6 +8,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.RatingBar
 import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -18,6 +19,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.onNavDestinationSelected
 import com.bumptech.glide.Glide
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.MainActivity
@@ -33,6 +35,12 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
     private lateinit var tvEmail: TextView
     private lateinit var tvLocation: TextView
     private lateinit var ivProfilePic: ImageView
+    private lateinit var rbDriver: RatingBar
+    private lateinit var numStarsDriver: TextView
+    private lateinit var numReviewsDriver: TextView
+    private lateinit var rbPassenger: RatingBar
+    private lateinit var numStarsPassenger: TextView
+    private lateinit var numReviewsPassenger: TextView
     private lateinit var user: User
     private var uid: String = ""
     private lateinit var optionsMenu: Menu
@@ -50,6 +58,12 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
         tvEmail = view.findViewById(R.id.tv_email)
         tvLocation = view.findViewById(R.id.tv_location)
         ivProfilePic = view.findViewById(R.id.iv_profile_pic)
+        rbDriver = view.findViewById(R.id.rb_showProfile_driver)
+        numStarsDriver = view.findViewById(R.id.tv_showProfile_numStars_driver)
+        numReviewsDriver = view.findViewById(R.id.tv_showProfile_numReviews_driver)
+        rbPassenger = view.findViewById(R.id.rb_showProfile_passenger)
+        numStarsPassenger = view.findViewById(R.id.tv_showProfile_numStars_passenger)
+        numReviewsPassenger = view.findViewById(R.id.tv_showProfile_numReviews_passenger)
 
         val fab = (activity as MainActivity).findViewById<ExtendedFloatingActionButton>(R.id.fab)
         fab.hide()
@@ -87,6 +101,31 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
         tvLocation.text = user.location
         Glide.with(view).load(user.imageUserRef).into(ivProfilePic)
         llEmail.isVisible = uid == model.getCurrentUser().value?.uid
+        val db = Firebase.firestore
+        db.collection("ratings").document(user.uid).get()
+            .addOnSuccessListener {
+                res ->
+                val  mapRatingDriver : Map<String,ArrayList<String>> = res.get("driverRatings") as Map<String, ArrayList<String>>
+                var vote: Int = 0
+                for(array in mapRatingDriver.values)
+                    vote = vote + array[0].toInt()
+
+                rbDriver.rating = (vote.toFloat())/(mapRatingDriver.size.toFloat())
+                numStarsDriver.text = "${rbDriver.rating}/5"
+                numReviewsDriver.text = "${mapRatingDriver.size} reviews"
+        }
+        db.collection("ratings").document(user.uid).get()
+            .addOnSuccessListener {
+                    res ->
+                val  mapRatingPassenger : Map<String,ArrayList<String>> = res.get("passengerRatings") as Map<String, ArrayList<String>>
+                var vote: Int = 0
+                for(array in mapRatingPassenger.values)
+                    vote = vote + array[0].toInt()
+                rbPassenger.rating = (vote.toFloat())/(mapRatingPassenger.size.toFloat())
+                numStarsPassenger.text = "${rbPassenger.rating}/5"
+                numReviewsPassenger.text = "${mapRatingPassenger.size} reviews"
+            }
+
     }
 
     private fun editProfile() {
