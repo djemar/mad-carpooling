@@ -42,7 +42,9 @@ import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.data.Trip
+import com.mad.carpooling.ui.DatePickerFragment
 import com.mad.carpooling.ui.SharedViewModel
+import com.mad.carpooling.ui.TimePickerFragment
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -466,63 +468,9 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
 
     }
 
-    class DatePickerFragment(tvDate: TextView) : DialogFragment(),
-        DatePickerDialog.OnDateSetListener {
-
-        private val tvDate = tvDate
-
-        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-            // Use the current date as the default date in the picker
-            val c = Calendar.getInstance()
-            val year = c.get(Calendar.YEAR)
-            val month = c.get(Calendar.MONTH)
-            val day = c.get(Calendar.DAY_OF_MONTH)
-
-            // Create a new instance of DatePickerDialog and return it
-            return DatePickerDialog(requireContext(), this, year, month, day)
-        }
-
-        @SuppressLint("SetTextI18n")
-        override fun onDateSet(view: DatePicker, year: Int, month: Int, day: Int) {
-            tvDate.text = "${day}/${(month + 1)}/${year}"
-        }
-    }
-
-
     private fun showDatePickerDialog() {
         val dateFragment = DatePickerFragment(etSearchDate)
         dateFragment.show(requireActivity().supportFragmentManager, "datePicker")
-    }
-
-    class TimePickerFragment(tvTime: TextView) : DialogFragment(),
-        TimePickerDialog.OnTimeSetListener {
-
-        private val tvTime = tvTime
-
-        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-            // Use the current time as the default values for the picker
-            val c = Calendar.getInstance()
-            val hour = c.get(Calendar.HOUR_OF_DAY)
-            val minute = c.get(Calendar.MINUTE)
-
-            // Create a new instance of TimePickerDialog and return it
-            return TimePickerDialog(
-                activity,
-                this,
-                hour,
-                minute,
-                DateFormat.is24HourFormat(activity)
-            )
-        }
-
-        @SuppressLint("SetTextI18n")
-        override fun onTimeSet(view: TimePicker, hourOfDay: Int, minute: Int) {
-            if (minute < 10) {
-                tvTime.text = "$hourOfDay:0$minute"
-            } else {
-                tvTime.text = "$hourOfDay:$minute"
-            }
-        }
     }
 
     private fun showTimePickerDialog() {
