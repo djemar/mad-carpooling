@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
+import android.media.Rating
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
@@ -26,6 +27,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -187,12 +189,12 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         db.collection("ratings").document(trip.owner?.id!!).get()
             .addOnSuccessListener {
                     res ->
-                val  mapRatingDriver : Map<String,ArrayList<String>> = res.get("driverRatings") as Map<String, ArrayList<String>>
-                var vote: Int = 0
+                val  mapRatingDriver : Map<String,ArrayList<Any>> = res.get("driverRatings") as Map<String, ArrayList<Any>>
+                var vote: Float = 0f
                 for(array in mapRatingDriver.values)
-                    vote = vote + array[0].toInt()
+                    vote = vote + array[0].toString().toFloat()
 
-                ratingBar.rating = (vote.toFloat())/(mapRatingDriver.size.toFloat())
+                ratingBar.rating = (vote)/(mapRatingDriver.size.toFloat())
             }
         ratingBar.setOnTouchListener(View.OnTouchListener { v, event ->
             if (event.action == MotionEvent.ACTION_UP) {
@@ -228,11 +230,16 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         var viewReview = view
         var reviewNickname : TextView? = null
         var reviewProfilePic : ImageView? = null
+        var etReview : EditText? = null
+        var rb_review : RatingBar? = null
+        private val model: SharedViewModel by activityViewModels()
 
         override fun onStart() {
             super.onStart()
             reviewProfilePic = dialog?.findViewById<ImageView>(R.id.iv_review_profile_pic) as ImageView
             reviewNickname = dialog?.findViewById<TextView>(R.id.tv_review_nickname) as TextView
+            etReview = dialog?.findViewById<EditText>(R.id.et_review) as EditText
+            rb_review = dialog?.findViewById<RatingBar>(R.id.rt_review_layout) as RatingBar
         }
 
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -252,12 +259,17 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                     .into(reviewProfilePic!!)
             }
 
-
             builder.setTitle("Add a review")
                 .setPositiveButton("Confirm", DialogInterface.OnClickListener { dialog, id ->
-
+                    //TODO: add new value to a map into DB
+                    //val msg = rb_review!!.rating.toString()
+                    //Toast.makeText(requireContext(), "Rating is: "+msg, Toast.LENGTH_SHORT).show()
+                    //val newarray: Array<Any> = arrayOf(rb_review!!.rating, etReview?.text?.trim().toString())
+                    //var map : Map<String,Array<Any>> = mapOf("driverRatings.${model.getCurrentUser().value?.uid}" to newarray)
+                    //db.collection("ratings").document(tripReview.owner!!.id).update(map)
                 })
                 .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, id ->
+
                 })
             // Create the AlertDialog object and return it
             return builder.create()

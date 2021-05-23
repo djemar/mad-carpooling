@@ -105,26 +105,27 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
         db.collection("ratings").document(user.uid).get()
             .addOnSuccessListener {
                 res ->
-                val  mapRatingDriver : Map<String,ArrayList<String>> = res.get("driverRatings") as Map<String, ArrayList<String>>
-                var vote: Int = 0
+                val  mapRatingDriver : Map<String,ArrayList<Any>> = res.get("driverRatings") as Map<String, ArrayList<Any>>
+                var vote: Float = 0f
                 for(array in mapRatingDriver.values)
-                    vote = vote + array[0].toInt()
+                    vote += array[0].toString().toFloat()
 
-                rbDriver.rating = (vote.toFloat())/(mapRatingDriver.size.toFloat())
+                rbDriver.rating = (vote)/(mapRatingDriver.size.toFloat())
                 numStarsDriver.text = "${rbDriver.rating}/5"
                 numReviewsDriver.text = "${mapRatingDriver.size} reviews"
         }
         db.collection("ratings").document(user.uid).get()
             .addOnSuccessListener {
                     res ->
-                val  mapRatingPassenger : Map<String,ArrayList<String>> = res.get("passengerRatings") as Map<String, ArrayList<String>>
-                var vote: Int = 0
+                val  mapRatingPassenger : Map<String,ArrayList<Any>> = res.get("passengerRatings") as Map<String, ArrayList<Any>>
+                var vote: Float = 0f
                 for(array in mapRatingPassenger.values)
-                    vote = vote + array[0].toInt()
-                rbPassenger.rating = (vote.toFloat())/(mapRatingPassenger.size.toFloat())
+                    vote = vote + array[0].toString().toFloat()
+                rbPassenger.rating = (vote)/(mapRatingPassenger.size.toFloat())
                 numStarsPassenger.text = "${rbPassenger.rating}/5"
                 numReviewsPassenger.text = "${mapRatingPassenger.size} reviews"
             }
+        //TODO: show ratings and comments of other users after clicking on ratebar
 
     }
 
