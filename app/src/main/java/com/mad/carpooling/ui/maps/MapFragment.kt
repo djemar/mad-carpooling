@@ -31,6 +31,8 @@ import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.function.Consumer
 import java.util.stream.Collectors
 import kotlin.collections.ArrayList
 
@@ -83,7 +85,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         )
 
         val waypoints = arrayListOf<Marker>()
-        var routeOverlay : Polyline = Polyline()
+        var routeOverlay: Polyline = Polyline()
 
         val mapEventsReceiver: MapEventsReceiver = object : MapEventsReceiver {
             override fun singleTapConfirmedHelper(p: GeoPoint): Boolean {
@@ -116,7 +118,14 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
                     marker.showInfoWindow()
                     waypoints.add(marker)
                     marker.icon = MapUtils.getNumMarker(waypoints.size.toString(), requireContext())
+                    marker.id = waypoints.size.toString()
                     marker.isDraggable = true
+                    marker.setOnMarkerClickListener { marker, mapView ->
+                        marker.remove(mapView)
+                        waypoints.remove(marker)
+                        redrawMarkers(waypoints, mapView)
+                        true
+                    }
                     map.overlays.add(marker)
                 }
                 map.invalidate()
@@ -129,13 +138,21 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         super.onViewCreated(view, savedInstanceState)
     }
 
+    private fun redrawMarkers(waypoints: java.util.ArrayList<Marker>, mapView: MapView) {
+        val count: AtomicInteger = AtomicInteger(0)
+        waypoints.stream().forEach { marker ->
+            marker.icon =
+                MapUtils.getNumMarker((count.incrementAndGet()).toString(), requireContext())
+        }
+            mapView.invalidate()
+    }
+
     suspend fun getFromLocation(p: GeoPoint): Address = withContext(Dispatchers.IO) {
-        //val geocoder = Geocoder(requireContext(), Locale.getDefault())    // grpc failed error
         val geocoder = GeocoderNominatim(
             Locale.getDefault(),
             BuildConfig.APPLICATION_ID
-        )   // osm implementation
-        var address = async { geocoder.getFromLocation(p.latitude, p.longitude, 1) }
+        )
+        val address = async { geocoder.getFromLocation(p.latitude, p.longitude, 1) }
         try {
             val a = address.await()
             return@withContext a[0]
@@ -147,7 +164,8 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
 
     suspend fun getRoute(waypoints: ArrayList<Marker>): Polyline = withContext(Dispatchers.IO) {
         val roadManager: RoadManager = OSRMRoadManager(requireContext(), BuildConfig.APPLICATION_ID)
-        val gp = waypoints.stream().map(Marker::getPosition).collect(Collectors.toList()) as ArrayList<GeoPoint>
+        val gp = waypoints.stream().map(Marker::getPosition)
+            .collect(Collectors.toList()) as ArrayList<GeoPoint>
         val road = async { roadManager.getRoad(gp) }
         val r = road.await()
         return@withContext RoadManager.buildRoadOverlay(r) as Polyline
