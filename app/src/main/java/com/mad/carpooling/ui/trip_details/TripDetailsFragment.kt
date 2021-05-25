@@ -1,17 +1,15 @@
 package com.mad.carpooling.ui.trip_details
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.Context
 import android.content.DialogInterface
-import android.opengl.Visibility
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
@@ -231,7 +229,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             ratingBar.setOnTouchListener(View.OnTouchListener { v, event ->
                 if (event.action == MotionEvent.ACTION_UP && trip.finished) {
                     // TODO perform your action here
-                    val reviewDial = ReviewDialogFragment(trip, view)
+                    val reviewDial = ReviewDialogFragment(trip, view, "driverRatings", null)
                     reviewDial.show(requireActivity().supportFragmentManager, "driverReviewDialog")
                 }
                 return@OnTouchListener true
@@ -277,7 +275,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     }
 
     // Review Dialog
-    class ReviewDialogFragment(trip: Trip, view: View) :
+    class ReviewDialogFragment(trip: Trip, view: View, var role: String, var passenger: String?) :
         DialogFragment() {
         var tripReview = trip
         var viewReview = view
@@ -285,6 +283,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         var reviewProfilePic: ImageView? = null
         var etReview: EditText? = null
         var rb_review: RatingBar? = null
+        var uid = ""
         private val model: SharedViewModel by activityViewModels()
 
         override fun onStart() {
@@ -302,8 +301,10 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             val db = Firebase.firestore
             val builder: AlertDialog.Builder = AlertDialog.Builder(activity)
             builder.setView(R.layout.review_layout)
+            uid = if (passenger != null) passenger as String
+            else tripReview.owner!!.id
 
-            db.collection("users").document(tripReview.owner!!.id).addSnapshotListener { value, e ->
+            db.collection("users").document(uid).addSnapshotListener { value, e ->
                 if (e != null) {
                     Log.e("userDoc exception => ", e.toString())
                     return@addSnapshotListener
@@ -320,11 +321,11 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                     val newArray: ArrayList<Any> =
                         arrayListOf(rb_review!!.rating, etReview?.text?.trim().toString())
 
-                    db.collection("ratings").document(tripReview.owner!!.id).get()
+                    db.collection("ratings").document(uid).get()
                         .addOnSuccessListener { res ->
                             if (res.exists()) {
-                                db.collection("ratings").document(tripReview.owner!!.id)
-                                    .update("driverRatings.${currentUser}", newArray)
+                                db.collection("ratings").document(uid)
+                                    .update("${role}.${currentUser}", newArray)
                             }
                         }
                 })
@@ -544,10 +545,16 @@ class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip
             btn.text = "accept"
             btn.setTextColor(ContextCompat.getColor(view.context, R.color.green_700))
             btn.strokeColor = ContextCompat.getColorStateList(view.context, R.color.green_700)
-        } else {
+        } else if (state.toLowerCase() == "remove") {
             btn.text = "remove"
             btn.setTextColor(ContextCompat.getColor(view.context, R.color.red_700))
             btn.strokeColor = ContextCompat.getColorStateList(view.context, R.color.red_700)
+        } else {
+            val value = TypedValue()
+            view.context.theme.resolveAttribute(R.attr.colorPrimary, value, true)
+            btn.text = "rate"
+            btn.setTextColor(value.data)
+            //btn.strokeColor = ContextCompat.getColorStateList(view.context, value.data)
         }
     }
 
@@ -556,16 +563,22 @@ class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip
         holder.bind(users?.get(position), holder)
         holder.btnAccept.visibility = View.VISIBLE
 
-        if (trip.acceptedPeople?.contains(users?.get(position))!!) {
-            initButtonState("remove", holder.btnAccept, holder.itemView)
-        } else {
-            initButtonState("accept", holder.btnAccept, holder.itemView)
-            if (trip.seats >= 1) {
-                holder.btnAccept.isEnabled = true
-                holder.btnAccept.alpha = 1f
+        if (!trip.finished) {
+            if (trip.acceptedPeople?.contains(users?.get(position))!!) {
+                initButtonState("remove", holder.btnAccept, holder.itemView)
             } else {
-                holder.btnAccept.isEnabled = false
-                holder.btnAccept.alpha = 0.5f
+                initButtonState("accept", holder.btnAccept, holder.itemView)
+                if (trip.seats >= 1) {
+                    holder.btnAccept.isEnabled = true
+                    holder.btnAccept.alpha = 1f
+                } else {
+                    holder.btnAccept.isEnabled = false
+                    holder.btnAccept.alpha = 0.5f
+                }
+            }
+        } else {
+            if (trip.acceptedPeople?.contains(users?.get(position))!!) {
+                initButtonState("rate", holder.btnAccept, holder.itemView)
             }
         }
 
@@ -578,7 +591,7 @@ class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip
                     "seats", FieldValue.increment(-1)
                 )
                 changeButtonState("accept", holder.btnAccept, holder.itemView)
-            } else {
+            } else if (holder.btnAccept.text.toString().toLowerCase() == "remove") {
                 db.collection("trips").document(trip.id).update(
                     "acceptedPeople", FieldValue.arrayRemove(users?.get(position))
                 )
@@ -586,6 +599,13 @@ class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip
                     "seats", FieldValue.increment(1)
                 )
                 changeButtonState("remove", holder.btnAccept, holder.itemView)
+            } else {
+                val fragment = TripDetailsFragment.ReviewDialogFragment(
+                    trip, holder.itemView, "passengerRatings",
+                    users?.get(position)
+                )
+                val activity = it.context as AppCompatActivity
+                fragment.show(activity.supportFragmentManager, "reviewDialog")
             }
         }
     }

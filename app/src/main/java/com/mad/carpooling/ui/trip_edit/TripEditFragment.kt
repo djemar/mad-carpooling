@@ -229,23 +229,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             if (trip.visibility) {
                 var hideVis = HideDialogFragment(viewModel, fab)
                 hideVis.show(requireActivity().supportFragmentManager, "visibilityDialog")
-                /* val alertDialog: AlertDialog? = activity?.let {
-                    val builder = AlertDialog.Builder(it)
-                    builder.apply {
-
-                        setPositiveButton("Confirm",
-                            DialogInterface.OnClickListener {
-                                // User clicked confirm button
-                            })
-                        setNegativeButton("Cancel",
-                            DialogInterface.OnClickListener {
-                                // User cancelled the dialog
-                            })
-                    }
-                    // Set other dialog properties
-                    // Create the AlertDialog
-                    builder.create()
-                } */
             } else {
                 var showVis = ShowDialogFragment(viewModel, fab)
                 showVis.show(requireActivity().supportFragmentManager, "visibilityDialog")
