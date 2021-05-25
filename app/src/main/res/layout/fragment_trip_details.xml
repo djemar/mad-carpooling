@@ -89,23 +89,40 @@
                         android:textAlignment="center"
                         android:textAppearance="@style/TextAppearance.AppCompat.Large"
                         android:textStyle="bold"
-                        app:layout_constraintStart_toEndOf="@id/cv_tripDetails_profile_pic"
-                        app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/rb_tripDetails_driver"/>
+                        app:layout_constraintEnd_toStartOf="@id/ll_rating_endTrip"
+                        app:layout_constraintStart_toEndOf="@id/cv_tripDetails_profile_pic"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                    <RatingBar
-                        android:id="@+id/rb_tripDetails_driver"
-                        style="?android:attr/ratingBarStyleSmall"
+                    <FrameLayout
+                        android:id="@+id/ll_rating_endTrip"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:isIndicator="true"
-                        android:numStars="5"
-                        android:rating="4.5"
-                        app:layout_constraintStart_toEndOf="@id/tv_tripDetails_fullName"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"/>
+                        app:layout_constraintStart_toEndOf="@id/tv_tripDetails_fullName"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <RatingBar
+                            android:id="@+id/rb_tripDetails_driver"
+                            style="?android:attr/ratingBarStyleSmall"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:isIndicator="true"
+                            android:numStars="5"
+                            android:rating="4.5" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_end_trip"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="end trip"
+                            app:cornerRadius="50dp"
+                            app:strokeColor="?attr/colorPrimary"
+                            app:strokeWidth="1dp" />
+                    </FrameLayout>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -559,8 +576,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:padding="12dp"
-                            android:textSize="16sp"
-                            android:text="@string/lorem_ipsum" />
+                            android:text="@string/lorem_ipsum"
+                            android:textSize="16sp" />
 
                     </com.google.android.material.card.MaterialCardView>
 
