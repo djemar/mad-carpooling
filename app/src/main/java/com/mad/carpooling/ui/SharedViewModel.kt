@@ -105,6 +105,7 @@ class SharedViewModel : ViewModel() {
 
         db.collection("trips").whereNotEqualTo("owner", currentUserRef)
             .whereEqualTo("visibility", true)
+            //.whereEqualTo("finished", false)
             .addSnapshotListener { value, e ->
                 if (e != null) {
                     othersTrips.postValue(HashMap())
@@ -115,7 +116,7 @@ class SharedViewModel : ViewModel() {
                 for (doc in value!!) {
                     tripsMap[doc.id] = doc.toObject(Trip::class.java)
                 }
-                othersTrips.postValue(tripsMap)
+                othersTrips.postValue(tripsMap.filterValues { t -> !t.finished } as HashMap<String, Trip>?)
             }
     }
 

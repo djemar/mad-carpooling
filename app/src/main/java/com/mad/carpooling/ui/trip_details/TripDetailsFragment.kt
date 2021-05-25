@@ -1,9 +1,12 @@
 package com.mad.carpooling.ui.trip_details
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
+import android.content.Context
 import android.content.DialogInterface
+import android.opengl.Visibility
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
@@ -21,12 +24,10 @@ import androidx.navigation.ui.onNavDestinationSelected
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -35,6 +36,8 @@ import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.data.Trip
 import com.mad.carpooling.ui.SharedViewModel
+import com.mad.carpooling.ui.trip_edit.TripEditViewModel
+import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -64,6 +67,8 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private lateinit var fab: ExtendedFloatingActionButton
     private lateinit var bottomSheet: ConstraintLayout
     private lateinit var bsb: BottomSheetBehavior<ConstraintLayout>
+    private lateinit var btnEndTrip: MaterialButton
+    private lateinit var ratingBar: RatingBar
     private var chattiness = false
     private var smoking = false
     private var pets = false
@@ -93,6 +98,8 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         ibtnMusic = view.findViewById(R.id.btn_tripDetails_music)
         tvNickname = view.findViewById(R.id.tv_tripDetails_fullName)
         profileLayout = view.findViewById(R.id.cl_tripDetails_profile)
+        btnEndTrip = view.findViewById(R.id.btn_end_trip)
+        ratingBar = view.findViewById<RatingBar>(R.id.rb_tripDetails_driver)
 
         bottomSheet = view.findViewById(R.id.bottom_sheet)
         fab = (activity as MainActivity).findViewById(R.id.fab)
@@ -184,36 +191,12 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             }
         }
 
-        val ratingBar = view.findViewById<RatingBar>(R.id.rb_tripDetails_driver)
-
-        db.collection("ratings").document(trip.owner?.id!!).get()
-            .addOnSuccessListener {
-                    res ->
-                if(res.exists()) {
-                    val mapRatingDriver: Map<String, ArrayList<Any>> =
-                        res.get("driverRatings") as Map<String, ArrayList<Any>>
-                    var vote: Float = 0f
-                    for (array in mapRatingDriver.values)
-                        vote = vote + array[0].toString().toFloat()
-                    ratingBar.rating = (vote) / (mapRatingDriver.size.toFloat())
-                } else {
-                    ratingBar.rating = 0f;
-                }
-            }
-
-        ratingBar.setOnTouchListener(View.OnTouchListener { v, event ->
-            if (event.action == MotionEvent.ACTION_UP) {
-                // TODO perform your action here
-                var reviewDial = ReviewDialogFragment(trip, view)
-                reviewDial.show(requireActivity().supportFragmentManager, "driverReviewDialog")
-            }
-            return@OnTouchListener true
-        })
 
         bsb.state = BottomSheetBehavior.STATE_HIDDEN
 
         initFab(db, view)
 
+        initBtnEndTripAndRatingBar(db, view)
         val scrollView = view.findViewById<ScrollView>(R.id.sv_tridDetails)
         scrollView.setOnScrollChangeListener { scrollView, scrollX, scrollY, oldScrollX, oldScrollY ->
             if (scrollY > oldScrollY && fab.visibility == View.VISIBLE && oldScrollY > 0) {
@@ -227,6 +210,37 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
     }
 
+    private fun initBtnEndTripAndRatingBar(db: FirebaseFirestore, view: View) {
+        if (trip.owner!!.id != model.getCurrentUser().value?.uid) {
+        } else {
+            ratingBar.visibility = View.GONE
+            btnEndTrip.visibility = View.VISIBLE
+            btnEndTrip.isEnabled = Calendar.getInstance().time >= trip.timestamp.toDate()
+            btnEndTrip.setOnClickListener() {
+                val fragment = EndTripDialogFragment(trip.id, btnEndTrip)
+                fragment.show(requireActivity().supportFragmentManager, "endTripDialog")
+            }
+        }
+    }
+
+    class EndTripDialogFragment(private var tripId: String, private var btnEndTrip: MaterialButton) :
+        DialogFragment() {
+
+        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+            // Use the Builder class for convenient dialog construction
+            val builder: AlertDialog.Builder = AlertDialog.Builder(activity)
+            val db = Firebase.firestore
+            builder.setMessage("Do you really want to end this trip?")
+                .setPositiveButton("Confirm", DialogInterface.OnClickListener { dialog, id ->
+                    db.collection("trips").document(tripId).update("finished", true)
+                    btnEndTrip.isEnabled = false
+                })
+                .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, id ->
+                })
+            // Create the AlertDialog object and return it
+            return builder.create()
+        }
+    }
     // Review Dialog
     class ReviewDialogFragment(trip : Trip, view: View) :
         DialogFragment() {
@@ -416,11 +430,10 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
-        optionsMenu.findItem(R.id.edit_trip).isVisible =
-            trip.owner!!.id == model.getCurrentUser().value?.uid
 
-        optionsMenu.findItem(R.id.visibility_trip).isVisible =
-            trip.owner!!.id == model.getCurrentUser().value?.uid
+        optionsMenu.findItem(R.id.edit_trip).isVisible = trip.owner!!.id == model.getCurrentUser().value?.uid && !trip.finished
+
+        optionsMenu.findItem(R.id.visibility_trip).isVisible = trip.owner!!.id == model.getCurrentUser().value?.uid && !trip.finished
 
         if (trip.visibility) {
             optionsMenu.findItem(R.id.visibility_trip).setIcon(R.drawable.ic_sharp_visibility);
@@ -504,11 +517,10 @@ class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip
             initButtonState("remove", holder.btnAccept, holder.itemView)
         } else {
             initButtonState("accept", holder.btnAccept, holder.itemView)
-            if(trip.seats>=1){
+            if (trip.seats >= 1) {
                 holder.btnAccept.isEnabled = true
                 holder.btnAccept.alpha = 1f
-            }
-            else {
+            } else {
                 holder.btnAccept.isEnabled = false
                 holder.btnAccept.alpha = 0.5f
             }

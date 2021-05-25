@@ -141,7 +141,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
                 )
                 Navigation.findNavController(holder.tripRL).navigate(action)
             }
-            holder.btnEdit.visibility = View.VISIBLE
+            holder.btnEdit.isVisible = trip.finished == false
             holder.btnEdit.setOnClickListener {
                 val action = TripListFragmentDirections.actionNavTripListToNavTripEdit(
                     trip.id,

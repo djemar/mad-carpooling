@@ -24,6 +24,7 @@ data class Trip(
     var interestedPeople: ArrayList<String>? = ArrayList<String>(),
     var acceptedPeople: ArrayList<String>? = ArrayList<String>(),
     var geopoints: ArrayList<GeoPoint> = ArrayList<GeoPoint>(),
-    var visibility: Boolean = true
+    var visibility: Boolean = true,
+    var finished: Boolean = false
 ) {
 }
