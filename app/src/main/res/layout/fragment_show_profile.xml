@@ -77,7 +77,10 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="As driver"
+                android:fontFamily="@font/overpass"
+                android:text="AS DRIVER"
+                android:textSize="12sp"
+                android:textStyle="bold"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
             <LinearLayout
@@ -101,6 +104,7 @@
                     android:layout_gravity="center"
                     android:isIndicator="true"
                     android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
                     android:numStars="5"
                     android:rating="3.5" />
             </LinearLayout>
@@ -128,7 +132,10 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="As passenger"
+                android:fontFamily="@font/overpass"
+                android:text="AS PASSENGER"
+                android:textSize="12sp"
+                android:textStyle="bold"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
             <LinearLayout
@@ -152,6 +159,7 @@
                     android:isIndicator="true"
                     android:numStars="5"
                     android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
                     android:layout_gravity="center"
                     android:rating="4.5" />
             </LinearLayout>
