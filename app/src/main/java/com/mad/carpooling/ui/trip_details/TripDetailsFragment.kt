@@ -239,15 +239,16 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         } else {
             ratingBar.visibility = View.GONE
             btnEndTrip.visibility = View.VISIBLE
-            btnEndTrip.isEnabled = Calendar.getInstance().time >= trip.timestamp.toDate()
+            btnEndTrip.isEnabled =
+                Calendar.getInstance().time >= trip.timestamp.toDate() && !trip.finished
             btnEndTrip.setOnClickListener() {
-                val fragment = EndTripDialogFragment(trip.id, btnEndTrip)
+                val fragment = EndTripDialogFragment(trip)
                 fragment.show(requireActivity().supportFragmentManager, "endTripDialog")
             }
         }
     }
 
-    class EndTripDialogFragment(private var tripId: String, private var btnEndTrip: MaterialButton) :
+    class EndTripDialogFragment(private var trip: Trip) :
         DialogFragment() {
 
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -256,8 +257,17 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             val db = Firebase.firestore
             builder.setMessage("Do you really want to end this trip?")
                 .setPositiveButton("Confirm", DialogInterface.OnClickListener { dialog, id ->
-                    db.collection("trips").document(tripId).update("finished", true)
-                    btnEndTrip.isEnabled = false
+                    db.collection("trips").document(trip.id).update("finished", true)
+                    if (trip.interestedPeople != null) {
+                        for (p in trip.interestedPeople!!) {
+                            if (!trip.acceptedPeople?.contains(p)!!) {
+                                db.collection("trips").document(trip.id)
+                                    .update("interestedPeople", FieldValue.arrayRemove(p))
+                                db.collection("users").document(p)
+                                    .update("favTrips", FieldValue.arrayRemove(trip.id))
+                            }
+                        }
+                    }
                 })
                 .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, id ->
                 })
@@ -462,9 +472,11 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
 
-        optionsMenu.findItem(R.id.edit_trip).isVisible = trip.owner!!.id == model.getCurrentUser().value?.uid && !trip.finished
+        optionsMenu.findItem(R.id.edit_trip).isVisible =
+            trip.owner!!.id == model.getCurrentUser().value?.uid && !trip.finished
 
-        optionsMenu.findItem(R.id.visibility_trip).isVisible = trip.owner!!.id == model.getCurrentUser().value?.uid && !trip.finished
+        optionsMenu.findItem(R.id.visibility_trip).isVisible =
+            trip.owner!!.id == model.getCurrentUser().value?.uid && !trip.finished
 
         if (trip.visibility) {
             optionsMenu.findItem(R.id.visibility_trip).setIcon(R.drawable.ic_sharp_visibility);
