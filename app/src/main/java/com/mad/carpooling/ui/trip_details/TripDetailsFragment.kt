@@ -36,8 +36,6 @@ import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.data.Trip
 import com.mad.carpooling.ui.SharedViewModel
-import com.mad.carpooling.ui.trip_edit.TripEditViewModel
-import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -231,7 +229,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                 }
 
             ratingBar.setOnTouchListener(View.OnTouchListener { v, event ->
-                if (event.action == MotionEvent.ACTION_UP) {
+                if (event.action == MotionEvent.ACTION_UP && trip.finished) {
                     // TODO perform your action here
                     val reviewDial = ReviewDialogFragment(trip, view)
                     reviewDial.show(requireActivity().supportFragmentManager, "driverReviewDialog")
