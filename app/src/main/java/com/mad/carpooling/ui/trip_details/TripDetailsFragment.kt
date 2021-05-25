@@ -107,6 +107,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         model.getTrips().observe(viewLifecycleOwner, { newTripsMap ->
             // Update the UI
             initTripDetails(newTripsMap, view)
+            (activity as MainActivity).invalidateOptionsMenu()
         })
     }
 
