@@ -191,12 +191,12 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             }
         }
 
-
         bsb.state = BottomSheetBehavior.STATE_HIDDEN
 
         initFab(db, view)
 
         initBtnEndTripAndRatingBar(db, view)
+
         val scrollView = view.findViewById<ScrollView>(R.id.sv_tridDetails)
         scrollView.setOnScrollChangeListener { scrollView, scrollX, scrollY, oldScrollX, oldScrollY ->
             if (scrollY > oldScrollY && fab.visibility == View.VISIBLE && oldScrollY > 0) {
@@ -212,6 +212,31 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
     private fun initBtnEndTripAndRatingBar(db: FirebaseFirestore, view: View) {
         if (trip.owner!!.id != model.getCurrentUser().value?.uid) {
+            ratingBar.visibility = View.VISIBLE
+            btnEndTrip.visibility = View.GONE
+
+            db.collection("ratings").document(trip.owner?.id!!).get()
+                .addOnSuccessListener { res ->
+                    if (res.exists()) {
+                        val mapRatingDriver: Map<String, ArrayList<Any>> =
+                            res.get("driverRatings") as Map<String, ArrayList<Any>>
+                        var vote: Float = 0f
+                        for (array in mapRatingDriver.values)
+                            vote = vote + array[0].toString().toFloat()
+                        ratingBar.rating = (vote) / (mapRatingDriver.size.toFloat())
+                    } else {
+                        ratingBar.rating = 0f;
+                    }
+                }
+
+            ratingBar.setOnTouchListener(View.OnTouchListener { v, event ->
+                if (event.action == MotionEvent.ACTION_UP) {
+                    // TODO perform your action here
+                    val reviewDial = ReviewDialogFragment(trip, view)
+                    reviewDial.show(requireActivity().supportFragmentManager, "driverReviewDialog")
+                }
+                return@OnTouchListener true
+            })
         } else {
             ratingBar.visibility = View.GONE
             btnEndTrip.visibility = View.VISIBLE
@@ -241,20 +266,22 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             return builder.create()
         }
     }
+
     // Review Dialog
-    class ReviewDialogFragment(trip : Trip, view: View) :
+    class ReviewDialogFragment(trip: Trip, view: View) :
         DialogFragment() {
         var tripReview = trip
         var viewReview = view
-        var reviewNickname : TextView? = null
-        var reviewProfilePic : ImageView? = null
-        var etReview : EditText? = null
-        var rb_review : RatingBar? = null
+        var reviewNickname: TextView? = null
+        var reviewProfilePic: ImageView? = null
+        var etReview: EditText? = null
+        var rb_review: RatingBar? = null
         private val model: SharedViewModel by activityViewModels()
 
         override fun onStart() {
             super.onStart()
-            reviewProfilePic = dialog?.findViewById<ImageView>(R.id.iv_review_profile_pic) as ImageView
+            reviewProfilePic =
+                dialog?.findViewById<ImageView>(R.id.iv_review_profile_pic) as ImageView
             reviewNickname = dialog?.findViewById<TextView>(R.id.tv_review_nickname) as TextView
             etReview = dialog?.findViewById<EditText>(R.id.et_review) as EditText
             rb_review = dialog?.findViewById<RatingBar>(R.id.rt_review_layout) as RatingBar
@@ -280,14 +307,19 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             builder.setTitle("Add a review")
                 .setPositiveButton("Confirm", DialogInterface.OnClickListener { dialog, id ->
                     //TODO: add new value to a map into DB
-                    //val msg = rb_review!!.rating.toString()
-                    //Toast.makeText(requireContext(), "Rating is: "+msg, Toast.LENGTH_SHORT).show()
-                    //val newarray: Array<Any> = arrayOf(rb_review!!.rating, etReview?.text?.trim().toString())
-                    //var map : Map<String,Array<Any>> = mapOf("driverRatings.${model.getCurrentUser().value?.uid}" to newarray)
-                    //db.collection("ratings").document(tripReview.owner!!.id).update(map)
+                    val currentUser = model.getCurrentUser().value?.uid
+                    val newArray: ArrayList<Any> =
+                        arrayListOf(rb_review!!.rating, etReview?.text?.trim().toString())
+
+                    db.collection("ratings").document(tripReview.owner!!.id).get()
+                        .addOnSuccessListener { res ->
+                            if (res.exists()) {
+                                db.collection("ratings").document(tripReview.owner!!.id)
+                                    .update("driverRatings.${currentUser}", newArray)
+                            }
+                        }
                 })
                 .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, id ->
-
                 })
             // Create the AlertDialog object and return it
             return builder.create()
