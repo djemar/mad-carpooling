@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
@@ -26,6 +27,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -60,7 +62,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private lateinit var tvNickname: TextView
     private lateinit var tripMap: HashMap<String, Trip>
     private lateinit var profileLayout: ConstraintLayout
-    private lateinit var fab: ExtendedFloatingActionButton
+    private lateinit var fab: FloatingActionButton
     private lateinit var bottomSheet: ConstraintLayout
     private lateinit var bsb: BottomSheetBehavior<ConstraintLayout>
     private lateinit var btnEndTrip: MaterialButton
@@ -339,33 +341,43 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private fun initFab(db: FirebaseFirestore, view: View) {
         val value = TypedValue()
         view.context.theme.resolveAttribute(R.attr.colorSecondary, value, true)
-        fab.setBackgroundColor(value.data)
+        if(value.data == R.color.amber_500)
+            fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.amber_500)
+        else
+            fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.amber_200)
 
         if (trip.owner!!.id != model.getCurrentUser().value?.uid) {
 
             if (trip.interestedPeople?.contains(model.getCurrentUser().value?.uid)!!) {
-                fab.icon =
+                fab.setImageDrawable(
                     ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_fullstar)
-                fab.text = ""
+                )
                 if (trip.acceptedPeople?.contains(model.getCurrentUser().value?.uid)!!) {
-                    fab.text = "accepted"
-                    fab.extend()
+                    fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(),R.color.green_700)
                 } else {
-                    fab.text = ""
-                    fab.shrink()
+                    if(value.data == R.color.amber_500)
+                        fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.amber_500)
+                    else
+                        fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.amber_200)
                 }
             } else {
-                fab.icon = ContextCompat.getDrawable(requireContext(), R.drawable.sl_favourite)
-                fab.text = ""
+                fab.setImageDrawable(
+                    ContextCompat.getDrawable(
+                        requireContext(),
+                        R.drawable.sl_favourite
+                    )
+                )
             }
 
             fab.show()
 
             fab.setOnClickListener {
                 if (trip.interestedPeople?.contains(model.getCurrentUser().value?.uid) == true) {
-                    fab.icon = ContextCompat.getDrawable(
-                        requireContext(),
-                        R.drawable.sl_favourite
+                    fab.setImageDrawable(
+                        ContextCompat.getDrawable(
+                            requireContext(),
+                            R.drawable.sl_favourite
+                        )
                     )
                     db.collection("trips").document(trip.id).update(
                         "interestedPeople",
@@ -375,7 +387,8 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                             "favTrips", FieldValue.arrayRemove(trip.id)
                         )
                     }
-                    if (trip.acceptedPeople?.contains(model.getCurrentUser().value?.uid!!)!!) {
+
+                    if (trip.acceptedPeople?.contains(model.getCurrentUser().value?.uid!!) == true) {
                         db.collection("trips").document(trip.id).update(
                             "acceptedPeople",
                             FieldValue.arrayRemove(model.getCurrentUser().value?.uid!!)
@@ -384,14 +397,12 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                                 "seats", FieldValue.increment(1)
                             )
                         }
-                        fab.text = ""
-                        fab.shrink()
                     }
                 } else {
-                    fab.icon = ContextCompat.getDrawable(
+                    fab.setImageDrawable(ContextCompat.getDrawable(
                         requireContext(),
                         R.drawable.ic_baseline_fullstar
-                    )
+                    ))
 
                     db.collection("trips").document(trip.id).update(
                         "interestedPeople", FieldValue.arrayUnion(model.getCurrentUser().value?.uid)
@@ -404,17 +415,19 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             }
         } else {
             if (trip.interestedPeople?.size == 0) {
-                fab.shrink()
+                fab.setImageDrawable(
+                    ContextCompat.getDrawable(
+                        requireContext(),
+                        R.drawable.sl_favourite
+                    )
+                )
             } else {
-                fab.text = "${trip.interestedPeople?.size.toString()} people"
-                fab.extend()
+                fab.setImageDrawable(ContextCompat.getDrawable(
+                    requireContext(),
+                    R.drawable.ic_baseline_fullstar
+                ))
             }
             fab.show()
-
-            fab.icon = ContextCompat.getDrawable(
-                requireContext(),
-                R.drawable.sl_favourite
-            )
 
             fab.setOnClickListener {
                 if (bsb.state == BottomSheetBehavior.STATE_HIDDEN)

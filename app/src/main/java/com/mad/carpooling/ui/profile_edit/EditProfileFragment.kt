@@ -31,6 +31,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.onNavDestinationSelected
 import com.bumptech.glide.Glide
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.ktx.firestore
@@ -81,7 +82,7 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
         etLocation = view.findViewById<EditText>(R.id.et_location)
         ivEditProfilePic = view.findViewById<ImageView>(R.id.et_profile_pic)
 
-        val fab = (activity as MainActivity).findViewById<ExtendedFloatingActionButton>(R.id.fab)
+        val fab = (activity as MainActivity).findViewById<FloatingActionButton>(R.id.fab)
         fab.hide()
 
         initProfile(model.getCurrentUser().value!!, viewModel, savedInstanceState)

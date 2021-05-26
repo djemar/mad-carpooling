@@ -5,6 +5,7 @@ import android.app.*
 import android.content.ActivityNotFoundException
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
@@ -22,6 +23,7 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.widget.*
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toBitmap
@@ -37,6 +39,7 @@ import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
@@ -184,7 +187,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             stopEditAdapter.addEmpty(",,", stops.size + 1)
         }
 
-        val fab = (activity as MainActivity).findViewById<ExtendedFloatingActionButton>(R.id.fab)
+        val fab = (activity as MainActivity).findViewById<FloatingActionButton>(R.id.fab)
         if (!isNew) {
             initFab(viewModel, fab)
 
@@ -202,26 +205,25 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
     }
 
-    private fun changeStateFab(fab: ExtendedFloatingActionButton) {
+    private fun changeStateFab(fab: FloatingActionButton) {
         if (trip.visibility) {
-            fab.icon = ContextCompat.getDrawable(
+            fab.setImageDrawable(ContextCompat.getDrawable(
                 requireContext(),
                 R.drawable.ic_sharp_visibility
-            )
-            fab.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.green_700))
+            ))
+            fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(),R.color.green_700)
         } else {
-            fab.icon = ContextCompat.getDrawable(
+            fab.setImageDrawable(ContextCompat.getDrawable(
                 requireContext(),
                 R.drawable.ic_baseline_visibility_off
-            )
-            fab.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red_700))
+            ))
+            fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(),R.color.red_700)
         }
     }
 
-    private fun initFab(viewModel: TripEditViewModel, fab: ExtendedFloatingActionButton) {
+    private fun initFab(viewModel: TripEditViewModel, fab: FloatingActionButton) {
 
         fab.show()
-        fab.shrink()
 
         changeStateFab(fab)
 
@@ -237,24 +239,23 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         }
     }
 
-    class HideDialogFragment(viewModel: TripEditViewModel, fab: ExtendedFloatingActionButton) :
+    class HideDialogFragment(viewModel: TripEditViewModel, var fab: FloatingActionButton) :
         DialogFragment() {
         var trip = viewModel.getTrip()
-        var efab = fab
 
-        private fun changeStateFab(fab: ExtendedFloatingActionButton) {
+        private fun changeStateFab(fab: FloatingActionButton) {
             if (trip.visibility) {
-                fab.icon = ContextCompat.getDrawable(
+                fab.setImageDrawable(ContextCompat.getDrawable(
                     requireContext(),
                     R.drawable.ic_sharp_visibility
-                )
-                fab.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.green_700))
+                ))
+                fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(),R.color.green_700)
             } else {
-                fab.icon = ContextCompat.getDrawable(
+                fab.setImageDrawable(ContextCompat.getDrawable(
                     requireContext(),
                     R.drawable.ic_baseline_visibility_off
-                )
-                fab.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red_700))
+                ))
+                fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(),R.color.red_700)
             }
         }
 
@@ -265,7 +266,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                 .setPositiveButton("Confirm", DialogInterface.OnClickListener { dialog, id ->
                     // hide the trip
                     trip.visibility = false
-                    changeStateFab(efab)
+                    changeStateFab(fab)
                 })
                 .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, id ->
                     // User cancelled the dialog
@@ -276,24 +277,23 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         }
     }
 
-    class ShowDialogFragment(viewModel: TripEditViewModel, fab: ExtendedFloatingActionButton) :
+    class ShowDialogFragment(viewModel: TripEditViewModel, var fab: FloatingActionButton) :
         DialogFragment() {
         var trip = viewModel.getTrip()
-        var efab = fab
 
-        private fun changeStateFab(fab: ExtendedFloatingActionButton) {
+        private fun changeStateFab(fab: FloatingActionButton) {
             if (trip.visibility) {
-                fab.icon = ContextCompat.getDrawable(
+                fab.setImageDrawable(ContextCompat.getDrawable(
                     requireContext(),
                     R.drawable.ic_sharp_visibility
-                )
-                fab.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.green_700))
+                ))
+                fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(),R.color.green_700)
             } else {
-                fab.icon = ContextCompat.getDrawable(
+                fab.setImageDrawable(ContextCompat.getDrawable(
                     requireContext(),
                     R.drawable.ic_baseline_visibility_off
-                )
-                fab.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red_700))
+                ))
+                fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(),R.color.red_700)
             }
         }
 
@@ -303,7 +303,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             builder.setMessage("Do you want to show the trip?")
                 .setPositiveButton("Confirm", DialogInterface.OnClickListener { dialog, id ->
                     trip.visibility = true
-                    changeStateFab(efab)
+                    changeStateFab(fab)
                 })
                 .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, id ->
                 })

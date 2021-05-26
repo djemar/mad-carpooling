@@ -1,6 +1,7 @@
 package com.mad.carpooling.ui.trip_list
 
 import android.annotation.SuppressLint
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.util.TypedValue
@@ -23,7 +24,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bumptech.glide.Glide
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.data.Trip
@@ -38,7 +39,6 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
     // Use the 'by activityViewModels()' Kotlin property delegate
     // from the fragment-ktx artifact
     private val model: SharedViewModel by activityViewModels()
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -68,14 +68,16 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
         if (tripAdapter.itemCount == 0) //from getItemCount
             emptyView.isVisible = true
 
-        val fab = (activity as MainActivity).findViewById<ExtendedFloatingActionButton>(R.id.fab)
-        fab.icon = ContextCompat.getDrawable(requireContext(),R.drawable.ic_baseline_add)
+        val fab = (activity as MainActivity).findViewById<FloatingActionButton>(R.id.fab)
+        fab.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.ic_baseline_add))
 
         val value = TypedValue()
         view.context.theme.resolveAttribute(R.attr.colorSecondary, value, true)
-        fab.setBackgroundColor(value.data)
+        if(value.data == R.color.amber_500)
+            fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.amber_500)
+        else
+            fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.amber_200)
 
-        fab.shrink()
         fab.show()
 
         var navController: NavController?

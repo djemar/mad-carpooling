@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
@@ -69,35 +70,14 @@ class BoughtTripsListFragment : Fragment(R.layout.fragment_trip_list) {
     private fun updateTripList(tripsMap: HashMap<String, Trip>, view: View) {
 
 
-        val fab = (activity as MainActivity).findViewById<ExtendedFloatingActionButton>(R.id.fab)
-        fab.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_add)
+        val fab = (activity as MainActivity).findViewById<FloatingActionButton>(R.id.fab)
+        fab.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_add))
 
         val value = TypedValue()
         view.context.theme.resolveAttribute(R.attr.colorSecondary, value, true)
         fab.setBackgroundColor(value.data)
 
-        fab.shrink()
         fab.hide()
-
-        var navController: NavController?
-        fab.setOnClickListener {
-            val action = TripListFragmentDirections.actionNavTripListToNavTripEdit(
-                "",
-                isNew = true
-            )
-            navController = Navigation.findNavController(view)
-            navController!!.navigate(action) //a new one from scratch
-        }
-        rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                if (dy > 0 && fab.visibility == View.VISIBLE) {
-                    fab.hide()
-                } else if (dy < 0 && fab.visibility != View.VISIBLE) {
-                    fab.show()
-                }
-            }
-        })
     }
 
     class BoughtTripAdapter() :
