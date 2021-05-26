@@ -3,269 +3,179 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/sv_editTrip"
+    android:background="#eeeeee"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     tools:context=".ui.trip_edit.TripEditFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl_tripEdit_main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:clipToPadding="false"
+        android:padding="8dp">
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cv_tripEdit_car_pic"
-            android:layout_width="match_parent"
-            android:layout_height="160dp"
-            android:layout_gravity="center"
-            android:layout_margin="4dp"
-            app:cardCornerRadius="16dp"
-            app:layout_constraintBottom_toTopOf="@+id/cl_tripEdit_main"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_tripEdit_map"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Plan your trip"
+            app:cornerRadius="16dp"
+            app:icon="@drawable/ic_baseline_map"
+            app:iconGravity="start"
+            app:iconPadding="16dp"
+            app:layout_constraintBottom_toTopOf="@+id/card_tripPlan"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <ImageView
-                android:id="@+id/iv_tripEdit_car_pic"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_tripPlan"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/cv_tripEdit_car_pic"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btn_tripEdit_map">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/cl_tripEdit_plan"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_car_square" />
-
-            <ImageButton
-                android:id="@+id/btn_tripEdit_camera"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_gravity="end|bottom"
+                android:layout_height="wrap_content"
                 android:layout_margin="8dp"
-                android:layout_marginEnd="16dp"
-                android:background="@drawable/shape_round_camera_car"
-                android:elevation="4dp"
-                android:src="@drawable/ic_baseline_camera"
-                android:tint="?attr/colorOnPrimary" />
+                android:clipToPadding="false">
 
-        </androidx.cardview.widget.CardView>
+                <TextView
+                    android:id="@+id/tv_tripEdit_yourTrip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:fontFamily="@font/overpass"
+                    android:text="Your trip"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textColor="?attr/colorOnBackground"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toTopOf="@+id/rv_tripEdit_stops"
+                    app:layout_constraintEnd_toStartOf="@+id/tv_tripEdit_duration"
+                    app:layout_constraintHorizontal_chainStyle="spread_inside"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/cl_tripEdit_main"
+                <TextView
+                    android:id="@+id/tv_tripEdit_duration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/overpass"
+                    android:text="Estimated duration"
+                    android:textAlignment="textEnd"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textColor="?attr/colorOnBackground"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@+id/tv_tripEdit_yourTrip"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/tv_tripEdit_yourTrip"
+                    app:layout_constraintTop_toTopOf="@+id/tv_tripEdit_yourTrip" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_tripEdit_stops"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="4dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tv_tripEdit_yourTrip" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cv_tripEdit_car_pic"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:layout_marginBottom="8dp"
+            app:cardCornerRadius="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/card_tripInfo"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/card_tripPlan">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/iv_tripEdit_car_pic"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_car" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_tripEdit_camera"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="end|bottom"
+                    android:layout_margin="16dp"
+                    android:insetLeft="0dp"
+                    android:insetTop="0dp"
+                    android:insetRight="0dp"
+                    android:insetBottom="0dp"
+                    app:cornerRadius="24dp"
+                    app:icon="@drawable/ic_baseline_camera"
+                    app:iconGravity="textStart"
+                    app:iconPadding="0dp" />
+            </FrameLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_tripInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:cardCornerRadius="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/cv_tripEdit_car_pic">
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/cl_tripEdit_locations"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp"
-                app:layout_constraintBottom_toTopOf="@id/cl_tripEdit_info"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/textInput_tripEdit_departure"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="@string/departure"
-                    android:padding="4dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/textInput_tripEdit_arrival"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_departure"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="text"
-                        android:selectAllOnFocus="true"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/textInput_tripEdit_arrival"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="@string/arrival"
-                    android:padding="4dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/textInput_tripEdit_departure"
-                    app:layout_constraintTop_toTopOf="parent">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_arrival"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="text"
-                        android:selectAllOnFocus="true"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/cl_tripEdit_info"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp"
-                app:layout_constraintBottom_toTopOf="@id/cl_tripEdit_seats_price"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cl_tripEdit_locations">
+                android:layout_margin="8dp"
+                android:clipToPadding="false">
 
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/mcv_tripEdit_date"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp"
-                    app:cardCornerRadius="50dp"
-                    app:layout_constraintBottom_toTopOf="@id/edit_date"
-                    app:layout_constraintEnd_toStartOf="@id/mcv_tripEdit_time"
-                    app:layout_constraintHorizontal_weight="1"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
-
-                    <TextView
-                        android:id="@+id/tv_tripEdit_date"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:freezesText="true"
-                        android:padding="12dp"
-                        android:text="dd/mm/yyyy"
-                        android:textAlignment="center"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                        android:textStyle="bold"
-                        app:layout_constraintBottom_toTopOf="@id/edit_date"
-                        app:layout_constraintEnd_toStartOf="@id/mcv_tripEdit_time"
-                        app:layout_constraintHorizontal_weight="1"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/edit_date"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                <TextView
+                    android:id="@+id/tv_tripEdit_info"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="4dp"
-                    android:gravity="center"
-                    android:text="Pick date"
-                    app:cornerRadius="16dp"
-                    app:layout_constraintBottom_toTopOf="@id/textInput_tripEdit_duration"
-                    app:layout_constraintEnd_toEndOf="@+id/mcv_tripEdit_date"
-                    app:layout_constraintHorizontal_chainStyle="spread"
-                    app:layout_constraintHorizontal_weight="1"
-                    app:layout_constraintStart_toStartOf="@id/mcv_tripEdit_date"
-                    app:layout_constraintTop_toBottomOf="@id/mcv_tripEdit_date"
-                    app:strokeColor="?attr/colorPrimary"
-                    app:strokeWidth="2dp" />
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/mcv_tripEdit_time"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp"
-                    app:cardCornerRadius="50dp"
-                    app:layout_constraintBottom_toTopOf="@id/edit_time"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_weight="1"
-                    app:layout_constraintStart_toEndOf="@id/mcv_tripEdit_date"
-                    app:layout_constraintTop_toTopOf="parent">
-
-                    <TextView
-                        android:id="@+id/tv_tripEdit_time"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:freezesText="true"
-                        android:padding="12dp"
-                        android:text="hh:mm"
-                        android:textAlignment="center"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                        android:textStyle="bold" />
-
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/edit_time"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp"
-                    android:elevation="0dp"
-                    android:gravity="center"
-                    android:text="Set time"
-                    app:cornerRadius="16dp"
-                    app:layout_constraintBottom_toTopOf="@id/textInput_tripEdit_duration"
-                    app:layout_constraintEnd_toEndOf="@id/mcv_tripEdit_time"
-                    app:layout_constraintHorizontal_weight="1"
-                    app:layout_constraintStart_toStartOf="@+id/mcv_tripEdit_time"
-                    app:layout_constraintTop_toBottomOf="@id/mcv_tripEdit_time"
-                    app:strokeColor="?attr/colorPrimary"
-                    app:strokeWidth="2dp" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/textInput_tripEdit_duration"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/duration"
-                    android:padding="4dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_weight="1"
+                    android:layout_marginBottom="8dp"
+                    android:fontFamily="@font/overpass"
+                    android:text="Trip details"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textColor="?attr/colorOnBackground"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toTopOf="@+id/textInput_tripEdit_seats"
+                    app:layout_constraintHorizontal_chainStyle="spread_inside"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/edit_date">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_duration"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="text"
-                        android:selectAllOnFocus="true"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/cl_tripEdit_seats_price"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:layout_marginBottom="4dp"
-                app:layout_constraintBottom_toTopOf="@id/cl_tripEdit_preferences"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cl_tripEdit_info">
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/textInput_tripEdit_seats"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
                     android:layout_weight="1"
                     android:hint="@string/seats"
                     android:padding="4dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintBottom_toTopOf="@+id/tripEdit_chattiness"
                     app:layout_constraintEnd_toStartOf="@id/textInput_tripEdit_price"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tv_tripEdit_info"
                     app:startIconDrawable="@drawable/ic_seats">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -286,10 +196,10 @@
                     android:layout_weight="1"
                     android:hint="@string/price"
                     android:padding="4dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintBottom_toBottomOf="@+id/textInput_tripEdit_seats"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/textInput_tripEdit_seats"
-                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/textInput_tripEdit_seats"
                     app:startIconDrawable="@drawable/ic_price">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -302,30 +212,18 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/cl_tripEdit_preferences"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp"
-                app:layout_constraintBottom_toTopOf="@id/cl_tripEdit_description_stops"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cl_tripEdit_seats_price">
-
                 <LinearLayout
                     android:id="@+id/tripEdit_chattiness"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
                     android:orientation="horizontal"
                     android:padding="4dp"
                     app:layout_constraintBottom_toTopOf="@+id/tripEdit_smoking"
                     app:layout_constraintEnd_toStartOf="@id/tripEdit_pets"
                     app:layout_constraintHorizontal_weight="1"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
+                    app:layout_constraintTop_toBottomOf="@+id/textInput_tripEdit_seats">
 
                     <ImageButton
                         android:id="@+id/btn_edit_chattiness"
@@ -354,7 +252,6 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:padding="4dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/tripEdit_music"
                     app:layout_constraintHorizontal_weight="1"
                     app:layout_constraintStart_toStartOf="parent"
@@ -391,7 +288,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_weight="1"
                     app:layout_constraintStart_toEndOf="@id/tripEdit_chattiness"
-                    app:layout_constraintTop_toTopOf="parent">
+                    app:layout_constraintTop_toTopOf="@+id/tripEdit_chattiness">
 
                     <ImageButton
                         android:id="@+id/btn_edit_pets"
@@ -420,7 +317,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:padding="4dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintBottom_toBottomOf="@+id/tripEdit_smoking"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_weight="1"
                     app:layout_constraintStart_toEndOf="@id/tripEdit_smoking"
@@ -448,19 +345,6 @@
 
                 </LinearLayout>
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/cl_tripEdit_description_stops"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="4dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cl_tripEdit_preferences">
-
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/textInput_tripEdit_description"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -471,68 +355,23 @@
                     app:counterEnabled="true"
                     app:counterMaxLength="120"
                     app:endIconMode="clear_text"
-                    app:layout_constraintBottom_toTopOf="@id/tv_tripEdit_stops"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
+                    app:layout_constraintTop_toBottomOf="@+id/tripEdit_smoking">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/et_description"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="top|left"
-                        android:minLines="4"
+                        android:gravity="top|start"
                         android:inputType="text|textMultiLine"
+                        android:minLines="3"
                         android:selectAllOnFocus="true"
                         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
-
                 </com.google.android.material.textfield.TextInputLayout>
-
-                <TextView
-                    android:id="@+id/tv_tripEdit_stops"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="4dp"
-                    android:text="Intermediate stops"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                    android:textStyle="bold"
-                    app:layout_constraintBottom_toTopOf="@id/rv_tripEdit_stops"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textInput_tripEdit_description" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rv_tripEdit_stops"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="4dp"
-                    app:layout_constraintBottom_toTopOf="@id/ib_add_stop"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tv_tripEdit_stops">
-
-                </androidx.recyclerview.widget.RecyclerView>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/ib_add_stop"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom|end"
-                    android:layout_margin="4dp"
-                    android:layout_marginBottom="8dp"
-                    android:clickable="true"
-                    android:src="@android:drawable/ic_input_add"
-                    android:text="Add stop"
-                    android:tint="?attr/colorOnPrimary"
-                    app:cornerRadius="26dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/rv_tripEdit_stops" />
-
             </androidx.constraintlayout.widget.ConstraintLayout>
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
