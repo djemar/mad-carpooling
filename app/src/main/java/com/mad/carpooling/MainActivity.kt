@@ -33,6 +33,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.mad.carpooling.data.Rating
 import com.mad.carpooling.data.User
 import com.mad.carpooling.ui.SharedViewModel
 
@@ -60,7 +61,12 @@ class MainActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.nav_show_profile, R.id.nav_trip_list, R.id.nav_others_trip_list, R.id.nav_bought_trips, R.id.nav_interest_trips, R.id.nav_map
+                R.id.nav_show_profile,
+                R.id.nav_trip_list,
+                R.id.nav_others_trip_list,
+                R.id.nav_bought_trips,
+                R.id.nav_interest_trips,
+                R.id.nav_map
             ), drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -91,7 +97,7 @@ class MainActivity : AppCompatActivity() {
         var log = findViewById<TextView>(R.id.tv_log)
 
         val currentUser = auth.currentUser
-        if(currentUser != null) {
+        if (currentUser != null) {
             log.setText("Logout")
             log.setOnClickListener {
                 logout()
@@ -205,15 +211,22 @@ class MainActivity : AppCompatActivity() {
                                     email = if (user.email != null) user.email else "email@address.com",
                                     imageUserRef = if (user.photoUrl != null) user.photoUrl!!.toString() else null
                                 )
+                                val newRating = Rating()
+                                // TODO: check if this works (add user in ratings collection)
                                 db.collection("users").document(user.uid)
                                     .set(newUser, SetOptions.merge())
                                     .addOnSuccessListener {
-                                        Snackbar.make(
-                                            findViewById(R.id.triplist_rv),
-                                            "Login successful",
-                                            Snackbar.LENGTH_SHORT
-                                        ).show()
+                                        db.collection("ratings").document(user.uid)
+                                            .set(newRating, SetOptions.merge())
+                                            .addOnSuccessListener {
+                                                Snackbar.make(
+                                                    findViewById(R.id.triplist_rv),
+                                                    "Login successful",
+                                                    Snackbar.LENGTH_SHORT
+                                                ).show()
+                                            }
                                     }
+
                             }
                         }
 

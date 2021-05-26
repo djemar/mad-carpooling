@@ -40,4 +40,6 @@
     <string name="lorem_ipsum">Lorem ipsum dolor sit amet.</string>
     <string name="menu_others_trips">Trips</string>
     <string name="add_a_comment">Add an optional comment</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
