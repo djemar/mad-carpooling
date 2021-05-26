@@ -1,5 +1,6 @@
 package com.mad.carpooling.ui.profile_reviews
 
+import android.app.ActionBar
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -7,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.RecyclerView
@@ -26,6 +28,8 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val role = arguments?.getString("role")
+        (requireActivity() as AppCompatActivity).supportActionBar?.title = "Reviews as ${role}"
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
