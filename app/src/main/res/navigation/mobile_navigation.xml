@@ -48,18 +48,17 @@
         android:name="com.mad.carpooling.ui.profile.ShowProfileFragment"
         android:label="@string/menu_show_myprofile"
         tools:layout="@layout/fragment_show_profile">
-        <action
-            android:id="@+id/action_nav_show_profile_to_nav_edit_profile"
-            app:destination="@id/nav_edit_profile"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim"
-            app:popUpTo="@id/nav_show_profile" />
         <argument
             android:name="uid"
             android:defaultValue="uid"
             app:argType="string" />
+        <action
+            android:id="@+id/action_nav_show_profile_to_nav_reviews_profile"
+            app:destination="@id/nav_reviews_profile"
+            app:popUpTo="@id/nav_show_profile" />
+        <action
+            android:id="@+id/action_nav_show_profile_to_nav_edit_profile"
+            app:destination="@id/nav_edit_profile" />
     </fragment>
 
     <fragment
@@ -71,6 +70,10 @@
             android:name="uid"
             android:defaultValue="uid"
             app:argType="string" />
+        <action
+            android:id="@+id/action_nav_show_profile_others_to_nav_reviews_profile"
+            app:destination="@id/nav_reviews_profile"
+            app:popUpTo="@id/nav_show_profile_others" />
     </fragment>
     <fragment
         android:id="@+id/nav_edit_profile"
@@ -85,10 +88,6 @@
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim"
             app:popUpTo="@id/nav_others_trip_list" />
-        <argument
-            android:name="uid"
-            android:defaultValue="uid"
-            app:argType="string" />
     </fragment>
 
     <fragment
@@ -158,7 +157,7 @@
         android:id="@+id/nav_interest_trips"
         android:name="com.mad.carpooling.ui.trip_interest.TripOfInterestListFragment"
         android:label="Trips you like"
-        tools:layout="@layout/fragment_trip_list" >
+        tools:layout="@layout/fragment_trip_list">
         <action
             android:id="@+id/action_nav_interest_trips_to_nav_trip_details"
             app:destination="@id/nav_trip_details"
@@ -168,6 +167,17 @@
         android:id="@+id/nav_map"
         android:name="com.mad.carpooling.ui.maps.MapFragment"
         android:label="Map"
-        tools:layout="@layout/fragment_map"/>
+        tools:layout="@layout/fragment_map" />
+    <fragment
+        android:id="@+id/nav_reviews_profile"
+        android:name="com.mad.carpooling.ui.profile_reviews.ReviewsProfileFragment"
+        android:label="Reviews profile"
+        tools:layout="@layout/fragment_reviews_profile">
+        <argument
+            android:name="review"
+            app:argType="android.os.Bundle"
+            app:nullable="true"
+            android:defaultValue="@null"/>
+    </fragment>
 
 </navigation>

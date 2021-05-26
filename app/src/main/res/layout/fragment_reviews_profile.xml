@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipToPadding="false"
+    android:orientation="vertical"
+    tools:context=".ui.profile_reviews.ReviewsProfileFragment">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/reviews_list"
+        android:elevation="1dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:clipToPadding="false"
+        android:focusable="true" />
+
+    <TextView
+        android:id="@+id/no_reviews_available"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="32dp"
+        android:gravity="center_horizontal"
+        android:text="You have zero reviews"
+        android:visibility="visible" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

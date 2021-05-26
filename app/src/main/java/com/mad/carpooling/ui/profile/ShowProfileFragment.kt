@@ -10,15 +10,19 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RatingBar
 import android.widget.TextView
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.onNavDestinationSelected
 import com.bumptech.glide.Glide
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -43,6 +47,8 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
     private lateinit var numReviewsPassenger: TextView
     private lateinit var user: User
     private var uid: String = ""
+    private lateinit var cvDriver: MaterialCardView
+    private lateinit var cvPassenger: MaterialCardView
     private lateinit var optionsMenu: Menu
     private val model: SharedViewModel by activityViewModels()
     private val args: ShowProfileFragmentArgs by navArgs()
@@ -64,8 +70,10 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
         rbPassenger = view.findViewById(R.id.rb_showProfile_passenger)
         numStarsPassenger = view.findViewById(R.id.tv_showProfile_numStars_passenger)
         numReviewsPassenger = view.findViewById(R.id.tv_showProfile_numReviews_passenger)
+        cvDriver = view.findViewById(R.id.ll_rating_driver)
+        cvPassenger = view.findViewById(R.id.ll_rating_passenger)
 
-        val fab = (activity as MainActivity).findViewById<ExtendedFloatingActionButton>(R.id.fab)
+        val fab = (activity as MainActivity).findViewById<FloatingActionButton>(R.id.fab)
         fab.hide()
 
         if (args.uid == "uid") {
@@ -112,7 +120,7 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
                     val mapRatingDriver: Map<String, ArrayList<Any>> =
                         res.get("driverRatings") as Map<String, ArrayList<Any>>
                     if (mapRatingDriver.isNotEmpty()) {
-                        Log.d("ratings:",mapRatingDriver.toString())
+                        Log.d("ratings:", mapRatingDriver.toString())
                         var vote: Float = 0f
                         for (array in mapRatingDriver.values)
                             vote += array[0].toString().toFloat()
@@ -153,14 +161,34 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
                     numReviewsPassenger.text = "0 reviews"
                 }
             }
-        //TODO: show ratings and comments of other users after clicking on ratebar
+
+        cvDriver.setOnClickListener {
+            val bundle: Bundle = bundleOf()
+            bundle.putString("uid", uid)
+            bundle.putString("role", "driver")
+
+            if (uid != model.getCurrentUser().value?.uid!!) {
+                findNavController().navigate(R.id.action_nav_show_profile_others_to_nav_reviews_profile, bundle)
+            } else {
+                findNavController().navigate(R.id.action_nav_show_profile_to_nav_reviews_profile, bundle)
+            }
+        }
+
+        cvPassenger.setOnClickListener {
+            val bundle: Bundle = bundleOf()
+            bundle.putString("uid", uid)
+            bundle.putString("role", "passenger")
+
+            if (uid != model.getCurrentUser().value?.uid!!) {
+                findNavController().navigate(R.id.action_nav_show_profile_others_to_nav_reviews_profile, bundle)
+            } else {
+                findNavController().navigate(R.id.action_nav_show_profile_to_nav_reviews_profile, bundle)
+            }
+        }
     }
 
     private fun editProfile() {
-        val action = ShowProfileFragmentDirections.actionNavShowProfileToNavEditProfile(
-            uid
-        )
-        findNavController().navigate(action)
+        findNavController().navigate(R.id.action_nav_show_profile_to_nav_edit_profile)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
