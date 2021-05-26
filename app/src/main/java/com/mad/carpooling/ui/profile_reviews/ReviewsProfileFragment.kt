@@ -1,29 +1,34 @@
 package com.mad.carpooling.ui.profile_reviews
 
-import android.app.ActionBar
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.recyclerview.widget.RecyclerView
-import com.mad.carpooling.R
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.MainActivity
+import com.mad.carpooling.R
 import com.mad.carpooling.ui.SharedViewModel
+import com.taufiqrahman.reviewratings.BarLabels
+import com.taufiqrahman.reviewratings.RatingReviews
+
 
 class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
     private lateinit var rv: RecyclerView
+    private lateinit var tv_stars: TextView
+    private lateinit var tv_reviews: TextView
+    private lateinit var rb_ratings: RatingBar
     private val model: SharedViewModel by activityViewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,9 +48,26 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
         val uid = arguments?.getString("uid")
         val role = arguments?.getString("role")
         rv = view.findViewById<RecyclerView>(R.id.reviews_list)
+        tv_stars = view.findViewById<TextView>(R.id.tv_number_stars)
+        tv_reviews = view.findViewById<TextView>(R.id.tv_number_reviews)
+        rb_ratings = view.findViewById<RatingBar>(R.id.rb_fragment_review)
+
         rv.layoutManager = LinearLayoutManager(context)
         rv.isNestedScrollingEnabled = false; //prevent toolbar to expand on scroll
+
         lateinit var userList: Array<String>
+        var stars = intArrayOf(0, 0, 0, 0, 0);
+        var totStars = 0;
+
+        val ratingReviews = view.findViewById(R.id.rating_reviews) as RatingReviews
+        val colors = intArrayOf(
+            Color.parseColor("#0e9d58"),
+            Color.parseColor("#bfd047"),
+            Color.parseColor("#ffc105"),
+            Color.parseColor("#ef7e14"),
+            Color.parseColor("#d36259")
+        )
+
         if (role == "driver") {
             db.collection("ratings").document(uid!!).get()
                 .addOnSuccessListener { res ->
@@ -55,8 +77,39 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
                     Log.d("keys",userList[0].toString())
                     val reviewAdapter = ReviewAdapter(userList, mapRatingDriver)
                     rv.adapter = reviewAdapter
-                    if (reviewAdapter.itemCount == 0) //from getItemCount
+                    if (reviewAdapter.itemCount == 0) {//from getItemCount
                         emptyView.isVisible = true
+                        tv_reviews.text = "0.0"
+                    }
+                    else {
+                        for (us in userList) {
+                            if (mapRatingDriver[us]?.get(0) == 1) {
+                                stars[4]++; totStars += 1
+                            }
+                            if (mapRatingDriver[us]?.get(0) == 2) {
+                                stars[3]++; totStars += 2
+                            }
+                            if (mapRatingDriver[us]?.get(0) == 3) {
+                                stars[2]++; totStars += 3
+                            }
+                            if (mapRatingDriver[us]?.get(0) == 4) {
+                                stars[1]++; totStars += 4
+                            }
+                            if (mapRatingDriver[us]?.get(0) == 5) {
+                                stars[0]++; totStars += 5
+                            }
+                        }
+
+                        tv_reviews.text = mapRatingDriver.size.toString()
+                        tv_stars.text = (totStars.toFloat() / mapRatingDriver.size).toString()
+                        rb_ratings.rating = totStars.toFloat() / mapRatingDriver.size
+                    }
+
+                    val raters = intArrayOf(
+                        stars[0], stars[1], stars[2], stars[3], stars[4]
+                    )
+
+                    ratingReviews.createRatingBars(10, BarLabels.STYPE1, colors, raters)
                 }
         } else {
             db.collection("ratings").document(uid!!).get()
@@ -66,8 +119,35 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
                     userList = mapRatingPassenger.keys.toTypedArray()
                     val reviewAdapter = ReviewAdapter(userList, mapRatingPassenger)
                     rv.adapter = reviewAdapter
-                    if (reviewAdapter.itemCount == 0) //from getItemCount
+
+                    if (reviewAdapter.itemCount == 0) {//from getItemCount
                         emptyView.isVisible = true
+                        tv_reviews.text = "0.0"
+                    }
+                    else {
+                        for (us in userList) {
+                            if (mapRatingPassenger[us]?.get(0) == 1) {
+                                stars[4]++; totStars += 1
+                            } else if (mapRatingPassenger[us]?.get(0) == 2) {
+                                stars[3]++; totStars += 2
+                            } else if (mapRatingPassenger[us]?.get(0) == 3) {
+                                stars[2]++; totStars += 3
+                            } else if (mapRatingPassenger[us]?.get(0) == 4) {
+                                stars[1]++; totStars += 4
+                            } else if (mapRatingPassenger[us]?.get(0) == 5) {
+                                stars[0]++; totStars += 5
+                            }
+                        }
+                        tv_reviews.text = mapRatingPassenger.size.toString()
+                        tv_stars.text = (totStars.toFloat() / mapRatingPassenger.size).toString()
+                        rb_ratings.rating = totStars.toFloat() / mapRatingPassenger.size
+                    }
+
+                    val raters = intArrayOf(
+                        stars[0], stars[1], stars[2], stars[3], stars[4]
+                    )
+
+                    ratingReviews.createRatingBars(10, BarLabels.STYPE1, colors, raters)
                 }
         }
 

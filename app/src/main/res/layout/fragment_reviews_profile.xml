@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -7,22 +8,107 @@
     android:orientation="vertical"
     tools:context=".ui.profile_reviews.ReviewsProfileFragment">
 
+    <TextView
+        android:id="@+id/tv_number_stars"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="?android:selectableItemBackground"
+        android:text="0.0"
+        android:textColor="#333333"
+        android:textSize="26sp"
+        app:layout_constraintEnd_toEndOf="@+id/rb_fragment_review"
+        app:layout_constraintHorizontal_bias="0.36"
+        app:layout_constraintStart_toStartOf="@+id/rb_fragment_review"
+        app:layout_constraintTop_toTopOf="@+id/rating_reviews" />
+
+    <RatingBar
+        android:id="@+id/rb_fragment_review"
+        style="@android:style/Widget.Material.Light.RatingBar.Small"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:numStars="5"
+        android:progressTint="#333333"
+        android:rating="0"
+        app:layout_constraintBottom_toBottomOf="@+id/rating_reviews"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_number_stars"
+        app:layout_constraintVertical_bias="0.07999998" />
+
+    <TextView
+        android:id="@+id/tv_number_reviews"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="2dp"
+        android:text="-"
+        android:textColor="#333333"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toStartOf="@+id/iv_reviews_icon"
+        app:layout_constraintStart_toStartOf="@+id/rb_fragment_review"
+        app:layout_constraintTop_toBottomOf="@+id/rb_fragment_review" />
+
+    <ImageView
+        android:id="@+id/iv_reviews_icon"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:backgroundTint="#333333"
+        app:layout_constraintEnd_toEndOf="@+id/rb_fragment_review"
+        app:layout_constraintStart_toEndOf="@+id/tv_number_reviews"
+        app:layout_constraintTop_toTopOf="@+id/tv_number_reviews"
+        app:srcCompat="@drawable/ic_person" />
+
+    <com.taufiqrahman.reviewratings.RatingReviews
+        android:id="@+id/rating_reviews"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="42dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        app:animation="true"
+        app:layout_constraintBottom_toTopOf="@+id/reviews_list"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/tv_number_stars"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.499"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:max_value="100"
+        app:rounded="true"
+        app:show_label="true"
+        app:spaces="2dp"
+        app:text_color="#333333"
+        app:text_size="12sp"
+        app:width="16dp" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/reviews_list"
-        android:elevation="1dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:clickable="true"
         android:clipToPadding="false"
-        android:focusable="true" />
+        android:elevation="1dp"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rating_reviews" />
 
     <TextView
         android:id="@+id/no_reviews_available"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingTop="32dp"
+        android:layout_height="0dp"
         android:gravity="center_horizontal"
+        android:paddingTop="32dp"
         android:text="You have zero reviews"
-        android:visibility="visible" />
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/rating_reviews"
+        tools:layout_editor_absoluteX="0dp" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

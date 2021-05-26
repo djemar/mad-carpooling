@@ -47,6 +47,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
+        android:stepSize="1"
         android:theme="@style/RatingBar"
         app:layout_constraintBottom_toTopOf="@id/ti_review"
         app:layout_constraintEnd_toEndOf="parent"
