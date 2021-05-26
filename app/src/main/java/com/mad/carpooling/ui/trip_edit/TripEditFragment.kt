@@ -36,7 +36,6 @@ import androidx.navigation.ui.onNavDestinationSelected
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -66,11 +65,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     private val model: SharedViewModel by activityViewModels()
     private lateinit var optionsMenu: Menu
     private lateinit var ivCarPic: ImageView
-    private lateinit var tvDate: TextView
-    private lateinit var tvTime: TextView
-    private lateinit var etDepartureLocation: EditText
-    private lateinit var etArrivalLocation: EditText
-    private lateinit var etDuration: EditText
+    private lateinit var tvDuration: TextView
     private lateinit var etSeats: EditText
     private lateinit var etPrice: EditText
     private lateinit var etDescription: EditText
@@ -79,6 +74,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     private lateinit var ibtnPets: ImageButton
     private lateinit var ibtnMusic: ImageButton
     private lateinit var stops: ArrayList<String>
+    private lateinit var stopIcon: ImageView
     private lateinit var trip: Trip
     private var isNew = false
     private var tripMap: HashMap<String, Trip>? = null
@@ -97,11 +93,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         super.onViewCreated(view, savedInstanceState)
 
         ivCarPic = view.findViewById(R.id.iv_tripEdit_car_pic)
-        tvDate = view.findViewById(R.id.tv_tripEdit_date)
-        tvTime = view.findViewById(R.id.tv_tripEdit_time)
-        etDepartureLocation = view.findViewById(R.id.et_departure)
-        etArrivalLocation = view.findViewById(R.id.et_arrival)
-        etDuration = view.findViewById(R.id.et_duration)
+        tvDuration = view.findViewById(R.id.tv_tripEdit_duration)
         etSeats = view.findViewById(R.id.et_seats)
         etPrice = view.findViewById(R.id.et_price)
         etDescription = view.findViewById(R.id.et_description)
@@ -125,13 +117,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             trip.music = changeStatePreference(!trip.music, ibtnMusic)
         }
 
-        val btnDate = view.findViewById<MaterialButton>(R.id.edit_date)
-        btnDate.setOnClickListener { showDatePickerDialog() }
-
-        val btnTime = view.findViewById<MaterialButton>(R.id.edit_time)
-        btnTime.setOnClickListener { showTimePickerDialog() }
-
-        val btnCamera = view.findViewById<ImageButton>(R.id.btn_tripEdit_camera)
+        val btnCamera = view.findViewById<MaterialButton>(R.id.btn_tripEdit_camera)
         registerForContextMenu(btnCamera)
         btnCamera.setOnClickListener { activity?.openContextMenu(btnCamera) }
     }
@@ -168,15 +154,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
         stops = trip.stops!!.toMutableList() as ArrayList<String>
         val stopEditAdapter = StopEditAdapter(stops)
-        tvDate.text =
-            SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(trip.timestamp.toDate())
-                .toString()
-        tvTime.text =
-            SimpleDateFormat("HH:mm", Locale.getDefault()).format(trip.timestamp.toDate())
-                .toString()
-        etDepartureLocation.setText(trip.departure)
-        etArrivalLocation.setText(trip.arrival)
-        etDuration.setText(trip.duration)
+        tvDuration.text = trip.duration
         etSeats.setText(trip.seats.toString())
         etPrice.setText(trip.price.toString())
         etDescription.setText(trip.description)
@@ -184,10 +162,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         rv.adapter = stopEditAdapter
         initPreferences()
 
-        val btnAddStop = view.findViewById<MaterialButton>(R.id.ib_add_stop)
-        btnAddStop.setOnClickListener {
-            stopEditAdapter.addEmpty(",,", stops.size + 1)
-        }
 
         val fab = (activity as MainActivity).findViewById<FloatingActionButton>(R.id.fab)
         if (!isNew) {
@@ -265,7 +239,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             // Use the Builder class for convenient dialog construction
             val builder: AlertDialog.Builder = AlertDialog.Builder(activity)
             builder.setMessage("Do you want to hide the trip?")
-                .setPositiveButton("Confirm", DialogInterface.OnClickListener { dialog, id ->
+                .setPositiveButton("Confirm") { dialog, id ->
                     // hide the trip
                     trip.visibility = false
                     changeStateFab(fab)
@@ -273,7 +247,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                 .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, id ->
                     // User cancelled the dialog
 
-                })
+                }
             // Create the AlertDialog object and return it
             return builder.create()
         }
@@ -303,7 +277,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             // Use the Builder class for convenient dialog construction
             val builder: AlertDialog.Builder = AlertDialog.Builder(activity)
             builder.setMessage("Do you want to show the trip?")
-                .setPositiveButton("Confirm", DialogInterface.OnClickListener { dialog, id ->
+                .setPositiveButton("Confirm") { dialog, id ->
                     trip.visibility = true
                     changeStateFab(fab)
                 })
@@ -535,17 +509,13 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
         }
 
-        etDepartureLocation.addTextChangedListener(textWatcher)
-        etArrivalLocation.addTextChangedListener(textWatcher)
-        etDuration.addTextChangedListener(textWatcher)
+        tvDuration.addTextChangedListener(textWatcher)
         etSeats.addTextChangedListener(textWatcher)
         etPrice.addTextChangedListener(textWatcher)
     }
 
     private fun validateSave() {
-        optionsMenu.findItem(R.id.save_trip).isEnabled =
-            etDepartureLocation.text.trim().isNotEmpty() && etArrivalLocation.text.trim()
-                .isNotEmpty() && etDuration.text.trim().isNotEmpty() && etSeats.text.trim()
+        optionsMenu.findItem(R.id.save_trip).isEnabled = etSeats.text.trim()
                 .isNotEmpty() && etPrice.text.trim()
                 .isNotEmpty() && ((isNew && currentPhotoPath != null) || !isNew)
     }
@@ -580,8 +550,8 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
     private fun updateFirestoreTrips() {
         val dateFormat = SimpleDateFormat("dd/MM/yyyyHH:mm")
-        val parsedDate = dateFormat.parse(tvDate.text.toString() + tvTime.text.toString())
-        val timestamp: Timestamp = Timestamp(parsedDate!!)
+        //val parsedDate = dateFormat.parse(tvDate.text.toString() + tvTime.text.toString())
+       // val timestamp: Timestamp = Timestamp(parsedDate!!)
 
 
         // TODO take username from login
@@ -590,10 +560,8 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         val db = Firebase.firestore
         val newDocRef = db.collection("trips").document()
 
-        trip.departure = etDepartureLocation.text.trim().toString()
-        trip.arrival = etArrivalLocation.text.trim().toString()
-        trip.duration = etDuration.text.trim().toString()
-        trip.timestamp = timestamp
+        trip.duration = tvDuration.text.trim().toString()
+        //trip.timestamp = timestamp
         trip.seats = etSeats.text.trim().toString().toInt()
         trip.price = etPrice.text.trim().toString().toFloat()
         trip.description = etDescription.text.trim().toString()
@@ -665,12 +633,12 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         }
     }
     private fun showDatePickerDialog() {
-        val dateFragment = DatePickerFragment(tvDate)
+        val dateFragment = DatePickerFragment(tvDuration) //TODO
         dateFragment.show(requireActivity().supportFragmentManager, "datePicker")
     }
 
     private fun showTimePickerDialog() {
-        val timeFragment = TimePickerFragment(tvTime)
+        val timeFragment = TimePickerFragment(tvDuration) //TODO
         timeFragment.show(requireActivity().supportFragmentManager, "timePicker")
     }
 
@@ -691,10 +659,10 @@ class StopEditAdapter(val stops: ArrayList<String>) :
 
     class StopEditViewHolder(v: View) : RecyclerView.ViewHolder(v) {
 
-        private var stopName: EditText = v.findViewById(R.id.et_stop_location)
+        private var stopName: TextView = v.findViewById(R.id.et_stop_location)
         private var stopDate: EditText = v.findViewById(R.id.et_stop_date)
         private var stopTime: EditText = v.findViewById(R.id.et_stop_time)
-        var deleteBtn: ImageButton = v.findViewById(R.id.ib_edit_delete_stop)
+        private var stopIcon: ImageView = v.findViewById(R.id.rv_stop_symbol)
 
         fun bind(stops: ArrayList<String>, position: Int) {
             Log.d("bind:", stops[position])
@@ -702,7 +670,12 @@ class StopEditAdapter(val stops: ArrayList<String>) :
             var stringName = stringArray[0].trim()
             var stringDate = stringArray[1].trim()
             var stringTime = stringArray[2].trim()
-            stopName.setText(stringName)
+            when(position){
+                0 -> stopIcon.setImageDrawable(ContextCompat.getDrawable(this.itemView.context, R.drawable.ic_twotone_stop_start))
+                stops.size-1 -> stopIcon.setImageDrawable(ContextCompat.getDrawable(this.itemView.context, R.drawable.ic_twotone_stop_end))
+                else -> stopIcon.setImageDrawable(ContextCompat.getDrawable(this.itemView.context, R.drawable.ic_twotone_stop))
+            }
+            stopName.text = stringName
             stopDate.setText(stringDate)
             stopTime.setText(stringTime)
 
@@ -781,10 +754,6 @@ class StopEditAdapter(val stops: ArrayList<String>) :
 
     override fun onBindViewHolder(holder: StopEditViewHolder, position: Int) {
         holder.bind(stops, position)
-        holder.deleteBtn.setOnClickListener {
-            stops.removeAt(position)
-            notifyDataSetChanged()
-        }
     }
 
     override fun getItemCount(): Int {
