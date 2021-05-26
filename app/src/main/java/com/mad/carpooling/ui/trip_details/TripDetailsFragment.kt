@@ -10,6 +10,7 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.widget.*
+import androidx.annotation.ColorRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -340,8 +341,8 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
     private fun initFab(db: FirebaseFirestore, view: View) {
         val value = TypedValue()
-        view.context.theme.resolveAttribute(R.attr.colorSecondary, value, true)
-        if(value.data == R.color.amber_500)
+        view.context.theme.resolveAttribute(R.attr.themeName, value, true)
+        if(value.string == "white")
             fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.amber_500)
         else
             fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.amber_200)
@@ -355,7 +356,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                 if (trip.acceptedPeople?.contains(model.getCurrentUser().value?.uid)!!) {
                     fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(),R.color.green_700)
                 } else {
-                    if(value.data == R.color.amber_500)
+                    if(value.string == "white")
                         fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.amber_500)
                     else
                         fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.amber_200)
@@ -564,10 +565,17 @@ class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip
             btn.strokeColor = ContextCompat.getColorStateList(view.context, R.color.red_700)
         } else {
             val value = TypedValue()
-            view.context.theme.resolveAttribute(R.attr.colorPrimary, value, true)
+            view.context.theme.resolveAttribute(R.attr.themeName, value, true)
             btn.text = "rate"
-            btn.setTextColor(value.data)
-            //btn.strokeColor = ContextCompat.getColorStateList(view.context, value.data)
+
+            if(value.string == "white") {
+                btn.strokeColor = ContextCompat.getColorStateList(view.context, R.color.blue_700)
+                btn.setTextColor(ContextCompat.getColor(view.context, R.color.blue_700))
+            }
+            else {
+                btn.strokeColor = ContextCompat.getColorStateList(view.context, R.color.blue_200)
+                btn.setTextColor(ContextCompat.getColor(view.context, R.color.blue_200))
+            }
         }
     }
 

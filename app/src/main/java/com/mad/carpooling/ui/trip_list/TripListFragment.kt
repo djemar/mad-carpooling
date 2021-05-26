@@ -72,8 +72,8 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
         fab.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.ic_baseline_add))
 
         val value = TypedValue()
-        view.context.theme.resolveAttribute(R.attr.colorSecondary, value, true)
-        if(value.data == R.color.amber_500)
+        view.context.theme.resolveAttribute(R.attr.themeName, value, true)
+        if(value.string == "white")
             fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.amber_500)
         else
             fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.amber_200)
