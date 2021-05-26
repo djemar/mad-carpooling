@@ -34,7 +34,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2">
+        android:layout_weight="2"
+        android:clipToPadding="false">
 
         <TextView
             android:id="@+id/tv_fullName"
@@ -44,145 +45,137 @@
             android:gravity="center"
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"
             android:textColor="?android:attr/textColorPrimary"
-            app:layout_constraintBottom_toTopOf="@+id/divider1"
+            app:layout_constraintBottom_toTopOf="@+id/ll_rating_driver"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_chainStyle="packed" />
 
-        <View
-            android:id="@+id/divider1"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="16dp"
-            android:alpha="0.3"
-            android:background="#aaaaaa"
-            app:layout_constraintBottom_toTopOf="@+id/ll_rating_driver"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_fullName" />
-
-        <LinearLayout
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/ll_rating_driver"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp"
-            app:layout_constraintBottom_toTopOf="@id/divider2"
+            android:layout_margin="8dp"
+            android:elevation="4dp"
+            app:cardCornerRadius="12dp"
+            app:layout_constraintBottom_toTopOf="@id/title_nickname"
             app:layout_constraintEnd_toStartOf="@id/ll_rating_passenger"
-            app:layout_constraintHorizontal_chainStyle="spread_inside"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/divider1">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/overpass"
-                android:text="AS DRIVER"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+            app:layout_constraintTop_toBottomOf="@id/tv_fullName">
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="2dp">
+                android:orientation="vertical"
+                android:padding="16dp">
 
                 <TextView
-                    android:id="@+id/tv_showProfile_numStars_driver"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="3.5/5"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+                    android:fontFamily="@font/overpass"
+                    android:text="AS DRIVER"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
 
-                <RatingBar
-                    android:id="@+id/rb_showProfile_driver"
-                    style="?android:attr/ratingBarStyleSmall"
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:isIndicator="true"
-                    android:layout_marginStart="4dp"
-                    android:layout_marginEnd="4dp"
-                    android:numStars="5"
-                    android:rating="3.5" />
+                    android:layout_marginTop="2dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tv_showProfile_numStars_driver"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="-/5"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+                    <RatingBar
+                        android:id="@+id/rb_showProfile_driver"
+                        style="?android:attr/ratingBarStyleSmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginEnd="4dp"
+                        android:isIndicator="true"
+                        android:numStars="5"
+                        android:rating="0" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tv_showProfile_numReviews_driver"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="0 reviews" />
             </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-            <TextView
-                android:id="@+id/tv_showProfile_numReviews_driver"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:text="7 reviews" />
-
-        </LinearLayout>
-
-        <LinearLayout
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/ll_rating_passenger"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp"
-            app:layout_constraintBottom_toTopOf="@id/divider2"
+            android:layout_margin="8dp"
+            android:elevation="4dp"
+            app:cardCornerRadius="12dp"
+            app:layout_constraintBottom_toTopOf="@id/title_nickname"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/ll_rating_driver"
-            app:layout_constraintTop_toBottomOf="@id/divider1">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/overpass"
-                android:text="AS PASSENGER"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+            app:layout_constraintTop_toBottomOf="@id/tv_fullName">
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="2dp">
+                android:orientation="vertical"
+                android:padding="16dp">
 
                 <TextView
-                    android:id="@+id/tv_showProfile_numStars_passenger"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="4.5/5"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+                    android:fontFamily="@font/overpass"
+                    android:text="AS PASSENGER"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
 
-                <RatingBar
-                    android:id="@+id/rb_showProfile_passenger"
-                    style="?android:attr/ratingBarStyleSmall"
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:isIndicator="true"
-                    android:numStars="5"
-                    android:layout_marginStart="4dp"
-                    android:layout_marginEnd="4dp"
-                    android:layout_gravity="center"
-                    android:rating="4.5" />
+                    android:layout_marginTop="2dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tv_showProfile_numStars_passenger"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="-/5"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+                    <RatingBar
+                        android:id="@+id/rb_showProfile_passenger"
+                        style="?android:attr/ratingBarStyleSmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginEnd="4dp"
+                        android:isIndicator="true"
+                        android:numStars="5"
+                        android:rating="0" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tv_showProfile_numReviews_passenger"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="0 reviews" />
+
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/tv_showProfile_numReviews_passenger"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="10 reviews"
-                android:layout_marginTop="2dp"/>
-
-        </LinearLayout>
-
-        <View
-            android:id="@+id/divider2"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:alpha="0.3"
-            android:background="#aaaaaa"
-            app:layout_constraintBottom_toTopOf="@+id/title_nickname"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/ll_rating_passenger" />
+        </com.google.android.material.card.MaterialCardView>
 
         <LinearLayout
             android:id="@+id/title_nickname"
@@ -193,7 +186,7 @@
             app:layout_constraintBottom_toTopOf="@+id/divider3"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/divider2">
+            app:layout_constraintTop_toBottomOf="@+id/ll_rating_driver">
 
             <TextView
                 android:layout_width="wrap_content"
