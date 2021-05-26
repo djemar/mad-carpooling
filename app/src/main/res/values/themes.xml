@@ -14,7 +14,7 @@
         <item name="colorSecondaryVariant">@color/amber_700</item>
         <item name="colorOnSecondary">@color/black</item>
 
-        <item name="backgroundColor">#eeeeee</item>
+        <item name="backgroundColor">#F5F5F5</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
