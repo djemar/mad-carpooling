@@ -44,17 +44,18 @@
         android:id="@+id/stopDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:autofillHints="Date"
         android:drawableStart="@drawable/ic_calendar"
         android:drawablePadding="8dp"
         android:text="Date"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/stopName"
         app:layout_constraintEnd_toStartOf="@id/stopTime"
         app:layout_constraintHorizontal_weight="0.5"
         app:layout_constraintStart_toEndOf="@id/stopName"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="@+id/stopName" />
 
     <TextView
         android:id="@+id/stopTime"
@@ -64,10 +65,10 @@
         android:drawablePadding="8dp"
         android:text="Time"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/stopDate"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_weight="0.5"
         app:layout_constraintStart_toEndOf="@id/stopDate"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="@+id/stopDate" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
