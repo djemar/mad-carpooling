@@ -6,7 +6,7 @@
     android:layout_height="wrap_content">
 
     <ScrollView
-        android:id="@+id/sv_tridDetails"
+        android:id="@+id/sv_tripDetails"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         tools:context=".ui.trip_details.TripDetailsFragment">
