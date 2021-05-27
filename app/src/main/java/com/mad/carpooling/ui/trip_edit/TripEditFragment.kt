@@ -126,6 +126,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         val args: TripEditFragmentArgs by navArgs()
         val rv = view.findViewById<RecyclerView>(R.id.rv_tripEdit_stops)
         rv.layoutManager = LinearLayoutManager(context)
+        rv.isNestedScrollingEnabled = false
         tripMap = model.getMyTrips().value
         isNew = args.isNew
 
@@ -632,6 +633,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             else -> super.onContextItemSelected(item)
         }
     }
+
     private fun showDatePickerDialog() {
         val dateFragment = DatePickerFragment(tvDuration) //TODO
         dateFragment.show(requireActivity().supportFragmentManager, "datePicker")
