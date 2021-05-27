@@ -70,7 +70,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         locationOverlay.enableFollowLocation()
         map.overlays.add(locationOverlay)
         val rotationGestureOverlay = RotationGestureOverlay(map);
-        rotationGestureOverlay.isEnabled
+        rotationGestureOverlay.isEnabled = true
         map.setMultiTouchControls(true);
         map.overlays.add(rotationGestureOverlay);
 
