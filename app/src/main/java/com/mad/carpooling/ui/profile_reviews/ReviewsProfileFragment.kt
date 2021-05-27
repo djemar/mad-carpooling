@@ -2,6 +2,7 @@ package com.mad.carpooling.ui.profile_reviews
 
 import android.graphics.Color
 import android.os.Bundle
+import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -109,7 +110,7 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
                         stars[0], stars[1], stars[2], stars[3], stars[4]
                     )
 
-                    ratingReviews.createRatingBars(10, BarLabels.STYPE1, colors, raters)
+                    ratingReviews.createRatingBars(mapRatingDriver.size, BarLabels.STYPE1, colors, raters)
                 }
         } else {
             db.collection("ratings").document(uid!!).get()
@@ -147,7 +148,7 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
                         stars[0], stars[1], stars[2], stars[3], stars[4]
                     )
 
-                    ratingReviews.createRatingBars(10, BarLabels.STYPE1, colors, raters)
+                    ratingReviews.createRatingBars(mapRatingPassenger.size, BarLabels.STYPE1, colors, raters)
                 }
         }
 
@@ -165,8 +166,8 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
 
             val ivProfile = v.findViewById<ImageView>(R.id.iv_ratings_profile_pic)
             val tvNickname = v.findViewById<TextView>(R.id.tv_ratings_nickname)
-            val rb = v.findViewById<RatingBar>(R.id.rb_ratings)
-            val comment = v.findViewById<TextView>(R.id.tv_comment)
+            val rb = v.findViewById<RatingBar>(R.id.rb_ratings_ratingbar)
+            val comment = v.findViewById<TextView>(R.id.tv_ratings_comment)
             val db = Firebase.firestore
 
             fun bind(userId: String, userReview: ArrayList<Any>, holder: ReviewViewHolder) {
@@ -177,6 +178,11 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
                 }
                 rb.rating = userReview[0].toString().toFloat()
                 comment.text = userReview[1].toString()
+                /* if ellipsize is set
+                comment.setOnClickListener {
+                    comment.maxLines = 100
+                }
+                */
             }
         }
 
