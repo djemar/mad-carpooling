@@ -538,7 +538,7 @@ class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BottomSheetViewHolder {
         val layout =
-            LayoutInflater.from(parent.context).inflate(R.layout.bottom_sheet_layout, parent, false)
+            LayoutInflater.from(parent.context).inflate(R.layout.rv_bottom_sheet, parent, false)
         return BottomSheetViewHolder(layout)
     }
 
@@ -642,13 +642,19 @@ class StopAdapter(private val stops: ArrayList<String>?) :
 
     class StopViewHolder(v: View) : RecyclerView.ViewHolder(v) {
 
-        private var stopId: TextView = v.findViewById(R.id.stopId)
+        private var stopIcon: ImageView = v.findViewById(R.id.rv_stop_icon)
         private var stopName: TextView = v.findViewById(R.id.stopName)
         private var stopDate: TextView = v.findViewById(R.id.stopDate)
         private var stopTime: TextView = v.findViewById(R.id.stopTime)
 
-        fun bind(stop: String?, position: Int) {
-            stopId.text = (position + 1).toString()
+        fun bind(stop: String?, position: Int, size: Int?) {
+            if (size != null) {
+                when(position){
+                    0 -> stopIcon.setImageDrawable(ContextCompat.getDrawable(this.itemView.context, R.drawable.ic_twotone_stop_start))
+                    size-1 -> stopIcon.setImageDrawable(ContextCompat.getDrawable(this.itemView.context, R.drawable.ic_twotone_stop_end))
+                    else -> stopIcon.setImageDrawable(ContextCompat.getDrawable(this.itemView.context, R.drawable.ic_twotone_stop))
+                }
+            }
             val stringArray = stop!!.split(",")
             stopName.text = stringArray[0].trim()
             stopDate.text = stringArray[1].trim()
@@ -659,12 +665,12 @@ class StopAdapter(private val stops: ArrayList<String>?) :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StopViewHolder {
         val layout =
-            LayoutInflater.from(parent.context).inflate(R.layout.stop_layout, parent, false)
+            LayoutInflater.from(parent.context).inflate(R.layout.rv_stop_details, parent, false)
         return StopViewHolder(layout)
     }
 
     override fun onBindViewHolder(holder: StopViewHolder, position: Int) {
-        holder.bind(stops?.get(position), position)
+        holder.bind(stops?.get(position), position, stops?.size)
     }
 
     override fun getItemCount(): Int {
