@@ -1,6 +1,8 @@
 package com.mad.carpooling.ui.trip_details
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.graphics.Paint
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
@@ -26,19 +28,30 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.card.MaterialCardView
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.mad.carpooling.BuildConfig
 import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.data.Trip
 import com.mad.carpooling.ui.SharedViewModel
-import java.text.SimpleDateFormat
+import com.mad.carpooling.ui.maps.MapUtils
+import kotlinx.coroutines.*
+import org.osmdroid.bonuspack.routing.OSRMRoadManager
+import org.osmdroid.bonuspack.routing.RoadManager
+import org.osmdroid.config.Configuration
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.Polyline
 import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.stream.Collectors
 
 
 class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
@@ -62,6 +75,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private lateinit var fab: FloatingActionButton
     private lateinit var bottomSheet: ConstraintLayout
     private lateinit var bsb: BottomSheetBehavior<ConstraintLayout>
+    private lateinit var map: MapView;
     private lateinit var btnEndTrip: MaterialButton
     private lateinit var ratingBar: RatingBar
     private var chattiness = false
@@ -72,6 +86,18 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        Configuration.getInstance().load(
+            requireContext(),
+            context?.getSharedPreferences("mad.carpooling.map", Context.MODE_PRIVATE)
+        );
+        return super.onCreateView(inflater, container, savedInstanceState)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -95,11 +121,68 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         bottomSheet = view.findViewById(R.id.bottom_sheet)
         fab = (activity as MainActivity).findViewById(R.id.fab)
         bsb = BottomSheetBehavior.from(bottomSheet)
+        map = view.findViewById(R.id.mapDetails)
         model.getTrips().observe(viewLifecycleOwner, { newTripsMap ->
             // Update the UI
             initTripDetails(newTripsMap, view)
+            initMap()
             (activity as MainActivity).invalidateOptionsMenu()
         })
+    }
+
+    private fun initMap() {
+        map.setTileSource(TileSourceFactory.MAPNIK);
+        map.setMultiTouchControls(false);
+        map.setOnTouchListener { v, event -> //disable touch events TODO navigate to map fragment
+            true
+        }
+        val marker = Marker(map)    //Testing
+        marker.position = GeoPoint(45.0580, 7.6482)
+        val marker2 = Marker(map)
+        marker2.position = GeoPoint(52.5899, 13.4199)
+        val waypoints = arrayListOf<Marker>(marker, marker2)
+        redrawMarkers(waypoints, map)
+        map.addOnFirstLayoutListener { v, left, top, right, bottom ->
+            val box = MapUtils.computeArea(
+                waypoints.stream().map(Marker::getPosition)
+                    .collect(Collectors.toList()) as ArrayList<GeoPoint>
+            )
+            map.zoomToBoundingBox(box, false, 200);
+        }
+
+        var routeOverlay: Polyline = Polyline()
+        val asyncJob = MainScope().launch {
+            map.overlays.remove(routeOverlay)
+            routeOverlay = getRoute(waypoints)
+            routeOverlay.outlinePaint.strokeWidth = 10f
+            routeOverlay.outlinePaint.alpha = 255
+            routeOverlay.outlinePaint.style = Paint.Style.FILL_AND_STROKE
+            routeOverlay.outlinePaint.strokeCap = Paint.Cap.ROUND
+            routeOverlay.outlinePaint.strokeJoin = Paint.Join.ROUND
+            map.overlays.add(routeOverlay)
+            map.invalidate()
+        }
+    }
+
+    private fun redrawMarkers(waypoints: java.util.ArrayList<Marker>, mapView: MapView) {
+        val count: AtomicInteger = AtomicInteger(0)
+        waypoints.stream().forEach { marker ->
+            marker.icon =
+                MapUtils.getNumMarker((count.incrementAndGet()).toString(), requireContext())
+            mapView.overlays.add(marker)
+        }
+        mapView.invalidate()
+    }
+
+    suspend fun getRoute(waypoints: ArrayList<Marker>): Polyline = withContext(Dispatchers.IO) {
+        val roadManager: RoadManager =
+            OSRMRoadManager(requireContext(), BuildConfig.APPLICATION_ID)
+        val gp = waypoints.stream().map(Marker::getPosition)
+            .collect(Collectors.toList()) as ArrayList<GeoPoint>
+        val road = async { roadManager.getRoad(gp) }
+        val r = road.await()
+        return@withContext RoadManager.buildRoadOverlay(r) as Polyline
+
     }
 
     @SuppressLint("SetTextI18n")
@@ -367,9 +450,10 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                         "interestedPeople",
                         FieldValue.arrayRemove(model.getCurrentUser().value?.uid)
                     ).addOnSuccessListener {
-                        db.collection("users").document(model.getCurrentUser().value?.uid!!).update(
-                            "favTrips", FieldValue.arrayRemove(trip.id)
-                        )
+                        db.collection("users").document(model.getCurrentUser().value?.uid!!)
+                            .update(
+                                "favTrips", FieldValue.arrayRemove(trip.id)
+                            )
                     }
 
                     if (trip.acceptedPeople?.contains(model.getCurrentUser().value?.uid!!) == true) {
@@ -389,11 +473,13 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                     ))
 
                     db.collection("trips").document(trip.id).update(
-                        "interestedPeople", FieldValue.arrayUnion(model.getCurrentUser().value?.uid)
+                        "interestedPeople",
+                        FieldValue.arrayUnion(model.getCurrentUser().value?.uid)
                     ).addOnSuccessListener {
-                        db.collection("users").document(model.getCurrentUser().value?.uid!!).update(
-                            "favTrips", FieldValue.arrayUnion(trip.id)
-                        )
+                        db.collection("users").document(model.getCurrentUser().value?.uid!!)
+                            .update(
+                                "favTrips", FieldValue.arrayUnion(trip.id)
+                            )
                     }
                 }
             }
@@ -510,9 +596,10 @@ class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip
                         .into(profilePic!!)
                 }
                 profile.setOnClickListener {
-                    val action = TripDetailsFragmentDirections.actionNavTripDetailsToNavShowProfile(
-                        user!!
-                    )
+                    val action =
+                        TripDetailsFragmentDirections.actionNavTripDetailsToNavShowProfile(
+                            user!!
+                        )
                     it.findNavController().navigate(action)
                 }
             }
@@ -632,10 +719,25 @@ class StopAdapter(private val stops: ArrayList<String>?) :
 
         fun bind(stop: String?, position: Int, size: Int?) {
             if (size != null) {
-                when(position){
-                    0 -> stopIcon.setImageDrawable(ContextCompat.getDrawable(this.itemView.context, R.drawable.ic_twotone_stop_start))
-                    size-1 -> stopIcon.setImageDrawable(ContextCompat.getDrawable(this.itemView.context, R.drawable.ic_twotone_stop_end))
-                    else -> stopIcon.setImageDrawable(ContextCompat.getDrawable(this.itemView.context, R.drawable.ic_twotone_stop))
+                when (position) {
+                    0 -> stopIcon.setImageDrawable(
+                        ContextCompat.getDrawable(
+                            this.itemView.context,
+                            R.drawable.ic_twotone_stop_start
+                        )
+                    )
+                    size - 1 -> stopIcon.setImageDrawable(
+                        ContextCompat.getDrawable(
+                            this.itemView.context,
+                            R.drawable.ic_twotone_stop_end
+                        )
+                    )
+                    else -> stopIcon.setImageDrawable(
+                        ContextCompat.getDrawable(
+                            this.itemView.context,
+                            R.drawable.ic_twotone_stop
+                        )
+                    )
                 }
             }
             val stringArray = stop!!.split(",")
