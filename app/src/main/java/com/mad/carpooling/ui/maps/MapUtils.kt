@@ -55,7 +55,7 @@ object MapUtils {
         return BoundingBox(north, east, south, west)
     }
 
-    fun redrawMarkers(waypoints: java.util.ArrayList<Marker>, mapView: MapView, ctx: Context) {
+    fun redrawMarkers(waypoints: ArrayList<Marker>, mapView: MapView, ctx: Context) {
         val count: AtomicInteger = AtomicInteger(0)
         waypoints.stream().forEach { marker ->
             marker.icon =
