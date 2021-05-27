@@ -11,6 +11,9 @@ import androidx.core.graphics.drawable.toBitmap
 import com.mad.carpooling.R
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
+import java.util.concurrent.atomic.AtomicInteger
 
 
 object MapUtils {
@@ -50,5 +53,14 @@ object MapUtils {
             east = position.longitude.coerceAtLeast(east)
         }
         return BoundingBox(north, east, south, west)
+    }
+
+    fun redrawMarkers(waypoints: java.util.ArrayList<Marker>, mapView: MapView, ctx: Context) {
+        val count: AtomicInteger = AtomicInteger(0)
+        waypoints.stream().forEach { marker ->
+            marker.icon =
+                MapUtils.getNumMarker((count.incrementAndGet()).toString(), ctx)
+        }
+        mapView.invalidate()
     }
 }

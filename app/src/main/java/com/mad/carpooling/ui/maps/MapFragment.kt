@@ -10,6 +10,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.mad.carpooling.BuildConfig
 import com.mad.carpooling.R
 import com.vmadalin.easypermissions.EasyPermissions
@@ -32,17 +34,30 @@ import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.function.Consumer
 import java.util.stream.Collectors
 import kotlin.collections.ArrayList
 
 
 class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionCallbacks {
     private lateinit var map: MapView;
+    private lateinit var mapViewModel: MapViewModel
+    private lateinit var viewModelFactory: MapViewModelFactory
+
 
     companion object {
         const val PERMISSION_LOCATION_REQUEST_CODE = 1
     }
+
+    class MapViewModelFactory(private val repo: MapRepository) : ViewModelProvider.Factory {
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(MapViewModel::class.java)) {
+                return MapViewModel(repo) as T
+            }
+            throw IllegalArgumentException("Unknown ViewModel class")
+        }
+
+    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -53,6 +68,10 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
             requireContext(),
             context?.getSharedPreferences("mad.carpooling.map", Context.MODE_PRIVATE)
         );
+        viewModelFactory = MapViewModelFactory(MapRepository())
+        mapViewModel = ViewModelProvider(this, viewModelFactory)
+            .get(MapViewModel::class.java)
+
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 
@@ -70,7 +89,6 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         locationOverlay.enableFollowLocation()
         map.overlays.add(locationOverlay)
         val rotationGestureOverlay = RotationGestureOverlay(map);
-        rotationGestureOverlay.isEnabled = true
         map.setMultiTouchControls(true);
         map.overlays.add(rotationGestureOverlay);
 
@@ -87,48 +105,55 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         val waypoints = arrayListOf<Marker>()
         var routeOverlay: Polyline = Polyline()
 
+        mapViewModel.address.observe(viewLifecycleOwner, { address ->
+            if (address != null) {
+                val marker = Marker(map)
+                val strAddress = arrayListOf(
+                    address.thoroughfare,
+                    address.subThoroughfare,
+                    address.postalCode,
+                    address.locality,
+                    address.countryName
+                ).filterNotNull()
+                marker.title = "Departure"
+                marker.snippet = strAddress.joinToString(", ")
+                marker.position = GeoPoint(address.latitude, address.longitude)
+                marker.showInfoWindow()
+                waypoints.add(marker)
+                marker.icon =
+                    MapUtils.getNumMarker(waypoints.size.toString(), requireContext())
+                marker.id = waypoints.size.toString()
+                marker.isDraggable = true
+                marker.setOnMarkerClickListener { clickedMarker, mapView ->
+                    clickedMarker.remove(mapView)
+                    waypoints.remove(clickedMarker)
+                    MapUtils.redrawMarkers(waypoints, mapView, requireContext())
+                    true
+                }
+                map.overlays.add(marker)
+                map.invalidate()
+            }
+        })
+
+        mapViewModel.route.observe(viewLifecycleOwner, { newRouteOverlay ->
+            if(newRouteOverlay != null){
+                routeOverlay = newRouteOverlay
+                map.overlays.add(routeOverlay)
+                map.invalidate()
+            }
+        })
+
         val mapEventsReceiver: MapEventsReceiver = object : MapEventsReceiver {
             override fun singleTapConfirmedHelper(p: GeoPoint): Boolean {
                 //do whatever you need here
-                val asyncJob = MainScope().launch {
-                    map.overlays.remove(routeOverlay)
-                    routeOverlay = getRoute(waypoints)
-                    map.overlays.add(routeOverlay)
-                }
-                map.invalidate()
+                map.overlays.remove(routeOverlay)
+                mapViewModel.getRoute(waypoints, requireContext())
                 return false
             }
 
             override fun longPressHelper(p: GeoPoint): Boolean {
                 //do whatever you need here
-                val marker = Marker(map)
-                marker.position = p
-
-                val asyncJob = MainScope().launch {
-                    val address = getFromLocation(p)
-                    val strAddress = arrayListOf(
-                        address.thoroughfare,
-                        address.subThoroughfare,
-                        address.postalCode,
-                        address.locality,
-                        address.countryName
-                    ).filterNotNull()
-                    marker.title = "Departure"
-                    marker.snippet = strAddress.joinToString(", ")
-                    marker.showInfoWindow()
-                    waypoints.add(marker)
-                    marker.icon = MapUtils.getNumMarker(waypoints.size.toString(), requireContext())
-                    marker.id = waypoints.size.toString()
-                    marker.isDraggable = true
-                    marker.setOnMarkerClickListener { marker, mapView ->
-                        marker.remove(mapView)
-                        waypoints.remove(marker)
-                        redrawMarkers(waypoints, mapView)
-                        true
-                    }
-                    map.overlays.add(marker)
-                }
-                map.invalidate()
+                mapViewModel.getFromLocation(p)
                 return true
             }
         }
@@ -138,39 +163,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         super.onViewCreated(view, savedInstanceState)
     }
 
-    private fun redrawMarkers(waypoints: java.util.ArrayList<Marker>, mapView: MapView) {
-        val count: AtomicInteger = AtomicInteger(0)
-        waypoints.stream().forEach { marker ->
-            marker.icon =
-                MapUtils.getNumMarker((count.incrementAndGet()).toString(), requireContext())
-        }
-            mapView.invalidate()
-    }
 
-    suspend fun getFromLocation(p: GeoPoint): Address = withContext(Dispatchers.IO) {
-        val geocoder = GeocoderNominatim(
-            Locale.getDefault(),
-            BuildConfig.APPLICATION_ID
-        )
-        val address = async { geocoder.getFromLocation(p.latitude, p.longitude, 1) }
-        try {
-            val a = address.await()
-            return@withContext a[0]
-        } catch (e: Throwable) {
-            Log.e("Marker Location", "Error ->" + e.message)
-            return@withContext Address(Locale.getDefault())
-        }
-    }
-
-    suspend fun getRoute(waypoints: ArrayList<Marker>): Polyline = withContext(Dispatchers.IO) {
-        val roadManager: RoadManager = OSRMRoadManager(requireContext(), BuildConfig.APPLICATION_ID)
-        val gp = waypoints.stream().map(Marker::getPosition)
-            .collect(Collectors.toList()) as ArrayList<GeoPoint>
-        val road = async { roadManager.getRoad(gp) }
-        val r = road.await()
-        return@withContext RoadManager.buildRoadOverlay(r) as Polyline
-
-    }
 
     override fun onResume() {
         super.onResume();
