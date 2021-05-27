@@ -47,10 +47,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private lateinit var trip: Trip
     private lateinit var ivCarPic: ImageView
     private lateinit var ivProfilePic: ImageView
-    private lateinit var tvDepartureLocation: TextView
-    private lateinit var tvDepartureDate: TextView
-    private lateinit var tvDepartureTime: TextView
-    private lateinit var tvArrivalLocation: TextView
     private lateinit var tvDuration: TextView
     private lateinit var tvSeats: TextView
     private lateinit var tvPrice: TextView
@@ -83,14 +79,10 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
         ivCarPic = view.findViewById(R.id.iv_tripDetails_car_pic)
         ivProfilePic = view.findViewById(R.id.iv_tripDetails_profile_pic)
-        tvDepartureLocation = view.findViewById(R.id.tv_tripDetails_departureLocation)
-        tvDepartureDate = view.findViewById(R.id.tv_tripDetails_departureDate)
-        tvDepartureTime = view.findViewById(R.id.tv_tripDetails_departureTime)
-        tvArrivalLocation = view.findViewById(R.id.tv_tripDetails_arrivalLocation)
         tvDuration = view.findViewById(R.id.tv_tripDetails_duration)
         tvSeats = view.findViewById(R.id.tv_tripDetails_seats)
         tvPrice = view.findViewById(R.id.tv_tripDetails_price)
-        tvDescription = view.findViewById(R.id.tv_tripDetails_description_text)
+        tvDescription = view.findViewById(R.id.tv_tripDetails_description)
         ibtnChattiness = view.findViewById(R.id.btn_tripDetails_chattiness)
         ibtnSmoking = view.findViewById(R.id.btn_tripDetails_smoking)
         ibtnPets = view.findViewById(R.id.btn_tripDetails_pets)
@@ -140,12 +132,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                 Glide.with(view).load(value?.get("imageUserRef"))
                     .into(ivProfilePic)
             }
-        tvDepartureLocation.text = trip.departure
-        tvArrivalLocation.text = trip.arrival
-        tvDepartureDate.text =
-            (SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM)).format(trip.timestamp.toDate())
-        tvDepartureTime.text =
-            (SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT)).format(trip.timestamp.toDate())
         tvDuration.text = trip.duration
         tvSeats.text = trip.seats.toString()
         tvPrice.text = "%.2f".format(trip.price)
@@ -166,11 +152,8 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             tripStopsTitle.visibility = View.GONE
         }
 
-        if (trip.description == "") {
-            val descTitle = view.findViewById<TextView>(R.id.tv_tripDetails_description)
-            val descMcv = view.findViewById<MaterialCardView>(R.id.mcv_tripDetails_description)
-            descTitle.visibility = View.GONE
-            descMcv.visibility = View.GONE
+        if (trip.description.isEmpty()) {
+            tvDescription.text = "No description :("
         }
 
         val bsrv = view.findViewById<RecyclerView>(R.id.rv_bottom_sheet)
