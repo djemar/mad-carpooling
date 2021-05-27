@@ -1,15 +1,12 @@
 package com.mad.carpooling.ui.trip_edit
 
-import android.annotation.SuppressLint
 import android.app.*
 import android.content.ActivityNotFoundException
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
-import android.icu.util.Calendar
 import android.media.ExifInterface
 import android.net.Uri
 import android.os.Bundle
@@ -18,7 +15,6 @@ import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.text.Editable
 import android.text.TextWatcher
-import android.text.format.DateFormat
 import android.util.Log
 import android.util.TypedValue
 import android.view.*
@@ -664,7 +660,7 @@ class StopEditAdapter(val stops: ArrayList<String>) :
         private var stopName: TextView = v.findViewById(R.id.et_stop_location)
         private var stopDate: EditText = v.findViewById(R.id.et_stop_date)
         private var stopTime: EditText = v.findViewById(R.id.et_stop_time)
-        private var stopIcon: ImageView = v.findViewById(R.id.rv_stop_symbol)
+        private var stopIcon: ImageView = v.findViewById(R.id.rv_stop_edit_icon)
 
         fun bind(stops: ArrayList<String>, position: Int) {
             Log.d("bind:", stops[position])
@@ -750,7 +746,7 @@ class StopEditAdapter(val stops: ArrayList<String>) :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StopEditViewHolder {
         val layout =
-            LayoutInflater.from(parent.context).inflate(R.layout.stop_edit_layout, parent, false)
+            LayoutInflater.from(parent.context).inflate(R.layout.rv_stop_edit, parent, false)
         return StopEditViewHolder(layout)
     }
 
