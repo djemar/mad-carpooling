@@ -311,18 +311,16 @@
                         app:layout_constraintStart_toStartOf="@+id/tv_tripDetails_seats"
                         app:layout_constraintTop_toTopOf="@+id/tv_title_price" />
 
-
-                    <LinearLayout
-                        android:id="@+id/tripDetails_chattiness"
-                        android:layout_width="0dp"
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/cl_tripDetails_preferences"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:padding="4dp"
-                        app:layout_constraintBottom_toTopOf="@+id/tripDetails_smoking"
-                        app:layout_constraintEnd_toStartOf="@id/tripDetails_pets"
-                        app:layout_constraintHorizontal_weight="1"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
+                        app:layout_constraintBottom_toTopOf="@id/tv_title_description"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/tv_title_price">
+                        app:layout_constraintTop_toBottomOf="@id/tv_title_price">
 
                         <ImageButton
                             android:id="@+id/btn_tripDetails_chattiness"
@@ -331,31 +329,14 @@
                             android:layout_gravity="center"
                             android:layout_margin="8dp"
                             android:background="@drawable/selector_preferences"
+                            android:clickable="false"
+                            android:focusable="false"
                             android:src="@drawable/ic_chattiness"
-                            android:tint="?attr/colorControlNormal" />
-
-                        <TextView
-                            android:id="@+id/tv_tripDetails_chattiness"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:fontFamily="@font/overpass"
-                            android:text="CHATTINESS"
-                            android:textAllCaps="true"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/tripDetails_smoking"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:padding="4dp"
-                        app:layout_constraintEnd_toStartOf="@id/tripDetails_music"
-                        app:layout_constraintHorizontal_weight="1"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/tripDetails_chattiness">
+                            android:tint="?attr/colorControlNormal"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/btn_tripDetails_smoking"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
 
                         <ImageButton
                             android:id="@+id/btn_tripDetails_smoking"
@@ -364,31 +345,14 @@
                             android:layout_gravity="center"
                             android:layout_margin="8dp"
                             android:background="@drawable/selector_preferences"
+                            android:clickable="false"
+                            android:focusable="false"
                             android:src="@drawable/ic_smoking"
-                            android:tint="?attr/colorControlNormal" />
-
-                        <TextView
-                            android:id="@+id/tv_tripDetails_smoking"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:fontFamily="@font/overpass"
-                            android:text="SMOKING"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/tripDetails_pets"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:padding="4dp"
-                        app:layout_constraintBottom_toTopOf="@id/tripDetails_music"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_weight="1"
-                        app:layout_constraintStart_toEndOf="@id/tripDetails_chattiness"
-                        app:layout_constraintTop_toTopOf="@+id/tripDetails_chattiness">
+                            android:tint="?attr/colorControlNormal"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/btn_tripDetails_pets"
+                            app:layout_constraintStart_toEndOf="@+id/btn_tripDetails_chattiness"
+                            app:layout_constraintTop_toTopOf="parent" />
 
                         <ImageButton
                             android:id="@+id/btn_tripDetails_pets"
@@ -397,31 +361,14 @@
                             android:layout_gravity="center"
                             android:layout_margin="8dp"
                             android:background="@drawable/selector_preferences"
+                            android:clickable="false"
+                            android:focusable="false"
                             android:src="@drawable/ic_pets"
-                            android:tint="?attr/colorControlNormal" />
-
-                        <TextView
-                            android:id="@+id/tv_tripDetails_pets"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:fontFamily="@font/overpass"
-                            android:text="PETS"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/tripDetails_music"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:padding="4dp"
-                        app:layout_constraintBottom_toBottomOf="@+id/tripDetails_smoking"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_weight="1"
-                        app:layout_constraintStart_toEndOf="@id/tripDetails_smoking"
-                        app:layout_constraintTop_toBottomOf="@id/tripDetails_pets">
+                            android:tint="?attr/colorControlNormal"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/btn_tripDetails_music"
+                            app:layout_constraintStart_toEndOf="@+id/btn_tripDetails_smoking"
+                            app:layout_constraintTop_toTopOf="parent" />
 
                         <ImageButton
                             android:id="@+id/btn_tripDetails_music"
@@ -430,20 +377,16 @@
                             android:layout_gravity="center"
                             android:layout_margin="8dp"
                             android:background="@drawable/selector_preferences"
+                            android:clickable="false"
+                            android:focusable="false"
                             android:src="@drawable/ic_music"
-                            android:tint="?attr/colorControlNormal" />
+                            android:tint="?attr/colorControlNormal"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toEndOf="@+id/btn_tripDetails_pets"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-                        <TextView
-                            android:id="@+id/tv_tripDetails_music"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:fontFamily="@font/overpass"
-                            android:text="MUSIC"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-
-                    </LinearLayout>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
 
                     <TextView
                         android:id="@+id/tv_title_description"
@@ -459,7 +402,7 @@
                         android:textStyle="bold"
                         app:layout_constraintBottom_toTopOf="@+id/tv_tripDetails_description"
                         app:layout_constraintStart_toStartOf="@+id/tv_tripDetails_info"
-                        app:layout_constraintTop_toBottomOf="@+id/tripDetails_smoking" />
+                        app:layout_constraintTop_toBottomOf="@+id/cl_tripDetails_preferences" />
 
                     <TextView
                         android:id="@+id/tv_tripDetails_description"
