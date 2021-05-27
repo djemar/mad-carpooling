@@ -2,6 +2,7 @@ package com.mad.carpooling.ui.trip_details
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Paint
 import android.app.AlertDialog
 import android.app.Dialog
@@ -16,9 +17,11 @@ import androidx.annotation.ColorRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -34,29 +37,34 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.mad.carpooling.BuildConfig
 import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.data.Trip
 import com.mad.carpooling.ui.SharedViewModel
+import com.mad.carpooling.ui.maps.MapRepository
 import com.mad.carpooling.ui.maps.MapUtils
+import com.mad.carpooling.ui.maps.MapViewModel
+import com.mad.carpooling.ui.maps.MapViewModelFactory
 import kotlinx.coroutines.*
-import org.osmdroid.bonuspack.routing.OSRMRoadManager
-import org.osmdroid.bonuspack.routing.RoadManager
+import org.osmdroid.bonuspack.clustering.RadiusMarkerClusterer
+import org.osmdroid.bonuspack.utils.BonusPackHelper
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.FolderOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 import java.util.*
-import java.util.concurrent.atomic.AtomicInteger
 import java.util.stream.Collectors
+import kotlin.collections.ArrayList
 
 
 class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
     private val model: SharedViewModel by activityViewModels()
+    private lateinit var mapViewModel: MapViewModel
+    private lateinit var viewModelFactory: MapViewModelFactory
     private lateinit var trip: Trip
     private lateinit var ivCarPic: ImageView
     private lateinit var ivProfilePic: ImageView
@@ -97,6 +105,9 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             requireContext(),
             context?.getSharedPreferences("mad.carpooling.map", Context.MODE_PRIVATE)
         );
+        viewModelFactory = MapViewModelFactory(MapRepository())
+        mapViewModel = ViewModelProvider(this, viewModelFactory)
+            .get(MapViewModel::class.java)
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 
@@ -132,58 +143,52 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
     private fun initMap() {
         map.setTileSource(TileSourceFactory.MAPNIK);
-        map.setMultiTouchControls(false);
-        map.setOnTouchListener { v, event -> //disable touch events TODO navigate to map fragment
+        map.setOnTouchListener { _, _ -> //disable touch events TODO navigate to map fragment
             true
         }
-        val marker = Marker(map)    //Testing
-        marker.position = GeoPoint(45.0580, 7.6482)
-        val marker2 = Marker(map)
-        marker2.position = GeoPoint(52.5899, 13.4199)
-        val waypoints = arrayListOf<Marker>(marker, marker2)
-        redrawMarkers(waypoints, map)
-        map.addOnFirstLayoutListener { v, left, top, right, bottom ->
-            val box = MapUtils.computeArea(
-                waypoints.stream().map(Marker::getPosition)
-                    .collect(Collectors.toList()) as ArrayList<GeoPoint>
-            )
-            map.zoomToBoundingBox(box, false, 200);
+
+        val waypoints = ArrayList<Marker>()
+        val stopsMarkers = FolderOverlay()
+        //val stopsMarkers = RadiusMarkerClusterer(requireContext())
+        //val clusterIcon: Bitmap? = ContextCompat.getDrawable( requireContext(), R.drawable.marker_cluster)?.toBitmap()
+        //stopsMarkers.setIcon(clusterIcon)
+        map.overlays.add(stopsMarkers)
+
+        trip.markers.stream().forEach { gp ->
+            run {
+                val marker = Marker(map)
+                marker.position = GeoPoint(gp.latitude, gp.longitude)
+                waypoints.add(marker)
+                stopsMarkers.add(marker)
+            }
         }
 
-        var routeOverlay: Polyline = Polyline()
-        val asyncJob = MainScope().launch {
-            map.overlays.remove(routeOverlay)
-            routeOverlay = getRoute(waypoints)
-            routeOverlay.outlinePaint.strokeWidth = 10f
-            routeOverlay.outlinePaint.alpha = 255
-            routeOverlay.outlinePaint.style = Paint.Style.FILL_AND_STROKE
-            routeOverlay.outlinePaint.strokeCap = Paint.Cap.ROUND
-            routeOverlay.outlinePaint.strokeJoin = Paint.Join.ROUND
-            map.overlays.add(routeOverlay)
+        MapUtils.redrawMarkers(waypoints, map, requireContext())
+
+        map.addOnFirstLayoutListener { _, _, _, _, _ ->
+            val box = MapUtils.computeArea(
+                trip.markers.stream().map { gp -> GeoPoint(gp.latitude, gp.longitude)}.collect(Collectors.toList()) as ArrayList<GeoPoint>
+            )
+            map.zoomToBoundingBox(box, false, 110);
             map.invalidate()
         }
+
+        var routeOverlay: Polyline
+        mapViewModel.route.observe(viewLifecycleOwner, { newRouteOverlay ->
+            if (newRouteOverlay != null) {
+                routeOverlay = newRouteOverlay
+                routeOverlay.outlinePaint.strokeWidth = 10f
+                routeOverlay.outlinePaint.alpha = 255
+                routeOverlay.outlinePaint.style = Paint.Style.FILL_AND_STROKE
+                routeOverlay.outlinePaint.strokeCap = Paint.Cap.ROUND
+                routeOverlay.outlinePaint.strokeJoin = Paint.Join.ROUND
+                map.overlays.add(routeOverlay)
+                map.invalidate()
+            }
+        })
+        mapViewModel.getRoute(waypoints, requireContext())
     }
 
-    private fun redrawMarkers(waypoints: java.util.ArrayList<Marker>, mapView: MapView) {
-        val count: AtomicInteger = AtomicInteger(0)
-        waypoints.stream().forEach { marker ->
-            marker.icon =
-                MapUtils.getNumMarker((count.incrementAndGet()).toString(), requireContext())
-            mapView.overlays.add(marker)
-        }
-        mapView.invalidate()
-    }
-
-    suspend fun getRoute(waypoints: ArrayList<Marker>): Polyline = withContext(Dispatchers.IO) {
-        val roadManager: RoadManager =
-            OSRMRoadManager(requireContext(), BuildConfig.APPLICATION_ID)
-        val gp = waypoints.stream().map(Marker::getPosition)
-            .collect(Collectors.toList()) as ArrayList<GeoPoint>
-        val road = async { roadManager.getRoad(gp) }
-        val r = road.await()
-        return@withContext RoadManager.buildRoadOverlay(r) as Polyline
-
-    }
 
     @SuppressLint("SetTextI18n")
     private fun initTripDetails(newTripsMap: HashMap<String, Trip>, view: View) {
