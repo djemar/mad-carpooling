@@ -9,6 +9,9 @@ import android.util.TypedValue
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.mad.carpooling.R
+import org.osmdroid.util.BoundingBox
+import org.osmdroid.util.GeoPoint
+
 
 object MapUtils {
     fun getNumMarker(text: String, ctx: Context): BitmapDrawable {
@@ -33,5 +36,19 @@ object MapUtils {
         )
 
         return BitmapDrawable(ctx.resources, bitmap)
+    }
+
+    fun computeArea(gp: ArrayList<GeoPoint>): BoundingBox? {
+        var north = -90.0
+        var south = 90.0
+        var west = 180.0
+        var east = -180.0
+        for (position in gp) {
+            north = position.latitude.coerceAtLeast(north)
+            south = position.latitude.coerceAtMost(south)
+            west = position.longitude.coerceAtMost(west)
+            east = position.longitude.coerceAtLeast(east)
+        }
+        return BoundingBox(north, east, south, west)
     }
 }
