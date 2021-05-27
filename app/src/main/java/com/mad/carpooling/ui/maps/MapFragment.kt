@@ -2,24 +2,16 @@ package com.mad.carpooling.ui.maps
 
 import android.Manifest
 import android.content.Context
-import android.location.Address
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.mad.carpooling.BuildConfig
 import com.mad.carpooling.R
 import com.vmadalin.easypermissions.EasyPermissions
 import com.vmadalin.easypermissions.dialogs.SettingsDialog
-import kotlinx.coroutines.*
-import org.osmdroid.bonuspack.location.GeocoderNominatim
-import org.osmdroid.bonuspack.routing.OSRMRoadManager
-import org.osmdroid.bonuspack.routing.RoadManager
 import org.osmdroid.config.Configuration.getInstance
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -32,9 +24,6 @@ import org.osmdroid.views.overlay.Polyline
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
-import java.util.*
-import java.util.concurrent.atomic.AtomicInteger
-import java.util.stream.Collectors
 import kotlin.collections.ArrayList
 
 
@@ -47,17 +36,6 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
     companion object {
         const val PERMISSION_LOCATION_REQUEST_CODE = 1
     }
-
-    class MapViewModelFactory(private val repo: MapRepository) : ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(MapViewModel::class.java)) {
-                return MapViewModel(repo) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
-        }
-
-    }
-
 
     override fun onCreateView(
         inflater: LayoutInflater,
