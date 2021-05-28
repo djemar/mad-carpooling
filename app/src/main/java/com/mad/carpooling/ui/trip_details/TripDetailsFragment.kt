@@ -1,22 +1,19 @@
 package com.mad.carpooling.ui.trip_details
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.graphics.Paint
 import android.app.AlertDialog
 import android.app.Dialog
+import android.content.Context
 import android.content.DialogInterface
-import android.content.res.ColorStateList
+import android.graphics.Paint
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.widget.*
-import androidx.annotation.ColorRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -30,7 +27,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -412,10 +408,12 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private fun initFab(db: FirebaseFirestore, view: View) {
         val value = TypedValue()
         view.context.theme.resolveAttribute(R.attr.themeName, value, true)
-        if(value.string == "white")
-            fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.amber_500)
+        if (value.string == "white")
+            fab.backgroundTintList =
+                ContextCompat.getColorStateList(requireContext(), R.color.amber_500)
         else
-            fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.amber_200)
+            fab.backgroundTintList =
+                ContextCompat.getColorStateList(requireContext(), R.color.amber_200)
 
         if (trip.owner!!.id != model.getCurrentUser().value?.uid) {
 
@@ -424,12 +422,15 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                     ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_fullstar)
                 )
                 if (trip.acceptedPeople?.contains(model.getCurrentUser().value?.uid)!!) {
-                    fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(),R.color.green_700)
+                    fab.backgroundTintList =
+                        ContextCompat.getColorStateList(requireContext(), R.color.green_700)
                 } else {
-                    if(value.string == "white")
-                        fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.amber_500)
+                    if (value.string == "white")
+                        fab.backgroundTintList =
+                            ContextCompat.getColorStateList(requireContext(), R.color.amber_500)
                     else
-                        fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.amber_200)
+                        fab.backgroundTintList =
+                            ContextCompat.getColorStateList(requireContext(), R.color.amber_200)
                 }
             } else {
                 fab.setImageDrawable(
@@ -471,10 +472,12 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                         }
                     }
                 } else {
-                    fab.setImageDrawable(ContextCompat.getDrawable(
-                        requireContext(),
-                        R.drawable.ic_baseline_fullstar
-                    ))
+                    fab.setImageDrawable(
+                        ContextCompat.getDrawable(
+                            requireContext(),
+                            R.drawable.ic_baseline_fullstar
+                        )
+                    )
 
                     db.collection("trips").document(trip.id).update(
                         "interestedPeople",
@@ -496,10 +499,12 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                     )
                 )
             } else {
-                fab.setImageDrawable(ContextCompat.getDrawable(
-                    requireContext(),
-                    R.drawable.ic_baseline_fullstar
-                ))
+                fab.setImageDrawable(
+                    ContextCompat.getDrawable(
+                        requireContext(),
+                        R.drawable.ic_baseline_fullstar
+                    )
+                )
             }
             fab.show()
 
@@ -669,13 +674,12 @@ class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip
             view.context.theme.resolveAttribute(R.attr.themeName, value, true)
             btn.text = "rate"
 
-            if(value.string == "white") {
+            if (value.string == "white") {
                 btn.strokeColor = ContextCompat.getColorStateList(view.context, R.color.blue_700)
                 btn.setTextColor(ContextCompat.getColor(view.context, R.color.blue_700))
-            }
-            else {
-                btn.strokeColor = ContextCompat.getColorStateList(view.context, R.color.blue_200)
-                btn.setTextColor(ContextCompat.getColor(view.context, R.color.blue_200))
+            } else {
+                btn.strokeColor = ContextCompat.getColorStateList(view.context, R.color.blue_300)
+                btn.setTextColor(ContextCompat.getColor(view.context, R.color.blue_300))
             }
         }
     }
