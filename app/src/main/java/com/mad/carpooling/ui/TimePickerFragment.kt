@@ -9,11 +9,13 @@ import android.text.format.DateFormat
 import android.widget.TextView
 import android.widget.TimePicker
 import androidx.fragment.app.DialogFragment
+import java.text.SimpleDateFormat
+import java.util.*
 
 class TimePickerFragment(val tvTime: TextView) : DialogFragment(),
     TimePickerDialog.OnTimeSetListener {
 
-   // private val tvTime = tvTime
+    // private val tvTime = tvTime
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         // Use the current time as the default values for the picker
@@ -33,10 +35,9 @@ class TimePickerFragment(val tvTime: TextView) : DialogFragment(),
 
     @SuppressLint("SetTextI18n")
     override fun onTimeSet(view: TimePicker, hourOfDay: Int, minute: Int) {
-        if (minute < 10) {
-            tvTime.text = "$hourOfDay:0$minute"
-        } else {
-            tvTime.text = "$hourOfDay:$minute"
-        }
+        tvTime.text =
+            (SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT, Locale.getDefault())).format(
+                SimpleDateFormat("HH:mm", Locale.getDefault()).parse("$hourOfDay:$minute")!!
+            )
     }
 }

@@ -8,6 +8,8 @@ import android.os.Bundle
 import android.widget.DatePicker
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class DatePickerFragment(val tvDate: TextView) : DialogFragment(),
@@ -31,7 +33,9 @@ class DatePickerFragment(val tvDate: TextView) : DialogFragment(),
 
     @SuppressLint("SetTextI18n")
     override fun onDateSet(view: DatePicker, year: Int, month: Int, day: Int) {
-        tvDate.text = "${day}/${(month + 1)}/${year}"
+        tvDate.text = (SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT, Locale.getDefault())).format(
+            SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse("${day}/${(month + 1)}/${year}")!!
+        )
     }
 
 }
