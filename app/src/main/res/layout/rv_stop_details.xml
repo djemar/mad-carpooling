@@ -18,22 +18,21 @@
         android:scaleType="centerCrop"
         android:src="@drawable/ic_twotone_stop"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/stopName"
+        app:layout_constraintEnd_toStartOf="@+id/stopCity"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:tint="?attr/colorOnBackground" />
 
     <TextView
-        android:id="@+id/stopName"
+        android:id="@+id/stopCity"
         android:layout_width="0dp"
-        android:layout_height="22dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
         android:gravity="center|start"
         android:text="Location"
         android:textColor="?attr/colorOnBackground"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/stopAddress"
         app:layout_constraintEnd_toStartOf="@id/stopDate"
         app:layout_constraintHorizontal_chainStyle="spread_inside"
         app:layout_constraintHorizontal_weight="1"
@@ -51,11 +50,11 @@
         android:drawablePadding="8dp"
         android:text="Date"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@+id/stopName"
+        app:layout_constraintBottom_toBottomOf="@+id/stopAddress"
         app:layout_constraintEnd_toStartOf="@id/stopTime"
         app:layout_constraintHorizontal_weight="0.5"
-        app:layout_constraintStart_toEndOf="@id/stopName"
-        app:layout_constraintTop_toTopOf="@+id/stopName" />
+        app:layout_constraintStart_toEndOf="@id/stopCity"
+        app:layout_constraintTop_toTopOf="@+id/stopCity" />
 
     <TextView
         android:id="@+id/stopTime"
@@ -70,5 +69,17 @@
         app:layout_constraintHorizontal_weight="0.5"
         app:layout_constraintStart_toEndOf="@id/stopDate"
         app:layout_constraintTop_toTopOf="@+id/stopDate" />
+
+    <TextView
+        android:id="@+id/stopAddress"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Address"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/stopCity"
+        app:layout_constraintStart_toStartOf="@+id/stopCity"
+        app:layout_constraintTop_toBottomOf="@+id/stopCity" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
