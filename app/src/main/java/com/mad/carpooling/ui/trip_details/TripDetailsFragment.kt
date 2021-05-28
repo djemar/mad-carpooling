@@ -161,13 +161,16 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
         MapUtils.redrawMarkers(waypoints, map, requireContext())
 
-        map.addOnFirstLayoutListener { _, _, _, _, _ ->
-            val box = MapUtils.computeArea(
-                trip.geopoints.stream().map { gp -> GeoPoint(gp.latitude, gp.longitude)}.collect(Collectors.toList()) as ArrayList<GeoPoint>
-            )
-            map.zoomToBoundingBox(box, false, 110);
-            map.invalidate()
-        }
+        map.post(Runnable() {
+            run() {
+                val box = MapUtils.computeArea(
+                    trip.geopoints.stream().map { gp -> GeoPoint(gp.latitude, gp.longitude) }
+                        .collect(Collectors.toList()) as ArrayList<GeoPoint>
+                )
+                map.zoomToBoundingBox(box, false, 110);
+                map.invalidate()
+            }
+        });
 
         var routeOverlay: Polyline
         mapViewModel.route.observe(viewLifecycleOwner, { newRouteOverlay ->
