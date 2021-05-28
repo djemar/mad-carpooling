@@ -577,6 +577,33 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
+    override fun onResume() {
+        super.onResume();
+        //this will refresh the osmdroid configuration on resuming.
+        //if you make changes to the configuration, use
+        //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        //Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
+        Configuration.getInstance().load(
+            requireContext(),
+            context?.getSharedPreferences("mad.carpooling.map", Context.MODE_PRIVATE)
+        )
+        map.onResume() //needed for compass, my location overlays, v6.0.0 and up
+    }
+
+    override fun onPause() {
+        super.onPause();
+        //this will refresh the osmdroid configuration on resuming.
+        //if you make changes to the configuration, use
+        //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        //Configuration.getInstance().save(this, prefs);
+        Configuration.getInstance().save(
+            requireContext(),
+            context?.getSharedPreferences("mad.carpooling.map", Context.MODE_PRIVATE)
+        )
+        map.overlays.clear()
+        map.onPause()  //needed for compass, my location overlays, v6.0.0 and up
+    }
+
 }
 
 class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip: Trip) :
