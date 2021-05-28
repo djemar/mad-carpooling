@@ -201,14 +201,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
         trip = newTripsMap[args.id]!!
 
-        Log.d("INFO", trip.owner!!.id)
-
-        // ivCarPic to be init from remote resource
-//        if (trip.imageCarURL != null) {
-//            BitmapFactory.decodeFile(trip.imageCarURL)?.also { bitmap ->
-//                ivCarPic.setImageBitmap(bitmap)
-//            }
-//        }
         if (trip.imageCarURL != "") {
             Glide.with(view).load(trip.imageCarURL).into(ivCarPic)
         }
