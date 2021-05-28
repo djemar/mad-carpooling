@@ -2,10 +2,28 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
     <org.osmdroid.views.MapView
         android:id="@+id/map"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" />
+
+        <com.google.android.material.button.MaterialButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:cornerRadius="16dp"
+            android:backgroundTint="@color/white"
+            app:elevation="8dp"
+            android:textSize="12sp"
+            android:layout_margin="16dp"
+            android:layout_gravity="bottom|end"
+            android:text="Delete marker"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+    </FrameLayout>
 </LinearLayout>
