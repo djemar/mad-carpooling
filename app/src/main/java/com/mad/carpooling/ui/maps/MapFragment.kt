@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.snackbar.Snackbar
 import com.mad.carpooling.R
 import com.vmadalin.easypermissions.EasyPermissions
 import com.vmadalin.easypermissions.dialogs.SettingsDialog
@@ -110,6 +111,8 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
                 }
                 map.overlays.add(marker)
                 map.invalidate()
+            } else {
+                Snackbar.make(view, "There was an error: check your internet connection", Snackbar.LENGTH_SHORT).show()
             }
         })
 
@@ -131,7 +134,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
 
             override fun longPressHelper(p: GeoPoint): Boolean {
                 //do whatever you need here
-                mapViewModel.getFromLocation(p)
+                mapViewModel.getFromLocation(p, requireContext())
                 return true
             }
         }

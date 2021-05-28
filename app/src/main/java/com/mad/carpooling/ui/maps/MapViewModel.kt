@@ -1,13 +1,15 @@
 package com.mad.carpooling.ui.maps
 
 import android.content.Context
+import android.content.Context.CONNECTIVITY_SERVICE
 import android.location.Address
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET
 import android.util.Log
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mad.carpooling.data.Trip
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
@@ -21,17 +23,26 @@ class MapViewModel(
     val address = MutableLiveData<Address?>()
     val route = MutableLiveData<Polyline?>()
 
-    fun getFromLocation(p: GeoPoint) {
-        viewModelScope.launch {
-            val result = try {
-                mapRepository.getFromLocation(p)
-            } catch(e: Exception) {
-                Log.e("getFromLocation -> ", e.message.toString())
+    fun getFromLocation(p: GeoPoint, context: Context) {
+
+        val cm = context.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+        val capabilities = cm.getNetworkCapabilities(cm.activeNetwork)
+        val isNetworkAvailable = capabilities?.hasCapability(NET_CAPABILITY_INTERNET) == true
+        if (isNetworkAvailable) {
+            viewModelScope.launch {
+                val result = try {
+                    mapRepository.getFromLocation(p)
+                } catch (e: Exception) {
+                    Log.e("getFromLocation -> ", e.message.toString())
+                }
+                when (result) {
+                    is Address -> address.postValue(result)
+                    else -> address.postValue(null) // Show error in UI
+                }
             }
-            when (result) {
-                is Address -> address.postValue(result)
-                else -> address.postValue(null) // Show error in UI
-            }
+        }
+        else {
+            address.postValue(null)
         }
     }
 
@@ -39,7 +50,7 @@ class MapViewModel(
         viewModelScope.launch {
             val result = try {
                 mapRepository.getRoute(waypoints, ctx)
-            } catch(e: Exception) {
+            } catch (e: Exception) {
                 Log.e("getRoute -> ", e.message.toString())
             }
             when (result) {
