@@ -48,8 +48,7 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.FolderOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
-import java.time.LocalDate
-import java.time.LocalTime
+import java.time.*
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.*
@@ -219,7 +218,18 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                 Glide.with(view).load(value?.get("imageUserRef"))
                     .into(ivProfilePic)
             }
-        tvDuration.text = trip.duration
+        val str1 = trip.stops?.get(0)?.split(",")?.get(2) + "T" + trip.stops?.get(0)?.split(",")?.get(3)
+        val str2 = trip.stops?.get(trip.stops!!.size-1)?.split(",")?.get(2) + "T" + trip.stops?.get(trip.stops!!.size-1)?.split(",")?.get(3)
+        val d1 = LocalDateTime.parse(str1, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+        val d2 = LocalDateTime.parse(str2, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+        val s = Duration.between(d1,d2).toMillis()/1000
+        var d : String = if(s/86400 > 0 ) {
+             String.format("%d days %d h %02d min", s/86400, (s%86400)/3600, (s % 3600) / 60)
+        } else {
+            String.format("%d h %02d min", s/3600, (s % 3600) / 60)
+        }
+        if(s/86400 < 2) d = d.replace("s", "")
+        tvDuration.text =  d
         tvSeats.text = trip.seats.toString()
         tvPrice.text = "%.2f".format(trip.price)
         tvDescription.text = trip.description
