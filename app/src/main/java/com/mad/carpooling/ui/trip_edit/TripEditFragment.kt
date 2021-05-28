@@ -657,7 +657,8 @@ class StopEditAdapter(val stops: ArrayList<String>) :
 
     class StopEditViewHolder(v: View) : RecyclerView.ViewHolder(v) {
 
-        private var stopName: TextView = v.findViewById(R.id.et_stop_location)
+        private var stopCity: TextView = v.findViewById(R.id.et_stop_city)
+        private var stopAddress: TextView = v.findViewById(R.id.et_stop_address)
         private var stopDate: EditText = v.findViewById(R.id.et_stop_date)
         private var stopTime: EditText = v.findViewById(R.id.et_stop_time)
         private var stopIcon: ImageView = v.findViewById(R.id.rv_stop_edit_icon)
@@ -665,7 +666,8 @@ class StopEditAdapter(val stops: ArrayList<String>) :
         fun bind(stops: ArrayList<String>, position: Int) {
             Log.d("bind:", stops[position])
             val stringArray = stops[position].split(",")
-            var stringName = stringArray[0].trim()
+            var stringCity = stringArray[0].trim()
+            var stringAddress = stringArray[0].trim()
             var stringDate = stringArray[1].trim()
             var stringTime = stringArray[2].trim()
             when(position){
@@ -673,17 +675,18 @@ class StopEditAdapter(val stops: ArrayList<String>) :
                 stops.size-1 -> stopIcon.setImageDrawable(ContextCompat.getDrawable(this.itemView.context, R.drawable.ic_twotone_stop_end))
                 else -> stopIcon.setImageDrawable(ContextCompat.getDrawable(this.itemView.context, R.drawable.ic_twotone_stop))
             }
-            stopName.text = stringName
+            stopCity.text = stringCity
+            stopAddress.text = stringAddress
             stopDate.setText(stringDate)
             stopTime.setText(stringTime)
 
             var stop: String
 
-            stopName.addTextChangedListener(object : TextWatcher {
+            stopCity.addTextChangedListener(object : TextWatcher {
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    stringName = s.toString()
+                    stringCity = s.toString()
                     Log.d("NAME:", s.toString())
-                    stop = "${stringName},${stringDate},${stringTime}"
+                    stop = "${stringCity},${stringDate},${stringTime}"
                     stops[position] = stop
                 }
 
@@ -703,7 +706,7 @@ class StopEditAdapter(val stops: ArrayList<String>) :
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                     stringDate = s.toString()
                     Log.d("DATE:", s.toString())
-                    stop = "${stringName},${stringDate},${stringTime}"
+                    stop = "${stringCity},${stringDate},${stringTime}"
                     stops[position] = stop
                 }
 
@@ -724,7 +727,7 @@ class StopEditAdapter(val stops: ArrayList<String>) :
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                     stringTime = s.toString()
                     Log.d("TIME:", s.toString())
-                    stop = "${stringName},${stringDate},${stringTime}"
+                    stop = "${stringCity},${stringDate},${stringTime}"
                     stops[position] = stop
                 }
 

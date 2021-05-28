@@ -2,7 +2,6 @@ package com.mad.carpooling.ui.trip_details
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Paint
 import android.app.AlertDialog
 import android.app.Dialog
@@ -46,8 +45,6 @@ import com.mad.carpooling.ui.maps.MapUtils
 import com.mad.carpooling.ui.maps.MapViewModel
 import com.mad.carpooling.ui.maps.MapViewModelFactory
 import kotlinx.coroutines.*
-import org.osmdroid.bonuspack.clustering.RadiusMarkerClusterer
-import org.osmdroid.bonuspack.utils.BonusPackHelper
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -717,8 +714,9 @@ class StopAdapter(private val stops: ArrayList<String>?) :
     class StopViewHolder(v: View) : RecyclerView.ViewHolder(v) {
 
         private var stopIcon: ImageView = v.findViewById(R.id.rv_stop_icon)
-        private var stopName: TextView = v.findViewById(R.id.stopName)
+        private var stopCity: TextView = v.findViewById(R.id.stopCity)
         private var stopDate: TextView = v.findViewById(R.id.stopDate)
+        private var stopAddress: TextView = v.findViewById(R.id.stopAddress)
         private var stopTime: TextView = v.findViewById(R.id.stopTime)
 
         fun bind(stop: String?, position: Int, size: Int?) {
@@ -745,9 +743,10 @@ class StopAdapter(private val stops: ArrayList<String>?) :
                 }
             }
             val stringArray = stop!!.split(",")
-            stopName.text = stringArray[0].trim()
-            stopDate.text = stringArray[1].trim()
-            stopTime.text = stringArray[2].trim()
+            stopCity.text = stringArray[0].trim()
+            stopAddress.text = stringArray[1].trim()
+            stopDate.text = stringArray[2].trim()
+            stopTime.text = stringArray[3].trim()
         }
 
     }
