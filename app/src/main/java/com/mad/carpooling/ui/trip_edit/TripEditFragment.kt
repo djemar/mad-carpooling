@@ -21,6 +21,7 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toBitmap
@@ -662,16 +663,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         }
     }
 
-    private fun showDatePickerDialog() {
-        val dateFragment = DatePickerFragment(tvDuration) //TODO
-        dateFragment.show(requireActivity().supportFragmentManager, "datePicker")
-    }
-
-    private fun showTimePickerDialog() {
-        val timeFragment = TimePickerFragment(tvDuration) //TODO
-        timeFragment.show(requireActivity().supportFragmentManager, "timePicker")
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
@@ -724,8 +715,14 @@ class StopEditAdapter(val stops: ArrayList<String>) :
             }
             stopCity.text = stringCity
             stopAddress.text = stringAddress
-            stopDate.setText(stringDate)
-            stopTime.setText(stringTime)
+            stopDate.setText(
+                (SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT, Locale.getDefault())).format(
+                    SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse(stringDate)!!
+                )
+            )
+            stopTime.setText((SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT, Locale.getDefault())).format(
+                SimpleDateFormat("HH:mm", Locale.getDefault()).parse(stringTime)!!
+            ))
 
             var stop: String
 
@@ -790,6 +787,29 @@ class StopEditAdapter(val stops: ArrayList<String>) :
                 ) {
                 }
             })
+
+            stopDate.setOnClickListener {
+                showDatePickerDialog()
+            }
+            stopTime.setOnClickListener {
+                showTimePickerDialog()
+            }
+        }
+
+        private fun showDatePickerDialog() {
+            val dateFragment = DatePickerFragment(stopDate) //TODO
+            dateFragment.show(
+                (stopDate.context as AppCompatActivity).supportFragmentManager,
+                "datePicker"
+            )
+        }
+
+        private fun showTimePickerDialog() {
+            val timeFragment = TimePickerFragment(stopTime) //TODO
+            timeFragment.show(
+                (stopTime.context as AppCompatActivity).supportFragmentManager,
+                "timePicker"
+            )
         }
 
     }
