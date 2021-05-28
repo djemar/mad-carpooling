@@ -154,7 +154,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         //stopsMarkers.setIcon(clusterIcon)
         map.overlays.add(stopsMarkers)
 
-        trip.markers.stream().forEach { gp ->
+        trip.geopoints.stream().forEach { gp ->
             run {
                 val marker = Marker(map)
                 marker.position = GeoPoint(gp.latitude, gp.longitude)
@@ -167,7 +167,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
         map.addOnFirstLayoutListener { _, _, _, _, _ ->
             val box = MapUtils.computeArea(
-                trip.markers.stream().map { gp -> GeoPoint(gp.latitude, gp.longitude)}.collect(Collectors.toList()) as ArrayList<GeoPoint>
+                trip.geopoints.stream().map { gp -> GeoPoint(gp.latitude, gp.longitude)}.collect(Collectors.toList()) as ArrayList<GeoPoint>
             )
             map.zoomToBoundingBox(box, false, 110);
             map.invalidate()
