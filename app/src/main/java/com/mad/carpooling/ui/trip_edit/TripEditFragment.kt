@@ -668,9 +668,9 @@ class StopEditAdapter(val stops: ArrayList<String>) :
             Log.d("bind:", stops[position])
             val stringArray = stops[position].split(",")
             var stringCity = stringArray[0].trim()
-            var stringAddress = stringArray[0].trim()
-            var stringDate = stringArray[1].trim()
-            var stringTime = stringArray[2].trim()
+            var stringAddress = stringArray[1].trim()
+            var stringDate = stringArray[2].trim()
+            var stringTime = stringArray[3].trim()
             when(position){
                 0 -> stopIcon.setImageDrawable(ContextCompat.getDrawable(this.itemView.context, R.drawable.ic_twotone_stop_start))
                 stops.size-1 -> stopIcon.setImageDrawable(ContextCompat.getDrawable(this.itemView.context, R.drawable.ic_twotone_stop_end))
