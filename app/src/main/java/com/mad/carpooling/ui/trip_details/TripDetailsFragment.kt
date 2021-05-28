@@ -107,7 +107,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        postponeEnterTransition()
         ivCarPic = view.findViewById(R.id.iv_tripDetails_car_pic)
         ivProfilePic = view.findViewById(R.id.iv_tripDetails_profile_pic)
         tvDuration = view.findViewById(R.id.tv_tripDetails_duration)
@@ -187,6 +187,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                 map.overlays.add(routeOverlay)
                 map.overlays.add(stopsMarkers)
                 map.invalidate()
+                startPostponedEnterTransition()
             }
         })
         mapViewModel.getRoute(waypoints, requireContext())

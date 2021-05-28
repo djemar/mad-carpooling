@@ -62,7 +62,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-
+        postponeEnterTransition()
         val args: MapFragmentArgs by navArgs()
         map = view.findViewById<MapView>(R.id.map)
         map.setTileSource(TileSourceFactory.MAPNIK);
@@ -147,6 +147,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
                 map.overlays.add(routeOverlay)
                 map.overlays.add(stopsMarkers)
                 map.invalidate()
+                startPostponedEnterTransition()
             }
         })
         mapViewModel.getRoute(waypoints, requireContext())
