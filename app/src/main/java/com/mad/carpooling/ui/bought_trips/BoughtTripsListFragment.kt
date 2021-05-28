@@ -35,6 +35,10 @@ import com.mad.carpooling.data.Trip
 import com.mad.carpooling.ui.SharedViewModel
 import com.mad.carpooling.ui.trip_list.TripListFragmentDirections
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 private lateinit var auth: FirebaseAuth
 class BoughtTripsListFragment : Fragment(R.layout.fragment_trip_list) {
@@ -111,10 +115,9 @@ class BoughtTripsListFragment : Fragment(R.layout.fragment_trip_list) {
                 if (!trip.visibility)
                     tripRL.alpha = 0.5f
                 location.text = "${trip.departure} - ${trip.arrival}"
-                timestamp.text = (SimpleDateFormat.getDateTimeInstance(
-                    SimpleDateFormat.MEDIUM,
-                    SimpleDateFormat.SHORT
-                )).format(trip.timestamp.toDate())
+                timestamp.text = (LocalDateTime.ofInstant(trip.timestamp.toDate().toInstant(),
+                    ZoneId.systemDefault())).format(
+                    DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT))
                 price.text = "Price: ${("%.2f".format(trip.price))} €"
                 if (trip.imageCarURL != "") {
                     Glide.with(this.itemView).load(trip.imageCarURL).into(ivCar)

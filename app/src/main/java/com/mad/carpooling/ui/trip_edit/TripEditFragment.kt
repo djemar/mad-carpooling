@@ -55,6 +55,10 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.util.*
 
 
@@ -716,13 +720,11 @@ class StopEditAdapter(val stops: ArrayList<String>) :
             stopCity.text = stringCity
             stopAddress.text = stringAddress
             stopDate.setText(
-                (SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT, Locale.getDefault())).format(
-                    SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse(stringDate)!!
-                )
+                LocalDate.parse(stringDate, DateTimeFormatter.ISO_LOCAL_DATE).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT))
             )
-            stopTime.setText((SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT, Locale.getDefault())).format(
-                SimpleDateFormat("HH:mm", Locale.getDefault()).parse(stringTime)!!
-            ))
+            stopTime.setText(
+                LocalTime.parse(stringTime, DateTimeFormatter.ISO_LOCAL_TIME).format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
+            )
 
             var stop: String
 

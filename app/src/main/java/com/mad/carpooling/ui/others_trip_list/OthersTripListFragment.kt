@@ -1,22 +1,16 @@
 package com.mad.carpooling.ui.trip_list
 
 import android.annotation.SuppressLint
-import android.app.DatePickerDialog
-import android.app.Dialog
-import android.app.TimePickerDialog
 import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.graphics.Color
-import android.icu.util.Calendar
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.text.format.DateFormat
 import android.view.*
 import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
@@ -32,7 +26,6 @@ import com.bumptech.glide.Glide
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.slider.RangeSlider
 import com.google.firebase.auth.FirebaseAuth
@@ -47,6 +40,10 @@ import com.mad.carpooling.ui.DatePickerFragment
 import com.mad.carpooling.ui.SharedViewModel
 import com.mad.carpooling.ui.TimePickerFragment
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.abs
@@ -134,7 +131,12 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
         if (currentUser == null) {
             fab.hide()
         } else {
-            fab.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_add))
+            fab.setImageDrawable(
+                ContextCompat.getDrawable(
+                    requireContext(),
+                    R.drawable.ic_baseline_add
+                )
+            )
             fab.show()
 
             fab.setOnClickListener {
@@ -321,10 +323,11 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
                 auth = Firebase.auth
                 val user = auth.currentUser
                 location.text = "${trip.departure} - ${trip.arrival}"
-                timestamp.text = (SimpleDateFormat.getDateTimeInstance(
-                    SimpleDateFormat.MEDIUM,
-                    SimpleDateFormat.SHORT, Locale.getDefault()
-                )).format(trip.timestamp.toDate())
+                timestamp.text = (LocalDateTime.ofInstant(
+                    trip.timestamp.toDate().toInstant(),
+                    ZoneId.systemDefault()
+                )).format(
+                    DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT))
                 price.text = "Price: ${("%.2f".format(trip.price))} €"
                 if (trip.imageCarURL != "") {
                     Glide.with(this.itemView).load(trip.imageCarURL).into(ivCar)
@@ -427,28 +430,39 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
             var formattedDate: String = ""
             var formattedTime: String = ""
             if (date != "") {
-                val tmpDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse(date)
-                formattedDate =
-                    SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(tmpDate)
-                        .toString()
+                formattedDate = (SimpleDateFormat.getDateInstance(
+                    SimpleDateFormat.SHORT,
+                    Locale.getDefault()
+                )).format(
+                    SimpleDateFormat.getDateInstance(
+                        SimpleDateFormat.SHORT,
+                        Locale.getDefault()
+                    ).parse(date)!!
+                )
             }
             if (time != "") {
-                val tmpTime = SimpleDateFormat("HH:mm", Locale.getDefault()).parse(time)
-                formattedTime =
-                    SimpleDateFormat("HH:mm", Locale.getDefault()).format(tmpTime).toString()
+                formattedTime = (SimpleDateFormat.getTimeInstance(
+                    SimpleDateFormat.SHORT,
+                    Locale.getDefault()
+                )).format(
+                    SimpleDateFormat.getTimeInstance(
+                        SimpleDateFormat.SHORT,
+                        Locale.getDefault()
+                    ).parse(time)!!
+                )
             }
             val resultList = ArrayList<Trip>()
             for (trip in tripList) {
-                val tripDate = SimpleDateFormat(
-                    "dd/MM/yyyy",
+                val tripDate = (SimpleDateFormat.getDateInstance(
+                    SimpleDateFormat.SHORT,
                     Locale.getDefault()
-                ).format(trip.timestamp.toDate())
+                )).format(trip.timestamp.toDate())
                     .toString()
                 val tripTime =
-                    SimpleDateFormat(
-                        "HH:mm",
+                    (SimpleDateFormat.getTimeInstance(
+                        SimpleDateFormat.SHORT,
                         Locale.getDefault()
-                    ).format(trip.timestamp.toDate())
+                    )).format(trip.timestamp.toDate())
                         .toString()
 
                 if (trip.departure.toLowerCase(Locale.ROOT)

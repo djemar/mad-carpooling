@@ -48,6 +48,10 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.FolderOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.util.*
 import java.util.stream.Collectors
 import kotlin.collections.ArrayList
@@ -775,8 +779,12 @@ class StopAdapter(private val stops: ArrayList<String>?) :
             val stringArray = stop!!.split(",")
             stopCity.text = stringArray[0].trim()
             stopAddress.text = stringArray[1].trim()
-            stopDate.text = stringArray[2].trim()
-            stopTime.text = stringArray[3].trim()
+            stopDate.text =
+                LocalDate.parse(stringArray[2].trim(), DateTimeFormatter.ISO_LOCAL_DATE).format(
+                    DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)
+                )
+            stopTime.text = LocalTime.parse(stringArray [3].trim(), DateTimeFormatter.ISO_LOCAL_TIME)
+                .format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
         }
 
     }
