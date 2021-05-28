@@ -23,10 +23,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="256dp"
                 android:layout_marginBottom="8dp"
+                android:clickable="false"
+                android:focusable="false"
                 app:layout_constraintBottom_toTopOf="@+id/cv_tripDetails_profile"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
+
+            <View
+                android:id="@+id/mapClickOverlay"
+                android:layout_width="match_parent"
+                android:layout_height="256dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_tripPlan"
@@ -295,7 +308,7 @@
                         android:textAllCaps="true"
                         android:textColor="?attr/colorOnBackground"
                         android:textStyle="bold"
-                        app:layout_constraintBottom_toTopOf="@+id/tripDetails_chattiness"
+                        app:layout_constraintBottom_toTopOf="@+id/cl_tripDetails_preferences"
                         app:layout_constraintStart_toStartOf="@+id/tv_tripDetails_info"
                         app:layout_constraintTop_toBottomOf="@+id/tv_title_seats" />
 

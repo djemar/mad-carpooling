@@ -65,8 +65,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_trip_list,
                 R.id.nav_others_trip_list,
                 R.id.nav_bought_trips,
-                R.id.nav_interest_trips,
-                R.id.nav_map
+                R.id.nav_interest_trips
             ), drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)

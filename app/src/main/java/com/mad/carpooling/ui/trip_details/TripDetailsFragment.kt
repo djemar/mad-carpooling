@@ -77,6 +77,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private lateinit var bottomSheet: ConstraintLayout
     private lateinit var bsb: BottomSheetBehavior<ConstraintLayout>
     private lateinit var map: MapView;
+    private lateinit var mapClickOverlay: View;
     private lateinit var btnEndTrip: MaterialButton
     private lateinit var ratingBar: RatingBar
     private var chattiness = false
@@ -121,6 +122,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         profileLayout = view.findViewById(R.id.cl_tripDetails_profile)
         btnEndTrip = view.findViewById(R.id.btn_end_trip)
         ratingBar = view.findViewById<RatingBar>(R.id.rb_tripDetails_driver)
+        mapClickOverlay = view.findViewById<View>(R.id.mapClickOverlay)
 
         bottomSheet = view.findViewById(R.id.bottom_sheet)
         fab = (activity as MainActivity).findViewById(R.id.fab)
@@ -135,8 +137,14 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     }
 
     private fun initMap() {
+        mapClickOverlay.setOnClickListener {
+            val action = TripDetailsFragmentDirections.actionNavTripDetailsToNavMap(
+                trip.id
+            )
+            findNavController().navigate(action)
+        }
         map.setTileSource(TileSourceFactory.MAPNIK);
-        map.setOnTouchListener { _, _ -> //disable touch events TODO navigate to map fragment
+        map.setOnTouchListener { _, _ -> //disable touch events
             true
         }
 
