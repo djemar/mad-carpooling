@@ -238,10 +238,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         rv.layoutManager = LinearLayoutManager(context)
         val stopAdapter = StopAdapter(trip.stops)
         rv.adapter = stopAdapter
-        if (stopAdapter.itemCount == 0) {
-            val tripStopsTitle = view.findViewById<TextView>(R.id.tv_tripDetails_stops)
-            tripStopsTitle.visibility = View.GONE
-        }
 
         if (trip.description.isEmpty()) {
             tvDescription.text = "No description :("
