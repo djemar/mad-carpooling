@@ -323,7 +323,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
                 location.text = "${trip.departure} - ${trip.arrival}"
                 timestamp.text = (SimpleDateFormat.getDateTimeInstance(
                     SimpleDateFormat.MEDIUM,
-                    SimpleDateFormat.SHORT
+                    SimpleDateFormat.SHORT, Locale.getDefault()
                 )).format(trip.timestamp.toDate())
                 price.text = "Price: ${("%.2f".format(trip.price))} €"
                 if (trip.imageCarURL != "") {
