@@ -2,15 +2,21 @@ package com.mad.carpooling.ui.maps
 
 import android.Manifest
 import android.content.Context
+import android.graphics.Paint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.google.android.material.snackbar.Snackbar
 import com.mad.carpooling.R
+import com.mad.carpooling.data.Trip
+import com.mad.carpooling.ui.SharedViewModel
 import com.vmadalin.easypermissions.EasyPermissions
 import com.vmadalin.easypermissions.dialogs.SettingsDialog
 import org.osmdroid.config.Configuration.getInstance
@@ -18,21 +24,22 @@ import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.FolderOverlay
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
-import org.osmdroid.views.overlay.OverlayItem
 import org.osmdroid.views.overlay.Polyline
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
-import kotlin.collections.ArrayList
+import java.util.stream.Collectors
 
 
 class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionCallbacks {
     private lateinit var map: MapView;
     private lateinit var mapViewModel: MapViewModel
     private lateinit var viewModelFactory: MapViewModelFactory
-
+    private val model: SharedViewModel by activityViewModels()
+    private lateinit var trip: Trip
 
     companion object {
         const val PERMISSION_LOCATION_REQUEST_CODE = 1
@@ -56,8 +63,96 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
+        val args: MapFragmentArgs by navArgs()
         map = view.findViewById<MapView>(R.id.map)
         map.setTileSource(TileSourceFactory.MAPNIK);
+
+        val previousFragment = findNavController().previousBackStackEntry?.destination?.id
+        if (previousFragment == R.id.nav_trip_edit) {
+            trip = model.getTrips().value!!.get(args.tid)!!
+            initFromEdit()
+        } else {
+            trip = model.getTrips().value!!.get(args.tid)!!
+            initFromDetails()
+        }
+        //TODO new trip
+
+        super.onViewCreated(view, savedInstanceState)
+    }
+
+    private fun initFromDetails() {
+        var clickedMarker : Marker = Marker(map)
+        val waypoints = ArrayList<Marker>()
+        val stopsMarkers = FolderOverlay()
+        val rotationGestureOverlay = RotationGestureOverlay(map);
+        map.setMultiTouchControls(true);
+        map.overlays.add(rotationGestureOverlay);
+
+        mapViewModel.address.observe(viewLifecycleOwner, { address ->
+            if (address != null) {
+                val strAddress = arrayListOf(
+                    address.thoroughfare,
+                    address.subThoroughfare,
+                    address.postalCode,
+                    address.locality,
+                    address.countryName
+                ).filterNotNull()
+                clickedMarker.title = address.locality
+                clickedMarker.snippet = strAddress.joinToString(", ")
+                clickedMarker.showInfoWindow()
+            } else {
+                Snackbar.make(
+                    map,
+                    "There was an error: check your internet connection",
+                    Snackbar.LENGTH_SHORT
+                ).show()
+            }
+        })
+
+        trip.geopoints.stream().forEach { gp ->
+            run {
+                val marker = Marker(map)
+                marker.position = GeoPoint(gp.latitude, gp.longitude)
+                marker.setOnMarkerClickListener { markerClick, mapView ->
+                    clickedMarker = markerClick
+                    mapViewModel.getFromLocation(markerClick.position, requireContext())
+                    true
+                }
+                waypoints.add(marker)
+                stopsMarkers.add(marker)
+            }
+        }
+
+        MapUtils.redrawMarkers(waypoints, map, requireContext())
+
+        map.post {
+            run() {
+                val box = MapUtils.computeArea(
+                    trip.geopoints.stream().map { gp -> GeoPoint(gp.latitude, gp.longitude) }
+                        .collect(Collectors.toList()) as ArrayList<GeoPoint>
+                )
+                map.zoomToBoundingBox(box, false, 110);
+                map.invalidate()
+            }
+        };
+
+        var routeOverlay: Polyline
+        mapViewModel.route.observe(viewLifecycleOwner, { newRouteOverlay ->
+            if (newRouteOverlay != null) {
+                routeOverlay = newRouteOverlay
+                routeOverlay.outlinePaint.strokeWidth = 10f
+                routeOverlay.outlinePaint.style = Paint.Style.FILL_AND_STROKE
+                routeOverlay.outlinePaint.strokeCap = Paint.Cap.ROUND
+                routeOverlay.outlinePaint.strokeJoin = Paint.Join.ROUND
+                map.overlays.add(routeOverlay)
+                map.overlays.add(stopsMarkers)
+                map.invalidate()
+            }
+        })
+        mapViewModel.getRoute(waypoints, requireContext())
+    }
+
+    private fun initFromEdit() {
         if (!hasLocationPermission()) {
             requestLocationPermission()
         }
@@ -70,17 +165,6 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         val rotationGestureOverlay = RotationGestureOverlay(map);
         map.setMultiTouchControls(true);
         map.overlays.add(rotationGestureOverlay);
-
-        //your items
-        val items = ArrayList<OverlayItem>()
-        items.add(
-            OverlayItem(
-                "Marcu", "Pacco", GeoPoint(
-                    45.0580, 7.6482
-                )
-            )
-        )
-
         val waypoints = arrayListOf<Marker>()
         var routeOverlay: Polyline = Polyline()
 
@@ -112,12 +196,16 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
                 map.overlays.add(marker)
                 map.invalidate()
             } else {
-                Snackbar.make(view, "There was an error: check your internet connection", Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(
+                    map,
+                    "There was an error: check your internet connection",
+                    Snackbar.LENGTH_SHORT
+                ).show()
             }
         })
 
         mapViewModel.route.observe(viewLifecycleOwner, { newRouteOverlay ->
-            if(newRouteOverlay != null){
+            if (newRouteOverlay != null) {
                 routeOverlay = newRouteOverlay
                 map.overlays.add(routeOverlay)
                 map.invalidate()
@@ -140,10 +228,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         }
         val evOverlay = MapEventsOverlay(mapEventsReceiver)
         map.overlays.add(evOverlay)
-
-        super.onViewCreated(view, savedInstanceState)
     }
-
 
 
     override fun onResume() {
