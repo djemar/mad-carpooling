@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/cl_stopEdit"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -13,33 +14,37 @@
         android:layout_marginEnd="8dp"
         android:scaleType="centerCrop"
         android:src="@drawable/ic_twotone_stop"
-        app:layout_constraintBottom_toBottomOf="@+id/et_stop_location"
-        app:layout_constraintEnd_toStartOf="@+id/et_stop_location"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/et_stop_city"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/et_stop_location"
+        app:layout_constraintTop_toTopOf="parent"
         app:tint="?attr/colorOnBackground" />
 
     <TextView
-        android:id="@+id/et_stop_location"
+        android:id="@+id/et_stop_city"
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:textSize="16sp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
         android:focusable="false"
         android:gravity="center|start"
-        android:textColor="?attr/colorOnBackground"
         android:selectAllOnFocus="true"
         android:text="Location"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:textColor="?attr/colorOnBackground"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/et_stop_address"
         app:layout_constraintEnd_toStartOf="@id/et_stop_date"
         app:layout_constraintHorizontal_chainStyle="spread_inside"
         app:layout_constraintHorizontal_weight="1"
         app:layout_constraintStart_toEndOf="@+id/rv_stop_edit_icon"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <EditText
         android:id="@+id/et_stop_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:autofillHints="Date"
         android:drawableStart="@drawable/ic_calendar"
         android:drawablePadding="8dp"
         android:drawableTint="?attr/colorPrimary"
@@ -49,12 +54,11 @@
         android:paddingBottom="12dp"
         android:text="Date"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/et_stop_address"
         app:layout_constraintEnd_toStartOf="@id/et_stop_time"
         app:layout_constraintHorizontal_weight="0.5"
-        app:layout_constraintStart_toEndOf="@id/et_stop_location"
-        app:layout_constraintTop_toTopOf="parent"
-        android:autofillHints="Date" />
+        app:layout_constraintStart_toEndOf="@id/et_stop_city"
+        app:layout_constraintTop_toTopOf="@+id/et_stop_city" />
 
     <EditText
         android:id="@+id/et_stop_time"
@@ -69,10 +73,22 @@
         android:paddingBottom="12dp"
         android:text="Time"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/et_stop_date"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_weight="0.5"
         app:layout_constraintStart_toEndOf="@id/et_stop_date"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="@+id/et_stop_date" />
+
+    <TextView
+        android:id="@+id/et_stop_address"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Address"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/et_stop_city"
+        app:layout_constraintStart_toStartOf="@+id/et_stop_city"
+        app:layout_constraintTop_toBottomOf="@+id/et_stop_city" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
