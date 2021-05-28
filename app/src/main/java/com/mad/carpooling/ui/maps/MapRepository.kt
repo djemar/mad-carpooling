@@ -3,7 +3,6 @@ package com.mad.carpooling.ui.maps
 import android.content.Context
 import android.location.Address
 import android.util.Log
-import androidx.core.content.ContentProviderCompat.requireContext
 import com.mad.carpooling.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -16,7 +15,6 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 import java.util.*
 import java.util.stream.Collectors
-import kotlin.collections.ArrayList
 
 class MapRepository {
 
@@ -35,13 +33,15 @@ class MapRepository {
         }
     }
 
-    suspend fun getRoute(waypoints: ArrayList<Marker>, ctx: Context): Polyline = withContext(Dispatchers.IO) {
-        val roadManager: RoadManager = OSRMRoadManager(ctx, BuildConfig.APPLICATION_ID)
-        val gp = waypoints.stream().map(Marker::getPosition)
-            .collect(Collectors.toList()) as ArrayList<GeoPoint>
-        val road = async { roadManager.getRoad(gp) }
-        val r = road.await()
-        return@withContext RoadManager.buildRoadOverlay(r) as Polyline
-    }
+    suspend fun getRoute(waypoints: ArrayList<Marker>, ctx: Context): Polyline =
+        withContext(Dispatchers.IO) {
+            val roadManager: RoadManager = OSRMRoadManager(ctx, BuildConfig.APPLICATION_ID)
+            val gp = waypoints.stream().map(Marker::getPosition)
+                .collect(Collectors.toList()) as ArrayList<GeoPoint>
+            val road = async { roadManager.getRoad(gp) }
+            val r = road.await()
+            return@withContext RoadManager.buildRoadOverlay(r) as Polyline
+        }
+
 
 }
