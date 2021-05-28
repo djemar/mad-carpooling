@@ -2,6 +2,7 @@ package com.mad.carpooling.ui.trip_edit
 
 import android.app.*
 import android.content.ActivityNotFoundException
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
@@ -240,11 +241,11 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                     // hide the trip
                     trip.visibility = false
                     changeStateFab(fab)
-                })
+                }
                 .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, id ->
                     // User cancelled the dialog
 
-                }
+                })
             // Create the AlertDialog object and return it
             return builder.create()
         }
@@ -277,7 +278,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                 .setPositiveButton("Confirm") { dialog, id ->
                     trip.visibility = true
                     changeStateFab(fab)
-                })
+                }
                 .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, id ->
                 })
             // Create the AlertDialog object and return it

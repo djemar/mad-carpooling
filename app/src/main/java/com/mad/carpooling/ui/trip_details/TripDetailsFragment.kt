@@ -264,7 +264,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
         initBtnEndTripAndRatingBar(db, view)
 
-        val scrollView = view.findViewById<ScrollView>(R.id.sv_tridDetails)
+        val scrollView = view.findViewById<ScrollView>(R.id.sv_tripDetails)
         scrollView.setOnScrollChangeListener { scrollView, scrollX, scrollY, oldScrollX, oldScrollY ->
             if (scrollY > oldScrollY && fab.visibility == View.VISIBLE && oldScrollY > 0) {
                 fab.hide()

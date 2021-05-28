@@ -167,11 +167,9 @@
             app:destination="@id/nav_map"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
-            app:launchSingleTop="true"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim"
-            app:popUpTo="@id/nav_trip_edit"
-            app:popUpToInclusive="true" />
+            app:popUpTo="@id/nav_trip_edit" />
     </fragment>
     <fragment
         android:id="@+id/nav_bought_trips"
@@ -211,6 +209,7 @@
             app:argType="string"
             app:nullable="true"
             android:defaultValue="@null" />
+    </fragment>
     <fragment
         android:id="@+id/nav_reviews_profile"
         android:name="com.mad.carpooling.ui.profile_reviews.ReviewsProfileFragment"
