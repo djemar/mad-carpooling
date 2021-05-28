@@ -1,10 +1,11 @@
 package com.mad.carpooling.ui.trip_edit
 
-import android.app.*
+import android.app.Activity
+import android.app.AlertDialog
+import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.DialogInterface
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
@@ -20,13 +21,13 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.widget.*
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toBitmap
-import androidx.fragment.app.*
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.onNavDestinationSelected
@@ -34,7 +35,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Timestamp
@@ -73,6 +73,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     private lateinit var stops: ArrayList<String>
     private lateinit var stopIcon: ImageView
     private lateinit var trip: Trip
+    private lateinit var btnMap: MaterialButton
     private var isNew = false
     private var tripMap: HashMap<String, Trip>? = null
     private var currentPhotoPath: String? = null
@@ -98,6 +99,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         ibtnSmoking = view.findViewById(R.id.btn_edit_smoking)
         ibtnPets = view.findViewById(R.id.btn_edit_pets)
         ibtnMusic = view.findViewById(R.id.btn_edit_music)
+        btnMap = view.findViewById(R.id.btn_tripEdit_map)
 
         initTrip(view, viewModel, savedInstanceState)
 
@@ -117,6 +119,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         val btnCamera = view.findViewById<MaterialButton>(R.id.btn_tripEdit_camera)
         registerForContextMenu(btnCamera)
         btnCamera.setOnClickListener { activity?.openContextMenu(btnCamera) }
+
     }
 
     private fun initTrip(view: View, viewModel: TripEditViewModel, savedInstanceState: Bundle?) {
@@ -126,6 +129,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         rv.isNestedScrollingEnabled = false
         tripMap = model.getMyTrips().value
         isNew = args.isNew
+
 
         if (savedInstanceState == null) {
             if (!args.isNew) {  // navigating from any edit btn
@@ -139,6 +143,13 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         }
 
         trip = viewModel.getTrip()
+
+        btnMap.setOnClickListener {
+            val action = TripEditFragmentDirections.actionNavTripEditToNavMap(
+                if (isNew) null else trip.id
+            )
+            findNavController().navigate(action)
+        }
 
         if (currentPhotoPath != null) {
             BitmapFactory.decodeFile(currentPhotoPath)?.also { bitmap ->
@@ -181,17 +192,23 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
     private fun changeStateFab(fab: FloatingActionButton) {
         if (trip.visibility) {
-            fab.setImageDrawable(ContextCompat.getDrawable(
-                requireContext(),
-                R.drawable.ic_sharp_visibility
-            ))
-            fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(),R.color.green_700)
+            fab.setImageDrawable(
+                ContextCompat.getDrawable(
+                    requireContext(),
+                    R.drawable.ic_sharp_visibility
+                )
+            )
+            fab.backgroundTintList =
+                ContextCompat.getColorStateList(requireContext(), R.color.green_700)
         } else {
-            fab.setImageDrawable(ContextCompat.getDrawable(
-                requireContext(),
-                R.drawable.ic_baseline_visibility_off
-            ))
-            fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(),R.color.red_700)
+            fab.setImageDrawable(
+                ContextCompat.getDrawable(
+                    requireContext(),
+                    R.drawable.ic_baseline_visibility_off
+                )
+            )
+            fab.backgroundTintList =
+                ContextCompat.getColorStateList(requireContext(), R.color.red_700)
         }
     }
 
@@ -219,17 +236,23 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
         private fun changeStateFab(fab: FloatingActionButton) {
             if (trip.visibility) {
-                fab.setImageDrawable(ContextCompat.getDrawable(
-                    requireContext(),
-                    R.drawable.ic_sharp_visibility
-                ))
-                fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(),R.color.green_700)
+                fab.setImageDrawable(
+                    ContextCompat.getDrawable(
+                        requireContext(),
+                        R.drawable.ic_sharp_visibility
+                    )
+                )
+                fab.backgroundTintList =
+                    ContextCompat.getColorStateList(requireContext(), R.color.green_700)
             } else {
-                fab.setImageDrawable(ContextCompat.getDrawable(
-                    requireContext(),
-                    R.drawable.ic_baseline_visibility_off
-                ))
-                fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(),R.color.red_700)
+                fab.setImageDrawable(
+                    ContextCompat.getDrawable(
+                        requireContext(),
+                        R.drawable.ic_baseline_visibility_off
+                    )
+                )
+                fab.backgroundTintList =
+                    ContextCompat.getColorStateList(requireContext(), R.color.red_700)
             }
         }
 
@@ -257,17 +280,23 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
         private fun changeStateFab(fab: FloatingActionButton) {
             if (trip.visibility) {
-                fab.setImageDrawable(ContextCompat.getDrawable(
-                    requireContext(),
-                    R.drawable.ic_sharp_visibility
-                ))
-                fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(),R.color.green_700)
+                fab.setImageDrawable(
+                    ContextCompat.getDrawable(
+                        requireContext(),
+                        R.drawable.ic_sharp_visibility
+                    )
+                )
+                fab.backgroundTintList =
+                    ContextCompat.getColorStateList(requireContext(), R.color.green_700)
             } else {
-                fab.setImageDrawable(ContextCompat.getDrawable(
-                    requireContext(),
-                    R.drawable.ic_baseline_visibility_off
-                ))
-                fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(),R.color.red_700)
+                fab.setImageDrawable(
+                    ContextCompat.getDrawable(
+                        requireContext(),
+                        R.drawable.ic_baseline_visibility_off
+                    )
+                )
+                fab.backgroundTintList =
+                    ContextCompat.getColorStateList(requireContext(), R.color.red_700)
             }
         }
 
@@ -287,9 +316,11 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        trip.stops = stops
-        viewModel.setTrip(trip)
-        outState.putString("state_currentPhotoPath", currentPhotoPath)
+        if (this::trip.isInitialized && trip != null) {
+            trip.stops = stops
+            viewModel.setTrip(trip)
+            outState.putString("state_currentPhotoPath", currentPhotoPath)
+        }
     }
 
     private fun initPreferences() {
@@ -514,8 +545,8 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
     private fun validateSave() {
         optionsMenu.findItem(R.id.save_trip).isEnabled = etSeats.text.trim()
-                .isNotEmpty() && etPrice.text.trim()
-                .isNotEmpty() && ((isNew && currentPhotoPath != null) || !isNew)
+            .isNotEmpty() && etPrice.text.trim()
+            .isNotEmpty() && ((isNew && currentPhotoPath != null) || !isNew)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -549,7 +580,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     private fun updateFirestoreTrips() {
         val dateFormat = SimpleDateFormat("dd/MM/yyyyHH:mm")
         //val parsedDate = dateFormat.parse(tvDate.text.toString() + tvTime.text.toString())
-       // val timestamp: Timestamp = Timestamp(parsedDate!!)
+        // val timestamp: Timestamp = Timestamp(parsedDate!!)
 
 
         // TODO take username from login
@@ -578,9 +609,9 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                 navigateToTripDetails(trip.id)
             }
         } else {
-            if(!trip.visibility){
+            if (!trip.visibility) {
                 for (user in trip.interestedPeople!!) {
-                    if(trip.acceptedPeople?.contains(user)!!){
+                    if (trip.acceptedPeople?.contains(user)!!) {
                         trip.seats++
                     }
                     db.collection("users").document(user).update(
@@ -671,10 +702,25 @@ class StopEditAdapter(val stops: ArrayList<String>) :
             var stringAddress = stringArray[1].trim()
             var stringDate = stringArray[2].trim()
             var stringTime = stringArray[3].trim()
-            when(position){
-                0 -> stopIcon.setImageDrawable(ContextCompat.getDrawable(this.itemView.context, R.drawable.ic_twotone_stop_start))
-                stops.size-1 -> stopIcon.setImageDrawable(ContextCompat.getDrawable(this.itemView.context, R.drawable.ic_twotone_stop_end))
-                else -> stopIcon.setImageDrawable(ContextCompat.getDrawable(this.itemView.context, R.drawable.ic_twotone_stop))
+            when (position) {
+                0 -> stopIcon.setImageDrawable(
+                    ContextCompat.getDrawable(
+                        this.itemView.context,
+                        R.drawable.ic_twotone_stop_start
+                    )
+                )
+                stops.size - 1 -> stopIcon.setImageDrawable(
+                    ContextCompat.getDrawable(
+                        this.itemView.context,
+                        R.drawable.ic_twotone_stop_end
+                    )
+                )
+                else -> stopIcon.setImageDrawable(
+                    ContextCompat.getDrawable(
+                        this.itemView.context,
+                        R.drawable.ic_twotone_stop
+                    )
+                )
             }
             stopCity.text = stringCity
             stopAddress.text = stringAddress
