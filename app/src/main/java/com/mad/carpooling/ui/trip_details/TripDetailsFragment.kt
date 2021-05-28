@@ -152,7 +152,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         //val stopsMarkers = RadiusMarkerClusterer(requireContext())
         //val clusterIcon: Bitmap? = ContextCompat.getDrawable( requireContext(), R.drawable.marker_cluster)?.toBitmap()
         //stopsMarkers.setIcon(clusterIcon)
-        map.overlays.add(stopsMarkers)
 
         trip.geopoints.stream().forEach { gp ->
             run {
@@ -178,11 +177,11 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             if (newRouteOverlay != null) {
                 routeOverlay = newRouteOverlay
                 routeOverlay.outlinePaint.strokeWidth = 10f
-                routeOverlay.outlinePaint.alpha = 255
                 routeOverlay.outlinePaint.style = Paint.Style.FILL_AND_STROKE
                 routeOverlay.outlinePaint.strokeCap = Paint.Cap.ROUND
                 routeOverlay.outlinePaint.strokeJoin = Paint.Join.ROUND
                 map.overlays.add(routeOverlay)
+                map.overlays.add(stopsMarkers)
                 map.invalidate()
             }
         })
