@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     android:clipToPadding="false"
     android:orientation="vertical"
-    tools:context=".ui.profile_reviews.ReviewsProfileFragment">
+    tools:context=".ui.profile_reviews.ReviewsProfileFragment"
+    android:layout_marginTop="12dp">
 
     <TextView
         android:id="@+id/tv_number_stars"
@@ -78,13 +79,14 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.499"
         app:layout_constraintVertical_chainStyle="packed"
+        app:show_raters="false"
         app:max_value="100"
         app:rounded="true"
         app:show_label="true"
         app:spaces="2dp"
         app:text_color="#333333"
         app:text_size="12sp"
-        app:width="16dp" />
+        app:width="14dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/reviews_list"
