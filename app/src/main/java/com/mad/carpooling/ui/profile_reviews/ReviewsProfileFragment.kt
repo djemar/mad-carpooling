@@ -2,12 +2,13 @@ package com.mad.carpooling.ui.profile_reviews
 
 import android.graphics.Color
 import android.os.Bundle
-import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.ImageView
+import android.widget.RatingBar
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -23,6 +24,8 @@ import com.mad.carpooling.R
 import com.mad.carpooling.ui.SharedViewModel
 import com.taufiqrahman.reviewratings.BarLabels
 import com.taufiqrahman.reviewratings.RatingReviews
+import java.lang.Math.round
+import kotlin.math.roundToInt
 
 
 class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
@@ -61,6 +64,7 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
         var totStars = 0;
 
         val ratingReviews = view.findViewById(R.id.rating_reviews) as RatingReviews
+
         val colors = intArrayOf(
             Color.parseColor("#0e9d58"),
             Color.parseColor("#bfd047"),
@@ -68,6 +72,15 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
             Color.parseColor("#ef7e14"),
             Color.parseColor("#d36259")
         )
+
+        /*
+        val colors: Array<Pair<Int,Int>> = arrayOf(
+            Pair(Color.parseColor("#0e9d58"), Color.parseColor("#6ec49a")),
+            Pair(Color.parseColor("#bfd047"), Color.parseColor("#d8e290")),
+            Pair(Color.parseColor("#ffc105"), Color.parseColor("#ffd969")),
+            Pair(Color.parseColor("#ef7e14"), Color.parseColor("#f5b172")),
+            Pair(Color.parseColor("#d36259"), Color.parseColor("#e4a09b"))
+        )*/
 
         if (role == "driver") {
             db.collection("ratings").document(uid!!).get()
@@ -107,10 +120,12 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
                     }
 
                     val raters = intArrayOf(
-                        stars[0], stars[1], stars[2], stars[3], stars[4]
+                        ((stars[0].toFloat()/mapRatingDriver.size)*100).roundToInt(), ((stars[1].toFloat()/mapRatingDriver.size)*100).roundToInt(),
+                        ((stars[2].toFloat()/mapRatingDriver.size)*100).roundToInt(), ((stars[3].toFloat()/mapRatingDriver.size)*100).roundToInt(),
+                        ((stars[4].toFloat()/mapRatingDriver.size)*100).roundToInt()
                     )
 
-                    ratingReviews.createRatingBars(mapRatingDriver.size, BarLabels.STYPE1, colors, raters)
+                    ratingReviews.createRatingBars(100, BarLabels.STYPE1, colors, raters)
                 }
         } else {
             db.collection("ratings").document(uid!!).get()
@@ -145,10 +160,12 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
                     }
 
                     val raters = intArrayOf(
-                        stars[0], stars[1], stars[2], stars[3], stars[4]
+                        ((stars[0].toFloat()/mapRatingPassenger.size)*100).roundToInt(), ((stars[1].toFloat()/mapRatingPassenger.size)*100).roundToInt(),
+                        ((stars[2].toFloat()/mapRatingPassenger.size)*100).roundToInt(), ((stars[3].toFloat()/mapRatingPassenger.size)*100).roundToInt(),
+                        ((stars[4].toFloat()/mapRatingPassenger.size)*100).roundToInt()
                     )
 
-                    ratingReviews.createRatingBars(mapRatingPassenger.size, BarLabels.STYPE1, colors, raters)
+                    ratingReviews.createRatingBars(100, BarLabels.STYPE1, colors, raters)
                 }
         }
 
