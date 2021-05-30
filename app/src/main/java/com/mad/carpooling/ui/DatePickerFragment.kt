@@ -17,6 +17,11 @@ class DatePickerFragment(val tvDate: TextView) : DialogFragment(),
 
    // private val tvDate = tvDate
 
+    override fun onPause() {
+        super.onPause()
+        dismissAllowingStateLoss()
+    }
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         // Use the current date as the default date in the picker
         val c = Calendar.getInstance()

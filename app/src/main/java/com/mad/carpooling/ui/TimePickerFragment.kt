@@ -17,6 +17,11 @@ class TimePickerFragment(val tvTime: TextView) : DialogFragment(),
 
     // private val tvTime = tvTime
 
+    override fun onPause() {
+        super.onPause()
+        dismissAllowingStateLoss()
+    }
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         // Use the current time as the default values for the picker
         val c = Calendar.getInstance()

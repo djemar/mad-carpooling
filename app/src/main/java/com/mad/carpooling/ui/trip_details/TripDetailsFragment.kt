@@ -328,6 +328,11 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     class EndTripDialogFragment(private var trip: Trip) :
         DialogFragment() {
 
+        override fun onPause() {
+            super.onPause()
+            dismissAllowingStateLoss()
+        }
+
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
             // Use the Builder class for convenient dialog construction
             val builder: AlertDialog.Builder = AlertDialog.Builder(activity)
@@ -364,6 +369,11 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         var rb_review: RatingBar? = null
         var uid = ""
         private val model: SharedViewModel by activityViewModels()
+
+        override fun onPause() {
+            super.onPause()
+            dismissAllowingStateLoss()
+        }
 
         override fun onStart() {
             super.onStart()

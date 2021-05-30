@@ -239,6 +239,11 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         DialogFragment() {
         var trip = viewModel.getTrip()
 
+        override fun onPause() {
+            super.onPause()
+            dismissAllowingStateLoss()
+        }
+
         private fun changeStateFab(fab: FloatingActionButton) {
             if (trip.visibility) {
                 fab.setImageDrawable(
@@ -282,6 +287,11 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     class ShowDialogFragment(viewModel: TripEditViewModel, var fab: FloatingActionButton) :
         DialogFragment() {
         var trip = viewModel.getTrip()
+
+        override fun onPause() {
+            super.onPause()
+            dismissAllowingStateLoss()
+        }
 
         private fun changeStateFab(fab: FloatingActionButton) {
             if (trip.visibility) {
