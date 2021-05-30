@@ -57,7 +57,7 @@ object MapUtils {
 
     fun redrawMarkers(waypoints: ArrayList<Marker>, mapView: MapView, ctx: Context) {
         val count: AtomicInteger = AtomicInteger(0)
-        waypoints.stream().forEach { marker ->
+        waypoints.forEach { marker ->
             marker.icon =
                 MapUtils.getNumMarker((count.incrementAndGet()).toString(), ctx)
         }

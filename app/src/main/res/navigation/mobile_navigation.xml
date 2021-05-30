@@ -152,7 +152,8 @@
             app:popUpTo="@id/nav_trip_list" />
         <argument
             android:name="id"
-            app:argType="string" />
+            app:argType="string"
+            android:defaultValue="id" />
         <argument
             android:name="isNew"
             android:defaultValue="false"
@@ -209,6 +210,18 @@
             app:argType="string"
             app:nullable="true"
             android:defaultValue="@null" />
+        <action
+            android:id="@+id/action_nav_map_to_nav_trip_edit"
+            app:destination="@id/nav_trip_edit"
+            app:popUpTo="@id/nav_trip_details" />
+<!--        <action
+            android:id="@+id/action_nav_map_to_nav_trip_edit_skip_details"
+            app:destination="@id/nav_trip_edit"
+            app:popUpTo="@id/nav_trip_list" />
+        <action
+            android:id="@+id/action_nav_map_to_nav_trip_edit_new"
+            app:destination="@id/nav_trip_edit"
+            app:popUpTo="@id/nav_others_trip_list" />-->
     </fragment>
     <fragment
         android:id="@+id/nav_reviews_profile"

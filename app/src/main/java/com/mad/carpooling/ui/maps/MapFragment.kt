@@ -4,17 +4,17 @@ import android.Manifest
 import android.content.Context
 import android.graphics.Paint
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.navigation.ui.onNavDestinationSelected
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
@@ -22,6 +22,7 @@ import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.data.Trip
 import com.mad.carpooling.ui.SharedViewModel
+import com.mad.carpooling.ui.trip_edit.TripEditViewModel
 import com.vmadalin.easypermissions.EasyPermissions
 import com.vmadalin.easypermissions.dialogs.SettingsDialog
 import org.osmdroid.config.Configuration.getInstance
@@ -47,11 +48,19 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
     private lateinit var btnDeleteMarker: MaterialButton;
     private lateinit var mapViewModel: MapViewModel
     private lateinit var viewModelFactory: MapViewModelFactory
-    private val model: SharedViewModel by activityViewModels()
+    private val sharedViewModel: SharedViewModel by activityViewModels()
+    private val tripEditViewModel: TripEditViewModel by activityViewModels()
     private lateinit var trip: Trip
+    private lateinit var optionsMenu: Menu
+    private val waypoints = ArrayList<Marker>()
 
     companion object {
         const val PERMISSION_LOCATION_REQUEST_CODE = 1
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(
@@ -82,27 +91,37 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         val previousFragment = findNavController().previousBackStackEntry?.destination?.id
         if (previousFragment == R.id.nav_trip_edit) {
             if (args.tid == null) {
-                initFromNew()
+                trip = tripEditViewModel.getTrip()
+                if (trip.stops?.size!! > 0) initFromEdit()
+                else initFromNew()
             } else {
-                trip = model.getTrips().value!!.get(args.tid)!!
+                trip = tripEditViewModel.getTrip()
                 initFromEdit()
             }
         } else {
-            trip = model.getTrips().value!!.get(args.tid)!!
+            trip = sharedViewModel.getTrips().value!![args.tid]!!
+            setHasOptionsMenu(false)
             initFromDetails()
         }
-        //TODO new trip
 
+        map.invalidate();
         super.onViewCreated(view, savedInstanceState)
     }
 
     private fun initFromDetails() {
-        var selectedMarker: Marker = Marker(map)
+        val selectedMarker = MutableLiveData<Marker?>(null)
         val waypoints = ArrayList<Marker>()
         val stopsMarkers = FolderOverlay()
         val rotationGestureOverlay = RotationGestureOverlay(map);
         map.setMultiTouchControls(true);
         map.overlays.add(rotationGestureOverlay);
+
+        selectedMarker.observe(viewLifecycleOwner, { marker ->
+            btnDeleteMarker.isVisible = marker != null
+            if (marker != null) {
+                map.controller.animateTo(marker.position)
+            }
+        })
 
         mapViewModel.address.observe(viewLifecycleOwner, { address ->
             if (address != null) {
@@ -113,9 +132,9 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
                     address.locality,
                     address.countryName
                 ).filterNotNull()
-                selectedMarker.title = address.locality
-                selectedMarker.snippet = strAddress.joinToString(", ")
-                selectedMarker.showInfoWindow()
+                selectedMarker.value?.title = address.locality
+                selectedMarker.value?.snippet = strAddress.joinToString(", ")
+                selectedMarker.value?.showInfoWindow()
             } else {
                 Snackbar.make(
                     map,
@@ -130,7 +149,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
                 val marker = Marker(map)
                 marker.position = GeoPoint(gp.latitude, gp.longitude)
                 marker.setOnMarkerClickListener { markerClick, mapView ->
-                    selectedMarker = markerClick
+                    selectedMarker.postValue(markerClick)
                     mapViewModel.getFromLocation(markerClick.position, requireContext())
                     true
                 }
@@ -171,7 +190,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
     private fun initFromEdit() {
         val selectedMarker = MutableLiveData<Marker?>(null)
         var routeOverlay: Polyline = Polyline()
-        val waypoints = ArrayList<Marker>()
+        //val waypoints = ArrayList<Marker>()
         val stopsMarkers = FolderOverlay()
         val rotationGestureOverlay = RotationGestureOverlay(map);
         map.setMultiTouchControls(true);
@@ -179,13 +198,13 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
 
         selectedMarker.observe(viewLifecycleOwner, { marker ->
             btnDeleteMarker.isVisible = marker != null
-            if (marker != null){
+            if (marker != null) {
                 map.controller.animateTo(marker.position)
             }
         })
 
         btnDeleteMarker.setOnClickListener {
-            if(selectedMarker.value != null){
+            if (selectedMarker.value != null) {
                 selectedMarker.value!!.closeInfoWindow()
                 stopsMarkers.remove(selectedMarker.value)
                 waypoints.remove(selectedMarker.value)
@@ -214,29 +233,35 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
                     marker.snippet = strAddress.joinToString(", ")
                     marker.position = GeoPoint(address.latitude, address.longitude)
                     marker.showInfoWindow()
-                    waypoints.add(marker)
-                    marker.icon =
-                        MapUtils.getNumMarker(waypoints.size.toString(), requireContext())
-                    marker.id = waypoints.size.toString()
-                    marker.isDraggable = true
-                    stopsMarkers.add(marker)
-                    selectedMarker.postValue(marker)
-                    marker.setOnMarkerDragListener(object : OnMarkerDragListener {
-                        override fun onMarkerDragStart(marker: Marker) {}
+                    if (!waypoints.stream()
+                            .filter { m -> m.position == marker.position } // avoid marker recretion after rotation
+                            .findFirst().isPresent
+                    ) {
+                        waypoints.add(marker)
+                        marker.icon =
+                            MapUtils.getNumMarker(waypoints.size.toString(), requireContext())
+                        marker.id = waypoints.size.toString()
+                        marker.isDraggable = true
+                        //if(!stopsMarkers.items.contains(marker))
+                        stopsMarkers.add(marker)
+                        selectedMarker.postValue(marker)
+                        marker.setOnMarkerDragListener(object : OnMarkerDragListener {
+                            override fun onMarkerDragStart(marker: Marker) {}
 
-                        override fun onMarkerDragEnd(marker: Marker) {
-                            mapViewModel.getRoute(waypoints, requireContext())
+                            override fun onMarkerDragEnd(marker: Marker) {
+                                mapViewModel.getRoute(waypoints, requireContext())
+                            }
+
+                            override fun onMarkerDrag(marker: Marker) {}
+                        })
+                        marker.setOnMarkerClickListener { markerClick, _ ->
+                            selectedMarker.postValue(markerClick)
+                            markerClick.showInfoWindow()
+                            true
                         }
-
-                        override fun onMarkerDrag(marker: Marker) {}
-                    })
-                    marker.setOnMarkerClickListener { markerClick, _ ->
-                        selectedMarker.postValue(markerClick)
-                        markerClick.showInfoWindow()
-                        true
                     }
+                    mapViewModel.getRoute(waypoints, requireContext())
                 }
-                mapViewModel.getRoute(waypoints, requireContext())
             } else {
                 Snackbar.make(
                     map,
@@ -253,7 +278,10 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
                 marker.isDraggable = true
                 marker.setOnMarkerClickListener { markerClick, _ ->
                     selectedMarker.postValue(markerClick)
-                    if(markerClick.title == null) mapViewModel.getFromLocation(markerClick.position, requireContext())
+                    if (markerClick.title == null) mapViewModel.getFromLocation(
+                        markerClick.position,
+                        requireContext()
+                    )
                     else markerClick.showInfoWindow()
                     true
                 }
@@ -261,6 +289,11 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
                     override fun onMarkerDragStart(marker: Marker) {}
 
                     override fun onMarkerDragEnd(marker: Marker) {
+                        selectedMarker.postValue(marker)
+                        if (marker.title == null) mapViewModel.getFromLocation(
+                            marker.position,
+                            requireContext()
+                        )
                         mapViewModel.getRoute(waypoints, requireContext())
                     }
 
@@ -287,6 +320,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         mapViewModel.route.observe(viewLifecycleOwner, { newRouteOverlay ->
             if (newRouteOverlay != null) {
                 map.overlays.remove(routeOverlay)
+                map.overlays.remove(stopsMarkers)
                 routeOverlay = newRouteOverlay
                 routeOverlay.outlinePaint.strokeWidth = 10f
                 routeOverlay.outlinePaint.style = Paint.Style.FILL_AND_STROKE
@@ -332,20 +366,20 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         val rotationGestureOverlay = RotationGestureOverlay(map);
         map.setMultiTouchControls(true);
         map.overlays.add(rotationGestureOverlay);
-        val waypoints = arrayListOf<Marker>()
+//        val waypoints = arrayListOf<Marker>()
         val stopsMarkers = FolderOverlay()
         var routeOverlay: Polyline = Polyline()
 
         selectedMarker.observe(viewLifecycleOwner, { marker ->
             btnDeleteMarker.isVisible = marker != null
-            if (marker != null){
+            if (marker != null) {
                 map.controller.animateTo(marker.position)
                 marker.showInfoWindow()
             }
         })
 
         btnDeleteMarker.setOnClickListener {
-            if(selectedMarker.value != null){
+            if (selectedMarker.value != null) {
                 selectedMarker.value!!.closeInfoWindow()
                 stopsMarkers.remove(selectedMarker.value)
                 waypoints.remove(selectedMarker.value)
@@ -382,6 +416,11 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
                     override fun onMarkerDragStart(marker: Marker) {}
 
                     override fun onMarkerDragEnd(marker: Marker) {
+                        selectedMarker.postValue(marker)
+                        if (marker.title == null) mapViewModel.getFromLocation(
+                            marker.position,
+                            requireContext()
+                        )
                         mapViewModel.getRoute(waypoints, requireContext())
                     }
 
@@ -429,6 +468,96 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         }
         val evOverlay = MapEventsOverlay(mapEventsReceiver)
         map.overlays.add(evOverlay)
+
+    }
+
+    private fun validateSave(): Boolean {
+        if (waypoints.size < 2) {
+            Snackbar.make(map, "You need at least 2 stops", Snackbar.LENGTH_SHORT).show()
+            return false
+        }
+        return true
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_map_edit, menu)
+        optionsMenu = menu
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        super.onPrepareOptionsMenu(menu)
+        validateSave()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.nav_trip_edit -> {
+                if (validateSave()) {
+                    createStopsArray()
+                    tripEditViewModel.setTrip(trip)
+/*                    val i = findNavController().backStack.size
+                    val entry = findNavController().backStack.elementAt(i - 3).destination
+                    findNavController().backStack.elementAt(i - 3).destination.id*/
+                    //if (entry.id == R.id.nav_trip_details) {
+                    val action: NavDirections = MapFragmentDirections.actionNavMapToNavTripEdit(
+                            id = trip.id
+                        )
+                    /*} else if (entry.id == R.id.nav_trip_list){
+                        action = MapFragmentDirections.actionNavMapToNavTripEditSkipDetails(
+                            id = trip.id
+                        )
+                    }else {
+                        action = MapFragmentDirections.actionNavMapToNavTripEditNew(
+                            id = trip.id
+                        )
+                    }*/
+                    findNavController().navigate(action)
+                }
+                true
+            }
+            else -> item.onNavDestinationSelected(findNavController()) || super.onOptionsItemSelected(
+                item
+            )
+        }
+    }
+
+    private fun createStopsArray() {
+        val stops = ArrayList<String>()
+        val geopoints = ArrayList<com.google.firebase.firestore.GeoPoint>()
+        //var i = 0
+
+        waypoints.forEach {
+            val marker = it as Marker
+            val gp = com.google.firebase.firestore.GeoPoint(
+                marker.position.latitude, marker.position.longitude
+            )
+            if (trip.geopoints.contains(gp)
+            ) {
+                val i = trip.geopoints.indexOf(gp)
+                val stopDetails = trip.stops!![i].split(',')
+                stops.add(
+                    "${stopDetails[0]},${stopDetails[1]},${
+                        stopDetails[2]
+                    },${stopDetails[3]}"
+                )
+                geopoints.add(gp)
+            } else {
+                val stopDetails = marker.snippet.split(',')
+                stops.add("${marker.title},${stopDetails[0]}${stopDetails[1]},,")
+                geopoints.add(gp)
+            }
+        }
+        trip.stops = stops
+        trip.geopoints = geopoints
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        val previousFragment = findNavController().previousBackStackEntry?.destination?.id
+        if (this::trip.isInitialized && previousFragment != R.id.nav_trip_details && waypoints.size > 0) {
+            createStopsArray()
+            tripEditViewModel.setTrip(trip)
+        }
     }
 
     override fun onResume() {

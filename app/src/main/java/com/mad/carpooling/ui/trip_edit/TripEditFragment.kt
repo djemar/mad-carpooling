@@ -28,7 +28,6 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.onNavDestinationSelected
@@ -64,7 +63,8 @@ import java.util.*
 
 class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
-    private val model: SharedViewModel by activityViewModels()
+    private val sharedViewModel: SharedViewModel by activityViewModels()
+    private val tripEditViewModel: TripEditViewModel by activityViewModels()
     private lateinit var optionsMenu: Menu
     private lateinit var ivCarPic: ImageView
     private lateinit var tvDuration: TextView
@@ -85,7 +85,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     private var REQUEST_IMAGE_CAPTURE = 1
     private var REQUEST_IMAGE_FROM_GALLERY = 2
     private var TMP_FILENAME_IMG = "temp_car_pic_img.jpg"
-    private val viewModel: TripEditViewModel by viewModels()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -106,7 +106,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         ibtnMusic = view.findViewById(R.id.btn_edit_music)
         btnMap = view.findViewById(R.id.btn_tripEdit_map)
 
-        initTrip(view, viewModel, savedInstanceState)
+        initTrip(view, tripEditViewModel, savedInstanceState)
 
         ibtnChattiness.setOnClickListener {
             trip.chattiness = changeStatePreference(!trip.chattiness, ibtnChattiness)
@@ -132,15 +132,18 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         val rv = view.findViewById<RecyclerView>(R.id.rv_tripEdit_stops)
         rv.layoutManager = LinearLayoutManager(context)
         rv.isNestedScrollingEnabled = false
-        tripMap = model.getMyTrips().value
+        tripMap = sharedViewModel.getMyTrips().value
         isNew = args.isNew
 
 
         if (savedInstanceState == null) {
+                val previousFragment = findNavController().previousBackStackEntry?.destination?.id
             if (!args.isNew) {  // navigating from any edit btn
-                viewModel.setTrip(tripMap?.get(args.id)!!.copy())
+                if(previousFragment != R.id.nav_map && args.id != "id")
+                    viewModel.setTrip(tripMap?.get(args.id)!!.copy())
             } else { // navigating from tripList FAB
                 (activity as MainActivity).supportActionBar?.title = "Create New Trip"
+                if(previousFragment != R.id.nav_map)
                 viewModel.setTrip(Trip())
             }
         } else {
@@ -150,6 +153,10 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         trip = viewModel.getTrip()
 
         btnMap.setOnClickListener {
+            if (this::trip.isInitialized && trip != null) {
+                trip.stops = stops
+                viewModel.setTrip(trip)
+            }
             val action = TripEditFragmentDirections.actionNavTripEditToNavMap(
                 if (isNew) null else trip.id
             )
@@ -333,11 +340,10 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     override fun onSaveInstanceState(outState: Bundle) {
         if (this::trip.isInitialized && trip != null) {
             trip.stops = stops
-            viewModel.setTrip(trip)
+            tripEditViewModel.setTrip(trip)
             outState.putString("state_currentPhotoPath", currentPhotoPath)
         }
     }
-
     private fun initPreferences() {
         trip.chattiness = changeStatePreference(trip.chattiness, ibtnChattiness)
         trip.smoking = changeStatePreference(trip.smoking, ibtnSmoking)
@@ -559,7 +565,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     }
 
     private fun validateSave() {
-        optionsMenu.findItem(R.id.save_trip).isEnabled = etSeats.text.trim()
+        optionsMenu.findItem(R.id.nav_trip_details).isEnabled = etSeats.text.trim()
             .isNotEmpty() && etPrice.text.trim()
             .isNotEmpty() && ((isNew && currentPhotoPath != null) || !isNew)
     }
@@ -578,7 +584,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.save_trip -> {
+            R.id.nav_trip_details -> {
                 if (currentPhotoPath != null) {
                     saveCarImage()
                 } else {
@@ -600,7 +606,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
         // TODO take username from login
         val userRef =
-            FirebaseFirestore.getInstance().document("users/${model.getCurrentUser().value?.uid}")
+            FirebaseFirestore.getInstance().document("users/${sharedViewModel.getCurrentUser().value?.uid}")
         val db = Firebase.firestore
         val newDocRef = db.collection("trips").document()
 
@@ -729,12 +735,13 @@ class StopEditAdapter(val stops: ArrayList<String>) :
             }
             stopCity.text = stringCity
             stopAddress.text = stringAddress
-            stopDate.setText(
-                LocalDate.parse(stringDate, DateTimeFormatter.ISO_LOCAL_DATE).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT))
-            )
-            stopTime.setText(
-                LocalTime.parse(stringTime, DateTimeFormatter.ISO_LOCAL_TIME).format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
-            )
+            val localizedDate = if(stringDate.isNotEmpty()) LocalDate.parse(stringDate, DateTimeFormatter.ISO_LOCAL_DATE)
+                .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)) else "Date"
+            val localizedTime = if(stringTime.isNotEmpty())  LocalTime.parse(stringTime, DateTimeFormatter.ISO_LOCAL_TIME)
+                .format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)) else "Time"
+
+            stopDate.setText(localizedDate)
+            stopTime.setText(localizedTime)
 
             var stop: String
 
@@ -742,7 +749,7 @@ class StopEditAdapter(val stops: ArrayList<String>) :
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                     stringCity = s.toString()
                     Log.d("NAME:", s.toString())
-                    stop = "${stringCity},${stringDate},${stringTime}"
+                    stop = "${stringCity},${stringAddress},${stringDate},${stringTime}"
                     stops[position] = stop
                 }
 
@@ -762,7 +769,7 @@ class StopEditAdapter(val stops: ArrayList<String>) :
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                     stringDate = s.toString()
                     Log.d("DATE:", s.toString())
-                    stop = "${stringCity},${stringDate},${stringTime}"
+                    stop = "${stringCity},${stringAddress},${stringDate},${stringTime}"
                     stops[position] = stop
                 }
 
@@ -783,7 +790,7 @@ class StopEditAdapter(val stops: ArrayList<String>) :
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                     stringTime = s.toString()
                     Log.d("TIME:", s.toString())
-                    stop = "${stringCity},${stringDate},${stringTime}"
+                    stop = "${stringCity},${stringAddress},${stringDate},${stringTime}"
                     stops[position] = stop
                 }
 

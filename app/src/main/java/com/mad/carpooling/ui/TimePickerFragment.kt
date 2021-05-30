@@ -9,8 +9,9 @@ import android.text.format.DateFormat
 import android.widget.TextView
 import android.widget.TimePicker
 import androidx.fragment.app.DialogFragment
-import java.text.SimpleDateFormat
-import java.util.*
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 class TimePickerFragment(val tvTime: TextView) : DialogFragment(),
     TimePickerDialog.OnTimeSetListener {
@@ -40,9 +41,15 @@ class TimePickerFragment(val tvTime: TextView) : DialogFragment(),
 
     @SuppressLint("SetTextI18n")
     override fun onTimeSet(view: TimePicker, hourOfDay: Int, minute: Int) {
-        tvTime.text =
-            (SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT, Locale.getDefault())).format(
+        val str = "${checkDigit(hourOfDay)}:${checkDigit(minute)}"
+        tvTime.text = LocalTime.parse(str, DateTimeFormatter.ISO_LOCAL_TIME)
+            .format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
+           /* (SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT, Locale.getDefault())).format(
                 SimpleDateFormat("HH:mm", Locale.getDefault()).parse("$hourOfDay:$minute")!!
-            )
+            )*/
+    }
+
+    fun checkDigit(number: Int): String {
+        return if (number <= 9) "0$number" else number.toString()
     }
 }
