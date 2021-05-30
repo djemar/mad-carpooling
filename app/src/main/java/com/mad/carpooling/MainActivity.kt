@@ -93,27 +93,36 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        var log = findViewById<TextView>(R.id.tv_log)
+        var prof = navView.getMenu().findItem(R.id.nav_show_profile)
+        var myTrips = navView.getMenu().findItem(R.id.nav_trip_list)
+        var intTrips = navView.getMenu().findItem(R.id.nav_interest_trips)
+        var boughtTrips = navView.getMenu().findItem(R.id.nav_bought_trips)
+        var log_item = navView.getMenu().findItem(R.id.nav_log)
 
         val currentUser = auth.currentUser
         if (currentUser != null) {
-            log.setText("Logout")
-            log.setOnClickListener {
+            log_item.setTitle("Logout")
+            log_item.setOnMenuItemClickListener {
                 logout()
+                true
             }
-            var prof = navView.getMenu().findItem(R.id.nav_show_profile)
+
             prof.setVisible(true)
-            var myTrips = navView.getMenu().findItem(R.id.nav_trip_list)
             myTrips.setVisible(true)
+            intTrips.setVisible(true)
+            boughtTrips.setVisible(true)
+
         } else {
-            log.setText("Login")
-            log.setOnClickListener {
+            log_item.setTitle("Login")
+            log_item.setOnMenuItemClickListener {
                 login()
+                true
             }
-            var prof = navView.getMenu().findItem(R.id.nav_show_profile)
+
             prof.setVisible(false)
-            var myTrips = navView.getMenu().findItem(R.id.nav_trip_list)
             myTrips.setVisible(false)
+            intTrips.setVisible(false)
+            boughtTrips.setVisible(false)
         }
     }
 
