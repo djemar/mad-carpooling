@@ -25,6 +25,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bumptech.glide.Glide
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.Timestamp
 import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.data.Trip
@@ -143,7 +144,8 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
                 )
                 Navigation.findNavController(holder.tripRL).navigate(action)
             }
-            holder.btnEdit.isVisible = trip.finished == false
+            if( trip.timestamp < Timestamp.now() )
+                holder.btnEdit.isVisible == false
             holder.btnEdit.setOnClickListener {
                 val action = TripListFragmentDirections.actionNavTripListToNavTripEdit(
                     trip.id,

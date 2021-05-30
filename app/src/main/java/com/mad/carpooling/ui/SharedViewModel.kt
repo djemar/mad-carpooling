@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -51,7 +52,7 @@ class SharedViewModel : ViewModel() {
                 for (doc in value!!) {
                     tripsMap[doc.id] = doc.toObject(Trip::class.java)
                 }
-                interestTrips.postValue(tripsMap)
+                interestTrips.postValue(tripsMap.filterValues { t -> t.timestamp>Timestamp.now() } as HashMap<String, Trip>?)
             }
     }
 
@@ -116,7 +117,7 @@ class SharedViewModel : ViewModel() {
                 for (doc in value!!) {
                     tripsMap[doc.id] = doc.toObject(Trip::class.java)
                 }
-                othersTrips.postValue(tripsMap.filterValues { t -> !t.finished } as HashMap<String, Trip>?)
+                othersTrips.postValue(tripsMap.filterValues { t -> !t.finished && t.timestamp>Timestamp.now() } as HashMap<String, Trip>?)
             }
     }
 

@@ -28,6 +28,7 @@ import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -584,9 +585,12 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
-
-        optionsMenu.findItem(R.id.edit_trip).isVisible =
-            trip.owner!!.id == model.getCurrentUser().value?.uid && !trip.finished
+        
+        if( trip.timestamp<Timestamp.now() )
+            optionsMenu.findItem(R.id.edit_trip).isVisible = false
+        else
+            optionsMenu.findItem(R.id.edit_trip).isVisible =
+                trip.owner!!.id == model.getCurrentUser().value?.uid && !trip.finished
 
         optionsMenu.findItem(R.id.visibility_trip).isVisible =
             trip.owner!!.id == model.getCurrentUser().value?.uid && !trip.finished
