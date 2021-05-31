@@ -171,6 +171,10 @@
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim"
             app:popUpTo="@id/nav_trip_edit" />
+        <argument
+            android:name="fromMap"
+            app:argType="boolean"
+            android:defaultValue="false" />
     </fragment>
     <fragment
         android:id="@+id/nav_bought_trips"
@@ -213,7 +217,8 @@
         <action
             android:id="@+id/action_nav_map_to_nav_trip_edit"
             app:destination="@id/nav_trip_edit"
-            app:popUpTo="@id/nav_trip_details" />
+            app:popUpTo="@id/nav_trip_edit"
+            app:popUpToInclusive="true" />
 <!--        <action
             android:id="@+id/action_nav_map_to_nav_trip_edit_skip_details"
             app:destination="@id/nav_trip_edit"
