@@ -338,7 +338,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        if (this::trip.isInitialized && trip != null) {
+        if (this::trip.isInitialized && trip != null && findNavController().currentDestination?.id != R.id.nav_map) {
             trip.stops = stops
             tripEditViewModel.setTrip(trip)
             outState.putString("state_currentPhotoPath", currentPhotoPath)
