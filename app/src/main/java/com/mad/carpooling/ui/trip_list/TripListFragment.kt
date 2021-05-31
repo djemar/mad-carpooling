@@ -1,8 +1,6 @@
 package com.mad.carpooling.ui.trip_list
 
 import android.annotation.SuppressLint
-import android.content.res.ColorStateList
-import android.graphics.Color
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -12,7 +10,6 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
-import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -22,7 +19,6 @@ import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bumptech.glide.Glide
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.Timestamp
@@ -70,14 +66,21 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
             emptyView.isVisible = true
 
         val fab = (activity as MainActivity).findViewById<FloatingActionButton>(R.id.fab)
-        fab.setImageDrawable(ContextCompat.getDrawable(requireContext(),R.drawable.ic_baseline_add))
+        fab.setImageDrawable(
+            ContextCompat.getDrawable(
+                requireContext(),
+                R.drawable.ic_baseline_add
+            )
+        )
 
         val value = TypedValue()
         view.context.theme.resolveAttribute(R.attr.themeName, value, true)
-        if(value.string == "white")
-            fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.amber_500)
+        if (value.string == "white")
+            fab.backgroundTintList =
+                ContextCompat.getColorStateList(requireContext(), R.color.amber_500)
         else
-            fab.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.amber_200)
+            fab.backgroundTintList =
+                ContextCompat.getColorStateList(requireContext(), R.color.amber_200)
 
         fab.show()
 
@@ -118,10 +121,13 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
 
             @SuppressLint("SetTextI18n")
             fun bind(trip: Trip) {
-                if(!trip.visibility)
-                    tripRL.alpha=0.5f
+                if (!trip.visibility)
+                    tripRL.alpha = 0.5f
                 location.text = "${trip.departure} - ${trip.arrival}"
-                timestamp.text = (SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.MEDIUM,SimpleDateFormat.SHORT)).format(trip.timestamp.toDate())
+                timestamp.text = (SimpleDateFormat.getDateTimeInstance(
+                    SimpleDateFormat.MEDIUM,
+                    SimpleDateFormat.SHORT
+                )).format(trip.timestamp.toDate())
                 price.text = "Price: ${("%.2f".format(trip.price))} €"
                 if (trip.imageCarURL != "") {
                     Glide.with(this.itemView).load(trip.imageCarURL).into(ivCar)
@@ -144,8 +150,8 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
                 )
                 Navigation.findNavController(holder.tripRL).navigate(action)
             }
-            if( trip.timestamp < Timestamp.now() )
-                holder.btnEdit.isVisible == false
+            holder.btnEdit.isVisible = trip.timestamp > Timestamp.now()
+
             holder.btnEdit.setOnClickListener {
                 val action = TripListFragmentDirections.actionNavTripListToNavTripEdit(
                     trip.id,

@@ -219,18 +219,20 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                 Glide.with(view).load(value?.get("imageUserRef"))
                     .into(ivProfilePic)
             }
-        val str1 = trip.stops?.get(0)?.split(",")?.get(2) + "T" + trip.stops?.get(0)?.split(",")?.get(3)
-        val str2 = trip.stops?.get(trip.stops!!.size-1)?.split(",")?.get(2) + "T" + trip.stops?.get(trip.stops!!.size-1)?.split(",")?.get(3)
+        val str1 =
+            trip.stops?.get(0)?.split(",")?.get(2) + "T" + trip.stops?.get(0)?.split(",")?.get(3)
+        val str2 = trip.stops?.get(trip.stops!!.size - 1)?.split(",")
+            ?.get(2) + "T" + trip.stops?.get(trip.stops!!.size - 1)?.split(",")?.get(3)
         val d1 = LocalDateTime.parse(str1, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
         val d2 = LocalDateTime.parse(str2, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-        val s = Duration.between(d1,d2).toMillis()/1000
-        var d : String = if(s/86400 > 0 ) {
-             String.format("%d days %d h %02d min", s/86400, (s%86400)/3600, (s % 3600) / 60)
+        val s = Duration.between(d1, d2).toMillis() / 1000
+        var d: String = if (s / 86400 > 0) {
+            String.format("%d days %d h %02d min", s / 86400, (s % 86400) / 3600, (s % 3600) / 60)
         } else {
-            String.format("%d h %02d min", s/3600, (s % 3600) / 60)
+            String.format("%d h %02d min", s / 3600, (s % 3600) / 60)
         }
-        if(s/86400 < 2) d = d.replace("s", "")
-        tvDuration.text =  d
+        if (s / 86400 < 2) d = d.replace("s", "")
+        tvDuration.text = d
         tvSeats.text = trip.seats.toString()
         tvPrice.text = "%.2f".format(trip.price)
         tvDescription.text = trip.description
@@ -585,12 +587,10 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
-        
-        if( trip.timestamp<Timestamp.now() )
-            optionsMenu.findItem(R.id.edit_trip).isVisible = false
-        else
-            optionsMenu.findItem(R.id.edit_trip).isVisible =
-                trip.owner!!.id == model.getCurrentUser().value?.uid && !trip.finished
+
+
+        optionsMenu.findItem(R.id.edit_trip).isVisible =
+            trip.owner!!.id == model.getCurrentUser().value?.uid && !trip.finished && trip.timestamp > Timestamp.now()
 
         optionsMenu.findItem(R.id.visibility_trip).isVisible =
             trip.owner!!.id == model.getCurrentUser().value?.uid && !trip.finished
@@ -807,7 +807,7 @@ class StopAdapter(private val stops: ArrayList<String>?) :
                 LocalDate.parse(stringArray[2].trim(), DateTimeFormatter.ISO_LOCAL_DATE).format(
                     DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)
                 )
-            stopTime.text = LocalTime.parse(stringArray [3].trim(), DateTimeFormatter.ISO_LOCAL_TIME)
+            stopTime.text = LocalTime.parse(stringArray[3].trim(), DateTimeFormatter.ISO_LOCAL_TIME)
                 .format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
         }
 
