@@ -21,7 +21,7 @@ data class Trip(
     var pets: Boolean = false,
     var music: Boolean = false,
     var description: String = "",
-    var stops: ArrayList<String>? = ArrayList<String>(),
+    var stops: ArrayList<String> = ArrayList<String>(),
     var imageCarURL: String? = null, //TODO change also in DB to imageCarRef
     var interestedPeople: ArrayList<String>? = ArrayList<String>(),
     var acceptedPeople: ArrayList<String>? = ArrayList<String>(),

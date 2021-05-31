@@ -9,7 +9,7 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.material.snackbar.Snackbar
+import com.mad.carpooling.data.Trip
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
@@ -20,6 +20,7 @@ class MapViewModel(
     private val mapRepository: MapRepository
 ) : ViewModel() {
 
+    private lateinit var trip: Trip
     val address = MutableLiveData<Address?>()
     val route = MutableLiveData<Polyline?>()
 
@@ -40,13 +41,13 @@ class MapViewModel(
                     else -> address.postValue(null) // Show error in UI
                 }
             }
-        }
-        else {
+        } else {
             address.postValue(null)
         }
     }
 
     fun getRoute(waypoints: ArrayList<Marker>, ctx: Context) {
+        if(waypoints.size > 1)
         viewModelScope.launch {
             val result = try {
                 mapRepository.getRoute(waypoints, ctx)
@@ -58,6 +59,14 @@ class MapViewModel(
                 else -> route.postValue(null) // Show error in UI
             }
         }
+    }
+
+    fun setTrip(trip: Trip) {
+        this.trip = trip
+    }
+
+    fun getTrip(): Trip {
+        return trip
     }
 
 }

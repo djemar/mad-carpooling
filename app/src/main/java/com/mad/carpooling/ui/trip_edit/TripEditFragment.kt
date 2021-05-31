@@ -137,9 +137,9 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
 
         if (savedInstanceState == null) {
-                val previousFragment = findNavController().previousBackStackEntry?.destination?.id
+            val previousFragment = findNavController().previousBackStackEntry?.destination?.id
             if (!args.isNew) {  // navigating from any edit btn
-                if(previousFragment != R.id.nav_map && args.id != "id")
+                if(!args.fromMap && args.id != "id")
                     viewModel.setTrip(tripMap?.get(args.id)!!.copy())
             } else { // navigating from tripList FAB
                 (activity as MainActivity).supportActionBar?.title = "Create New Trip"

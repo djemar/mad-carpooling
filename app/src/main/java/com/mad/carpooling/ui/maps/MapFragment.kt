@@ -88,20 +88,25 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         map.setTileSource(TileSourceFactory.MAPNIK);
         map.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
 
-        val previousFragment = findNavController().previousBackStackEntry?.destination?.id
-        if (previousFragment == R.id.nav_trip_edit) {
-            if (args.tid == null) {
-                trip = tripEditViewModel.getTrip()
-                if (trip.stops?.size!! > 0) initFromEdit()
-                else initFromNew()
+        if (savedInstanceState == null) {
+            val previousFragment = findNavController().previousBackStackEntry?.destination?.id
+            if (previousFragment == R.id.nav_trip_edit) {
+                if (args.tid == null) {
+                    trip = tripEditViewModel.getTrip()
+                    if (trip.stops?.size!! > 0) initFromEdit()
+                    else initFromNew()
+                } else {
+                    trip = tripEditViewModel.getTrip()
+                    initFromEdit()
+                }
             } else {
-                trip = tripEditViewModel.getTrip()
-                initFromEdit()
+                trip = sharedViewModel.getTrips().value!![args.tid]!!
+                setHasOptionsMenu(false)
+                initFromDetails()
             }
         } else {
-            trip = sharedViewModel.getTrips().value!![args.tid]!!
-            setHasOptionsMenu(false)
-            initFromDetails()
+            trip = tripEditViewModel.getTrip()
+            initFromEdit()
         }
 
         map.invalidate();
@@ -163,8 +168,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         map.post {
             run() {
                 val box = MapUtils.computeArea(
-                    trip.geopoints.stream().map { gp -> GeoPoint(gp.latitude, gp.longitude) }
-                        .collect(Collectors.toList()) as ArrayList<GeoPoint>
+                    trip.geopoints.map { gp -> GeoPoint(gp.latitude, gp.longitude) }.toList() as ArrayList<GeoPoint>
                 )
                 map.zoomToBoundingBox(box, false, 110);
                 map.invalidate()
@@ -271,7 +275,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
             }
         })
 
-        trip.geopoints.stream().forEach { gp ->
+        trip.geopoints.forEach { gp ->
             run {
                 val marker = Marker(map)
                 marker.position = GeoPoint(gp.latitude, gp.longitude)
@@ -309,8 +313,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         map.post {
             run() {
                 val box = MapUtils.computeArea(
-                    trip.geopoints.stream().map { gp -> GeoPoint(gp.latitude, gp.longitude) }
-                        .collect(Collectors.toList()) as ArrayList<GeoPoint>
+                    trip.geopoints.map { gp -> GeoPoint(gp.latitude, gp.longitude) }.toList() as ArrayList<GeoPoint>
                 )
                 map.zoomToBoundingBox(box, false, 110);
                 map.invalidate()
@@ -428,6 +431,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
                 })
                 stopsMarkers.add(marker)
                 selectedMarker.postValue(marker)
+                map.invalidate()
                 mapViewModel.getRoute(waypoints, requireContext())
             } else {
                 Snackbar.make(
@@ -441,6 +445,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         mapViewModel.route.observe(viewLifecycleOwner, { newRouteOverlay ->
             if (newRouteOverlay != null) {
                 map.overlays.remove(routeOverlay)
+                map.overlays.remove(stopsMarkers)
                 routeOverlay = newRouteOverlay
                 routeOverlay.outlinePaint.strokeWidth = 10f
                 routeOverlay.outlinePaint.style = Paint.Style.FILL_AND_STROKE
@@ -468,7 +473,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         }
         val evOverlay = MapEventsOverlay(mapEventsReceiver)
         map.overlays.add(evOverlay)
-
+        map.overlays.add(stopsMarkers)
     }
 
     private fun validateSave(): Boolean {
@@ -501,8 +506,8 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
                     findNavController().backStack.elementAt(i - 3).destination.id*/
                     //if (entry.id == R.id.nav_trip_details) {
                     val action: NavDirections = MapFragmentDirections.actionNavMapToNavTripEdit(
-                            id = trip.id
-                        )
+                        id = trip.id, fromMap = true
+                    )
                     /*} else if (entry.id == R.id.nav_trip_list){
                         action = MapFragmentDirections.actionNavMapToNavTripEditSkipDetails(
                             id = trip.id
@@ -523,7 +528,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
     }
 
     private fun createStopsArray() {
-        val stops = ArrayList<String>()
+        val stops : ArrayList<String> = ArrayList<String>()
         val geopoints = ArrayList<com.google.firebase.firestore.GeoPoint>()
         //var i = 0
 
@@ -550,14 +555,17 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         }
         trip.stops = stops
         trip.geopoints = geopoints
+        tripEditViewModel.setTrip(trip)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         val previousFragment = findNavController().previousBackStackEntry?.destination?.id
         if (this::trip.isInitialized && previousFragment != R.id.nav_trip_details && waypoints.size > 0) {
-            createStopsArray()
-            tripEditViewModel.setTrip(trip)
+           // createStopsArray()
+           // tripEditViewModel.setStops(trip.stops!!, trip.geopoints)
+            outState.putBoolean("state", true)
         }
+        super.onSaveInstanceState(outState)
     }
 
     override fun onResume() {
@@ -583,6 +591,12 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
             requireContext(),
             context?.getSharedPreferences("mad.carpooling.map", Context.MODE_PRIVATE)
         );
+        val previousFragment = findNavController().previousBackStackEntry?.destination?.id
+        if (this::trip.isInitialized && previousFragment != R.id.nav_trip_details && waypoints.size > 0) {
+            createStopsArray()
+            //tripEditViewModel.setStops(trip.stops!!, trip.geopoints)
+            //outState.putBoolean("state", true)
+        }
         map.overlays.clear()
         map.onPause();  //needed for compass, my location overlays, v6.0.0 and up
     }
