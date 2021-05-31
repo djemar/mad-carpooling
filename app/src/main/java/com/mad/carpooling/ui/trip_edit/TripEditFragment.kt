@@ -57,6 +57,7 @@ import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 import java.time.format.FormatStyle
 import java.util.*
 
@@ -139,12 +140,12 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         if (savedInstanceState == null) {
             val previousFragment = findNavController().previousBackStackEntry?.destination?.id
             if (!args.isNew) {  // navigating from any edit btn
-                if(!args.fromMap && args.id != "id")
+                if (!args.fromMap && args.id != "id")
                     viewModel.setTrip(tripMap?.get(args.id)!!.copy())
             } else { // navigating from tripList FAB
                 (activity as MainActivity).supportActionBar?.title = "Create New Trip"
-                if(previousFragment != R.id.nav_map)
-                viewModel.setTrip(Trip())
+                if (previousFragment != R.id.nav_map)
+                    viewModel.setTrip(Trip())
             }
         } else {
             currentPhotoPath = savedInstanceState.getString("state_currentPhotoPath")
@@ -344,6 +345,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             outState.putString("state_currentPhotoPath", currentPhotoPath)
         }
     }
+
     private fun initPreferences() {
         trip.chattiness = changeStatePreference(trip.chattiness, ibtnChattiness)
         trip.smoking = changeStatePreference(trip.smoking, ibtnSmoking)
@@ -604,9 +606,9 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         // val timestamp: Timestamp = Timestamp(parsedDate!!)
 
 
-        // TODO take username from login
         val userRef =
-            FirebaseFirestore.getInstance().document("users/${sharedViewModel.getCurrentUser().value?.uid}")
+            FirebaseFirestore.getInstance()
+                .document("users/${sharedViewModel.getCurrentUser().value?.uid}")
         val db = Firebase.firestore
         val newDocRef = db.collection("trips").document()
 
@@ -735,42 +737,24 @@ class StopEditAdapter(val stops: ArrayList<String>) :
             }
             stopCity.text = stringCity
             stopAddress.text = stringAddress
-            val localizedDate = if(stringDate.isNotEmpty()) LocalDate.parse(stringDate, DateTimeFormatter.ISO_LOCAL_DATE)
+            val localizedDate = if (stringDate.isNotEmpty()) LocalDate.parse(
+                stringDate,
+                DateTimeFormatter.ISO_LOCAL_DATE
+            )
                 .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)) else "Date"
-            val localizedTime = if(stringTime.isNotEmpty())  LocalTime.parse(stringTime, DateTimeFormatter.ISO_LOCAL_TIME)
+            val localizedTime = if (stringTime.isNotEmpty()) LocalTime.parse(
+                stringTime,
+                DateTimeFormatter.ISO_LOCAL_TIME
+            )
                 .format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)) else "Time"
 
             stopDate.setText(localizedDate)
             stopTime.setText(localizedTime)
 
-            var stop: String
-
-            stopCity.addTextChangedListener(object : TextWatcher {
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    stringCity = s.toString()
-                    Log.d("NAME:", s.toString())
-                    stop = "${stringCity},${stringAddress},${stringDate},${stringTime}"
-                    stops[position] = stop
-                }
-
-                override fun afterTextChanged(s: Editable?) {
-                }
-
-                override fun beforeTextChanged(
-                    s: CharSequence?,
-                    start: Int,
-                    count: Int,
-                    after: Int
-                ) {
-                }
-            })
-
             stopDate.addTextChangedListener(object : TextWatcher {
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                     stringDate = s.toString()
-                    Log.d("DATE:", s.toString())
-                    stop = "${stringCity},${stringAddress},${stringDate},${stringTime}"
-                    stops[position] = stop
+                    stops[position] = formatStops(stringCity, stringAddress, stringDate, stringTime)
                 }
 
                 override fun afterTextChanged(s: Editable?) {
@@ -789,9 +773,7 @@ class StopEditAdapter(val stops: ArrayList<String>) :
             stopTime.addTextChangedListener(object : TextWatcher {
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                     stringTime = s.toString()
-                    Log.d("TIME:", s.toString())
-                    stop = "${stringCity},${stringAddress},${stringDate},${stringTime}"
-                    stops[position] = stop
+                    stops[position] = formatStops(stringCity, stringAddress, stringDate, stringTime)
                 }
 
                 override fun afterTextChanged(s: Editable?) {
@@ -813,6 +795,37 @@ class StopEditAdapter(val stops: ArrayList<String>) :
             stopTime.setOnClickListener {
                 showTimePickerDialog()
             }
+        }
+
+        private fun formatStops(
+            stringCity: String,
+            stringAddress: String,
+            stringDate: String,
+            stringTime: String
+        ): String {
+
+            val date = try {
+                LocalDate.parse(
+                    stringDate,
+                    DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)
+                )
+                    .format(
+                        DateTimeFormatter.ISO_LOCAL_DATE
+                    )
+            } catch (e: DateTimeParseException) {
+                if (stringDate.isEmpty()) "" else stringDate
+            }
+            val time : String = try {
+                LocalTime.parse(
+                    stringTime,
+                    DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
+                )
+                    .format(DateTimeFormatter.ISO_LOCAL_TIME)
+
+            } catch (e: DateTimeParseException) {
+                if (stringTime.isEmpty()) "" else stringTime
+            }
+            return "${stringCity},${stringAddress},${date},${time}"
         }
 
         private fun showDatePickerDialog() {
