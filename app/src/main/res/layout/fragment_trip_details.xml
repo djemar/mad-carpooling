@@ -71,7 +71,7 @@
                         android:textColor="?attr/colorOnBackground"
                         android:textSize="20sp"
                         android:textStyle="bold"
-                        app:layout_constraintBottom_toTopOf="@+id/rv_tripEdit_stops"
+                        app:layout_constraintBottom_toTopOf="@+id/rv_tripDetails_stops"
                         app:layout_constraintEnd_toStartOf="@+id/tv_tripDetails_duration"
                         app:layout_constraintHorizontal_chainStyle="spread_inside"
                         app:layout_constraintStart_toStartOf="parent"
@@ -279,8 +279,8 @@
                         android:textStyle="bold"
                         app:layout_constraintBottom_toTopOf="@+id/tv_title_price"
                         app:layout_constraintEnd_toStartOf="@+id/tv_tripDetails_seats"
-                        app:layout_constraintHorizontal_chainStyle="spread_inside"
-                        app:layout_constraintStart_toStartOf="@+id/tv_tripDetails_info"
+                        app:layout_constraintHorizontal_chainStyle="packed"
+                        app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/tv_tripDetails_info" />
 
                     <TextView
@@ -293,7 +293,8 @@
                         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                         app:layout_constraintBottom_toBottomOf="@+id/tv_title_seats"
                         app:layout_constraintStart_toEndOf="@+id/tv_title_seats"
-                        app:layout_constraintTop_toTopOf="@+id/tv_title_seats" />
+                        app:layout_constraintTop_toTopOf="@+id/tv_title_seats"
+                        app:layout_constraintEnd_toEndOf="parent"/>
 
                     <TextView
                         android:id="@+id/tv_title_price"
@@ -309,8 +310,10 @@
                         android:textColor="?attr/colorOnBackground"
                         android:textStyle="bold"
                         app:layout_constraintBottom_toTopOf="@+id/cl_tripDetails_preferences"
-                        app:layout_constraintStart_toStartOf="@+id/tv_tripDetails_info"
-                        app:layout_constraintTop_toBottomOf="@+id/tv_title_seats" />
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/tv_title_seats"
+                        app:layout_constraintEnd_toStartOf="@id/tv_tripDetails_price"
+                        app:layout_constraintHorizontal_chainStyle="packed"/>
 
                     <TextView
                         android:id="@+id/tv_tripDetails_price"
@@ -318,11 +321,13 @@
                         android:layout_height="0dp"
                         android:fontFamily="@font/overpass"
                         android:gravity="center_vertical"
+                        android:layout_marginStart="16dp"
                         android:text="Price"
                         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                         app:layout_constraintBottom_toBottomOf="@+id/tv_title_price"
-                        app:layout_constraintStart_toStartOf="@+id/tv_tripDetails_seats"
-                        app:layout_constraintTop_toTopOf="@+id/tv_title_price" />
+                        app:layout_constraintStart_toEndOf="@id/tv_title_price"
+                        app:layout_constraintTop_toTopOf="@+id/tv_title_price"
+                        app:layout_constraintEnd_toEndOf="parent"/>
 
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/cl_tripDetails_preferences"
