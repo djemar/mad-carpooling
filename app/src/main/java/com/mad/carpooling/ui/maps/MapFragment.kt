@@ -250,6 +250,10 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
                             override fun onMarkerDragStart(marker: Marker) {}
 
                             override fun onMarkerDragEnd(marker: Marker) {
+                                mapViewModel.getFromLocation(
+                                    marker.position,
+                                    requireContext()
+                                )
                                 mapViewModel.getRoute(waypoints, requireContext())
                             }
 
@@ -291,7 +295,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
 
                     override fun onMarkerDragEnd(marker: Marker) {
                         selectedMarker.postValue(marker)
-                        if (marker.title == null) mapViewModel.getFromLocation(
+                        mapViewModel.getFromLocation(
                             marker.position,
                             requireContext()
                         )
@@ -503,7 +507,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
                     findNavController().backStack.elementAt(i - 3).destination.id*/
                     //if (entry.id == R.id.nav_trip_details) {
                     val action: NavDirections = MapFragmentDirections.actionNavMapToNavTripEdit(
-                        id = trip.id, fromMap = true
+                        id = trip.id, isNew = trip.id == "id", fromMap = true
                     )
                     /*} else if (entry.id == R.id.nav_trip_list){
                         action = MapFragmentDirections.actionNavMapToNavTripEditSkipDetails(
