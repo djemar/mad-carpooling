@@ -5,14 +5,13 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.app.Dialog
+import android.content.DialogInterface
+import android.graphics.Paint
 import android.graphics.Point
 import android.graphics.Rect
 import android.graphics.RectF
-import android.app.AlertDialog
-import android.app.Dialog
-import android.content.Context
-import android.content.DialogInterface
-import android.graphics.Paint
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
@@ -51,12 +50,14 @@ import com.mad.carpooling.ui.maps.MapUtils
 import com.mad.carpooling.ui.maps.MapViewModel
 import com.mad.carpooling.ui.maps.MapViewModelFactory
 import kotlinx.coroutines.*
-import org.osmdroid.config.Configuration
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.tileprovider.MapTileProviderBasic
 import org.osmdroid.util.GeoPoint
+import org.osmdroid.util.TileSystem
+import org.osmdroid.util.TileSystemWebMercator
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.FolderOverlay
 import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.Overlay
 import org.osmdroid.views.overlay.Polyline
 import java.time.*
 import java.time.format.DateTimeFormatter
@@ -75,6 +76,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private lateinit var ivCarPic: ImageView
     private lateinit var ivProfilePic: ImageView
     private lateinit var ivExpanded: ImageView
+    private lateinit var ivMap: ImageView
     private lateinit var tvDuration: TextView
     private lateinit var tvSeats: TextView
     private lateinit var tvPrice: TextView
@@ -90,7 +92,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private lateinit var fab: FloatingActionButton
     private lateinit var bottomSheet: ConstraintLayout
     private lateinit var bsb: BottomSheetBehavior<ConstraintLayout>
-    private lateinit var map: MapView;
     private lateinit var mapClickOverlay: View;
     private lateinit var btnTrip: MaterialButton
     private lateinit var ratingBar: RatingBar
@@ -119,10 +120,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        Configuration.getInstance().load(
-            requireContext(),
-            context?.getSharedPreferences("mad.carpooling.map", Context.MODE_PRIVATE)
-        );
         viewModelFactory = MapViewModelFactory(MapRepository())
         mapViewModel = ViewModelProvider(this, viewModelFactory)
             .get(MapViewModel::class.java)
@@ -134,6 +131,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
         ivCarPic = view.findViewById(R.id.iv_tripDetails_car_pic)
         ivExpanded = view.findViewById(R.id.expanded_image)
+        ivMap = view.findViewById(R.id.iv_map)
         ivProfilePic = view.findViewById(R.id.iv_tripDetails_profile_pic)
         tvDuration = view.findViewById(R.id.tv_tripDetails_duration)
         tvSeats = view.findViewById(R.id.tv_tripDetails_seats)
@@ -147,59 +145,48 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         profileLayout = view.findViewById(R.id.cl_tripDetails_profile)
         btnTrip = view.findViewById(R.id.btn_endtrip_ratedriver)
         ratingBar = view.findViewById<RatingBar>(R.id.rb_tripDetails_driver)
-        mapClickOverlay = view.findViewById<View>(R.id.mapClickOverlay)
 
         bottomSheet = view.findViewById(R.id.bottom_sheet)
         fab = view.findViewById(R.id.fab_tripdetails)
         bsb = BottomSheetBehavior.from(bottomSheet)
-        map = view.findViewById(R.id.mapDetails)
+        // map = view.findViewById(R.id.mapDetails)
         model.getTrips().observe(viewLifecycleOwner, { newTripsMap ->
             // Update the UI
             initTripDetails(newTripsMap, view)
-            initMap()
+            initMapSnapshot()
+            //initMap()
             (activity as MainActivity).invalidateOptionsMenu()
         })
     }
 
-    private fun initMap() {
-        mapClickOverlay.setOnClickListener {
-            val action = TripDetailsFragmentDirections.actionNavTripDetailsToNavMap(
-                trip.id
-            )
-            findNavController().navigate(action)
-        }
-        map.setTileSource(TileSourceFactory.MAPNIK);
-        map.setOnTouchListener { _, _ -> //disable touch events
-            true
-        }
-
+    private fun initMapSnapshot() {
+        val overlays = ArrayList<Overlay>()
         val waypoints = ArrayList<Marker>()
         val stopsMarkers = FolderOverlay()
-        //val stopsMarkers = RadiusMarkerClusterer(requireContext())
-        //val clusterIcon: Bitmap? = ContextCompat.getDrawable( requireContext(), R.drawable.marker_cluster)?.toBitmap()
-        //stopsMarkers.setIcon(clusterIcon)
+        val tileSystem: TileSystem = TileSystemWebMercator()
+        val displayMetrics = resources.displayMetrics
+        val map = MapView(requireContext())
 
         trip.geopoints.stream().forEach { gp ->
             run {
                 val marker = Marker(map)
                 marker.position = GeoPoint(gp.latitude, gp.longitude)
                 waypoints.add(marker)
+                marker.icon = MapUtils.getNumMarker(waypoints.size.toString(), requireContext())
                 stopsMarkers.add(marker)
             }
         }
 
-        MapUtils.redrawMarkers(waypoints, map, requireContext())
-
-        map.post(Runnable() {
-            run() {
-                val box = MapUtils.computeArea(
-                    trip.geopoints.stream().map { gp -> GeoPoint(gp.latitude, gp.longitude) }
-                        .collect(Collectors.toList()) as ArrayList<GeoPoint>
-                )
-                map.zoomToBoundingBox(box, false, 110);
-                map.invalidate()
-            }
-        });
+        val box = MapUtils.computeArea(
+            trip.geopoints.stream().map { gp -> GeoPoint(gp.latitude, gp.longitude) }
+                .collect(Collectors.toList()) as ArrayList<GeoPoint>
+        )
+            ?.increaseByScale(if (resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_PORTRAIT) 5f else 9f)
+        val zoom = tileSystem.getBoundingBoxZoom(
+            box,
+            displayMetrics.widthPixels,
+            displayMetrics.heightPixels
+        )
 
         var routeOverlay: Polyline
         mapViewModel.route.observe(viewLifecycleOwner, { newRouteOverlay ->
@@ -209,14 +196,28 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                 routeOverlay.outlinePaint.style = Paint.Style.FILL_AND_STROKE
                 routeOverlay.outlinePaint.strokeCap = Paint.Cap.ROUND
                 routeOverlay.outlinePaint.strokeJoin = Paint.Join.ROUND
-                map.overlays.add(routeOverlay)
-                map.overlays.add(stopsMarkers)
-                map.invalidate()
+                overlays.add(routeOverlay)
+                overlays.add(stopsMarkers)
+                MapUtils.mapToBitmap(
+                    overlays,
+                    box,
+                    zoom,
+                    MapTileProviderBasic(requireActivity()),
+                    displayMetrics.widthPixels.coerceAtMost(displayMetrics.heightPixels),
+                    ivMap
+                )
             }
         })
         mapViewModel.getRoute(waypoints, requireContext())
-    }
 
+        ivMap.setOnClickListener {
+            val action = TripDetailsFragmentDirections.actionNavTripDetailsToNavMap(
+                trip.id
+            )
+            findNavController().navigate(action)
+        }
+
+    }
 
     @SuppressLint("SetTextI18n")
     private fun initTripDetails(newTripsMap: HashMap<String, Trip>, view: View) {
@@ -248,7 +249,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         // Retrieve and cache the system's default "short" animation time.
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
 
-       
+
         tvSeats.text = trip.seats.toString()
         tvPrice.text = "%.2f".format(trip.price) + " €"
         tvDescription.text = trip.description
@@ -323,11 +324,11 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                         ratingBar.rating = 0f;
                     }
                 }
-            if(trip.finished){
+            if (trip.finished) {
                 ratingBar.visibility = View.GONE
                 btnTrip.visibility = View.VISIBLE
                 btnTrip.text = "rate"
-                btnTrip.setOnClickListener{
+                btnTrip.setOnClickListener {
                     val reviewDial = ReviewDialogFragment(trip, view, "driverRatings", null)
                     reviewDial.show(requireActivity().supportFragmentManager, "driverReviewDialog")
                 }
@@ -461,8 +462,8 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                 fab.setImageDrawable(
                     ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_fullstar)
                 )
-                if (trip.acceptedPeople?.contains(model.getCurrentUser().value?.uid)!!){
-                    if(trip.finished) fab.hide()
+                if (trip.acceptedPeople?.contains(model.getCurrentUser().value?.uid)!!) {
+                    if (trip.finished) fab.hide()
                 }
             } else {
                 fab.setImageDrawable(
@@ -567,7 +568,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         // bounds, since that's the origin for the positioning animation
         // properties (X, Y).
         thumbView.getGlobalVisibleRect(startBoundsInt)
-            view.findViewById<View>(R.id.container)
+        view.findViewById<View>(R.id.container)
             .getGlobalVisibleRect(finalBoundsInt, globalOffset)
         startBoundsInt.offset(-globalOffset.x, -globalOffset.y)
         finalBoundsInt.offset(-globalOffset.x, -globalOffset.y)
@@ -621,16 +622,16 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         ivExpanded.pivotY = 0f
 
 
-
         // Construct and run the parallel animation of the four translation and
         // scale properties (X, Y, SCALE_X, and SCALE_Y).
         currentAnimator = AnimatorSet().apply {
             play(
                 ObjectAnimator.ofFloat(
-                ivExpanded,
-                View.X,
-                startBounds.left,
-                finalBounds.left)
+                    ivExpanded,
+                    View.X,
+                    startBounds.left,
+                    finalBounds.left
+                )
             ).apply {
                 with(ObjectAnimator.ofFloat(ivExpanded, View.Y, startBounds.top, finalBounds.top))
                 with(ObjectAnimator.ofFloat(ivExpanded, View.SCALE_X, startScale, 1f))
@@ -664,7 +665,8 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             val initialRadius = Math.hypot(cx.toDouble(), cy.toDouble()).toFloat()
 
             // create the animation (the final radius is zero)
-            val anim = ViewAnimationUtils.createCircularReveal(ivExpanded, cx, cy, initialRadius, 0f)
+            val anim =
+                ViewAnimationUtils.createCircularReveal(ivExpanded, cx, cy, initialRadius, 0f)
             anim.start()
 
 
@@ -764,33 +766,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         inflater.inflate(R.menu.menu_trip_details, menu)
         optionsMenu = menu
         super.onCreateOptionsMenu(menu, inflater)
-    }
-
-    override fun onResume() {
-        super.onResume();
-        //this will refresh the osmdroid configuration on resuming.
-        //if you make changes to the configuration, use
-        //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        //Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
-        Configuration.getInstance().load(
-            requireContext(),
-            context?.getSharedPreferences("mad.carpooling.map", Context.MODE_PRIVATE)
-        )
-        map.onResume() //needed for compass, my location overlays, v6.0.0 and up
-    }
-
-    override fun onPause() {
-        super.onPause();
-        //this will refresh the osmdroid configuration on resuming.
-        //if you make changes to the configuration, use
-        //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        //Configuration.getInstance().save(this, prefs);
-        Configuration.getInstance().save(
-            requireContext(),
-            context?.getSharedPreferences("mad.carpooling.map", Context.MODE_PRIVATE)
-        )
-        map.overlays.clear()
-        map.onPause()  //needed for compass, my location overlays, v6.0.0 and up
     }
 
 }
