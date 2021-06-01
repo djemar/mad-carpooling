@@ -142,28 +142,38 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
                     }
                     else {
                         for (us in userList) {
-                            if (mapRatingPassenger[us]?.get(0) == 1) {
-                                stars[4]++; totStars += 1
-                            } else if (mapRatingPassenger[us]?.get(0) == 2) {
-                                stars[3]++; totStars += 2
-                            } else if (mapRatingPassenger[us]?.get(0) == 3) {
-                                stars[2]++; totStars += 3
-                            } else if (mapRatingPassenger[us]?.get(0) == 4) {
-                                stars[1]++; totStars += 4
-                            } else if (mapRatingPassenger[us]?.get(0) == 5) {
-                                stars[0]++; totStars += 5
+                            when {
+                                mapRatingPassenger[us]?.get(0) == 1 -> {
+                                    stars[4]++; totStars += 1
+                                }
+                                mapRatingPassenger[us]?.get(0) == 2 -> {
+                                    stars[3]++; totStars += 2
+                                }
+                                mapRatingPassenger[us]?.get(0) == 3 -> {
+                                    stars[2]++; totStars += 3
+                                }
+                                mapRatingPassenger[us]?.get(0) == 4 -> {
+                                    stars[1]++; totStars += 4
+                                }
+                                mapRatingPassenger[us]?.get(0) == 5 -> {
+                                    stars[0]++; totStars += 5
+                                }
                             }
                         }
                         tv_reviews.text = mapRatingPassenger.size.toString()
                         tv_stars.text = (totStars.toFloat() / mapRatingPassenger.size).toString()
                         rb_ratings.rating = totStars.toFloat() / mapRatingPassenger.size
                     }
-
-                    val raters = intArrayOf(
-                        ((stars[0].toFloat()/mapRatingPassenger.size)*100).roundToInt(), ((stars[1].toFloat()/mapRatingPassenger.size)*100).roundToInt(),
-                        ((stars[2].toFloat()/mapRatingPassenger.size)*100).roundToInt(), ((stars[3].toFloat()/mapRatingPassenger.size)*100).roundToInt(),
-                        ((stars[4].toFloat()/mapRatingPassenger.size)*100).roundToInt()
-                    )
+                    val raters =
+                    if(mapRatingPassenger.isNotEmpty()){
+                        intArrayOf(
+                            ((stars[0].toFloat()/mapRatingPassenger.size)*100).roundToInt(), ((stars[1].toFloat()/mapRatingPassenger.size)*100).roundToInt(),
+                            ((stars[2].toFloat()/mapRatingPassenger.size)*100).roundToInt(), ((stars[3].toFloat()/mapRatingPassenger.size)*100).roundToInt(),
+                            ((stars[4].toFloat()/mapRatingPassenger.size)*100).roundToInt()
+                        )
+                    } else {
+                        intArrayOf(0,0,0,0,0)
+                    }
 
                     ratingReviews.createRatingBars(100, BarLabels.STYPE1, colors, raters)
                 }
@@ -187,14 +197,14 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
             val comment = v.findViewById<TextView>(R.id.tv_ratings_comment)
             val db = Firebase.firestore
 
-            fun bind(userId: String, userReview: ArrayList<Any>, holder: ReviewViewHolder) {
+            fun bind(userId: String, userReview: ArrayList<Any>?, holder: ReviewViewHolder) {
                 db.collection("users").document(userId).get().addOnSuccessListener {
                     tvNickname.text = it.get("nickname").toString()
                     Glide.with(holder.itemView).load(it?.get("imageUserRef"))
                         .into(ivProfile)
                 }
-                rb.rating = userReview[0].toString().toFloat()
-                comment.text = userReview[1].toString()
+                rb.rating = userReview?.get(0).toString().toFloat()
+                comment.text = userReview?.get(1).toString()
                 /* if ellipsize is set
                 comment.setOnClickListener {
                     comment.maxLines = 100
@@ -212,7 +222,7 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
         override fun onBindViewHolder(holder: ReviewViewHolder, position: Int) {
             val userId = userList[position]
             val userReview = map[userId]
-            holder.bind(userId, userReview!!, holder)
+            holder.bind(userId, userReview, holder)
         }
 
         override fun getItemCount(): Int {
