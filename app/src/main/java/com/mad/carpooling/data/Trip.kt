@@ -12,7 +12,6 @@ data class Trip(
     var owner: DocumentReference? = null,
     var departure: String = "",
     var arrival: String = "",
-    var duration: String = "",
     var timestamp: Timestamp = Timestamp.now(),
     var seats: Int = 1,
     var price: Float = 1f,

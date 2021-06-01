@@ -50,6 +50,7 @@ import com.mad.carpooling.data.Trip
 import com.mad.carpooling.ui.DatePickerFragment
 import com.mad.carpooling.ui.SharedViewModel
 import com.mad.carpooling.ui.TimePickerFragment
+import com.mad.carpooling.ui.TripUtils
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -182,7 +183,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
         stops = trip.stops!!.toMutableList() as ArrayList<String>
         val stopEditAdapter = StopEditAdapter(stops)
-        tvDuration.text = trip.duration
+        tvDuration.text = TripUtils.calcDuration(stops)
         etSeats.setText(trip.seats.toString())
         etPrice.setText(trip.price.toString())
         etDescription.setText(trip.description)
@@ -618,12 +619,13 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         val db = Firebase.firestore
         val newDocRef = db.collection("trips").document()
 
-        trip.duration = tvDuration.text.trim().toString()
         //trip.timestamp = timestamp
         trip.seats = etSeats.text.trim().toString().toInt()
         trip.price = etPrice.text.trim().toString().toFloat()
         trip.description = etDescription.text.trim().toString()
         trip.stops = stops
+        trip.departure = stops[0].split(",")[0]
+        trip.arrival = stops[stops.size-1].split(",")[0]
 
         trip.id = if (isNew) {
             newDocRef.id
@@ -761,7 +763,7 @@ class StopEditAdapter(val stops: ArrayList<String>) :
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                     stringDate = s.toString()
                     stops[position] = formatStops(stringCity, stringAddress, stringDate, stringTime)
-                    tvDuration.text = calcDuration(stops)
+                    tvDuration.text = TripUtils.calcDuration(stops)
                 }
 
                 override fun afterTextChanged(s: Editable?) {
@@ -782,7 +784,7 @@ class StopEditAdapter(val stops: ArrayList<String>) :
                     //TODO check time today: if earlier than now,
                     stringTime = s.toString()
                     stops[position] = formatStops(stringCity, stringAddress, stringDate, stringTime)
-                    tvDuration.text = calcDuration(stops)
+                    tvDuration.text = TripUtils.calcDuration(stops)
                 }
 
                 override fun afterTextChanged(s: Editable?) {
@@ -804,24 +806,6 @@ class StopEditAdapter(val stops: ArrayList<String>) :
             stopTime.setOnClickListener {
                 showTimePickerDialog()
             }
-        }
-
-        private fun calcDuration(stops: ArrayList<String>): String {
-            val str1 =
-                stops?.get(0)?.split(",")?.get(2) + "T" + stops?.get(0)?.split(",")?.get(3)
-            val str2 = stops?.get(stops!!.size - 1)?.split(",")
-                ?.get(2) + "T" + stops?.get(stops!!.size - 1)?.split(",")?.get(3)
-
-            val d1 = LocalDateTime.parse(str1, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-            val d2 = LocalDateTime.parse(str2, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-            val s = Duration.between(d1, d2).toMillis() / 1000
-            var d: String = if (s / 86400 > 0) {
-                String.format("%d days %d h %02d min", s / 86400, (s % 86400) / 3600, (s % 3600) / 60)
-            } else {
-                String.format("%d h %02d min", s / 3600, (s % 3600) / 60)
-            }
-            if (s / 86400 < 2) d = d.replace("s", "")
-            return d
         }
 
         private fun formatStops(
