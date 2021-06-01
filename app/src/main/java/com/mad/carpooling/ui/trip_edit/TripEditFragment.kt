@@ -144,12 +144,10 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         if (savedInstanceState == null) {
             val previousFragment = findNavController().previousBackStackEntry?.destination?.id
             if (!args.isNew) {  // navigating from any edit btn
-                emptyView.visibility = View.GONE
                 if (!args.fromMap && args.id != "id")
                     viewModel.setTrip(tripMap?.get(args.id)!!.copy())
             } else { // navigating from tripList FAB
                 (activity as MainActivity).supportActionBar?.title = "Create New Trip"
-                emptyView.visibility = View.VISIBLE
                 if (previousFragment != R.id.nav_map)
                     viewModel.setTrip(Trip())
             }
@@ -158,6 +156,8 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         }
 
         trip = viewModel.getTrip()
+
+        emptyView.isVisible = trip.stops.isEmpty()
 
         btnMap.setOnClickListener {
             if (this::trip.isInitialized && trip != null) {
