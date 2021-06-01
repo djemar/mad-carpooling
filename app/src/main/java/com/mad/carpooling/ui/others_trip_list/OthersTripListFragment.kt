@@ -124,19 +124,12 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
 
 
     private fun initFab(view: View) {
-        val fab = (activity as MainActivity).findViewById<FloatingActionButton>(R.id.fab)
 
         auth = Firebase.auth
         val currentUser = auth.currentUser
         if (currentUser == null) {
             fab.hide()
         } else {
-            fab.setImageDrawable(
-                ContextCompat.getDrawable(
-                    requireContext(),
-                    R.drawable.ic_baseline_add
-                )
-            )
             fab.show()
 
             fab.setOnClickListener {

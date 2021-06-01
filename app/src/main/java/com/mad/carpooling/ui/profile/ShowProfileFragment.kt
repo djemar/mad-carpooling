@@ -73,9 +73,6 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
         cvDriver = view.findViewById(R.id.ll_rating_driver)
         cvPassenger = view.findViewById(R.id.ll_rating_passenger)
 
-        val fab = (activity as MainActivity).findViewById<FloatingActionButton>(R.id.fab)
-        fab.hide()
-
         if (args.uid == "uid") {
             model.getCurrentUser().observe(viewLifecycleOwner, Observer { currentUser ->
                 // Update the UI

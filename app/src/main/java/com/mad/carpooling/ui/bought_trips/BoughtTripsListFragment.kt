@@ -66,23 +66,10 @@ class BoughtTripsListFragment : Fragment(R.layout.fragment_trip_list) {
             // Update the UI
             emptyView.isVisible = newTripsMap.isEmpty()
             tripAdapter.submitList(newTripsMap.values.toList())
-            updateTripList(newTripsMap, view)
         })
 
     }
 
-    private fun updateTripList(tripsMap: HashMap<String, Trip>, view: View) {
-
-
-        val fab = (activity as MainActivity).findViewById<FloatingActionButton>(R.id.fab)
-        fab.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_add))
-
-        val value = TypedValue()
-        view.context.theme.resolveAttribute(R.attr.colorSecondary, value, true)
-        fab.setBackgroundColor(value.data)
-
-        fab.hide()
-    }
 
     class BoughtTripAdapter() :
         ListAdapter<Trip, BoughtTripAdapter.TripViewHolder>(TaskDiffCallback()) {

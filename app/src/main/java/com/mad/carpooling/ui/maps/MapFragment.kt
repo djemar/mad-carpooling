@@ -44,7 +44,6 @@ import java.util.stream.Collectors
 
 class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionCallbacks {
     private lateinit var map: MapView;
-    private lateinit var fab: FloatingActionButton;
     private lateinit var btnDeleteMarker: MaterialButton;
     private lateinit var mapViewModel: MapViewModel
     private lateinit var viewModelFactory: MapViewModelFactory
@@ -80,8 +79,6 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        fab = (activity as MainActivity).findViewById(R.id.fab)
-        fab.isVisible = false
         btnDeleteMarker = view.findViewById(R.id.btn_delete_marker)
         val args: MapFragmentArgs by navArgs()
         map = view.findViewById<MapView>(R.id.map)

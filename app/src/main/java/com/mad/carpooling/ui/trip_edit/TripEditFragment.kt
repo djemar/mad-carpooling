@@ -191,7 +191,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         initPreferences()
 
 
-        val fab = (activity as MainActivity).findViewById<FloatingActionButton>(R.id.fab)
         if (!isNew) {
             initFab(viewModel, fab)
 

@@ -178,9 +178,6 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
                     ratingReviews.createRatingBars(100, BarLabels.STYPE1, colors, raters)
                 }
         }
-
-        val fab = (activity as MainActivity).findViewById<FloatingActionButton>(R.id.fab)
-        fab.hide()
     }
 
     class ReviewAdapter(

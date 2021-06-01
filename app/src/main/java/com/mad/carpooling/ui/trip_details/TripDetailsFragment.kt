@@ -129,7 +129,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         mapClickOverlay = view.findViewById<View>(R.id.mapClickOverlay)
 
         bottomSheet = view.findViewById(R.id.bottom_sheet)
-        fab = (activity as MainActivity).findViewById(R.id.fab)
         bsb = BottomSheetBehavior.from(bottomSheet)
         map = view.findViewById(R.id.mapDetails)
         model.getTrips().observe(viewLifecycleOwner, { newTripsMap ->
@@ -439,31 +438,12 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     }
 
     private fun initFab(db: FirebaseFirestore, view: View) {
-        val value = TypedValue()
-        view.context.theme.resolveAttribute(R.attr.themeName, value, true)
-        if (value.string == "white")
-            fab.backgroundTintList =
-                ContextCompat.getColorStateList(requireContext(), R.color.amber_500)
-        else
-            fab.backgroundTintList =
-                ContextCompat.getColorStateList(requireContext(), R.color.amber_200)
-
         if (trip.owner!!.id != model.getCurrentUser().value?.uid) {
 
             if (trip.interestedPeople?.contains(model.getCurrentUser().value?.uid)!!) {
                 fab.setImageDrawable(
                     ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_fullstar)
                 )
-                if (trip.acceptedPeople?.contains(model.getCurrentUser().value?.uid)!!) {
-                    fab.backgroundTintList =
-                        ContextCompat.getColorStateList(requireContext(), R.color.green_700)
-                } else {
-                    if (value.string == "white")
-                        fab.backgroundTintList =
-                            ContextCompat.getColorStateList(requireContext(), R.color.amber_500)
-                    else
-                        fab.backgroundTintList =
-                            ContextCompat.getColorStateList(requireContext(), R.color.amber_200)
                 }
             } else {
                 fab.setImageDrawable(
@@ -473,8 +453,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                     )
                 )
             }
-
-            fab.show()
 
             fab.setOnClickListener {
                 if (trip.interestedPeople?.contains(model.getCurrentUser().value?.uid) == true) {
