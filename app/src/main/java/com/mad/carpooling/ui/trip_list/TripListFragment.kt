@@ -27,6 +27,9 @@ import com.mad.carpooling.R
 import com.mad.carpooling.data.Trip
 import com.mad.carpooling.ui.SharedViewModel
 import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 
 class TripListFragment : Fragment(R.layout.fragment_trip_list) {

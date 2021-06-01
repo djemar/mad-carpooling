@@ -66,7 +66,8 @@ import java.time.format.FormatStyle
 import java.util.*
 
 
-    private lateinit var tvDuration: TextView
+private lateinit var tvDuration: TextView
+
 class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
     private val sharedViewModel: SharedViewModel by activityViewModels()
@@ -145,11 +146,11 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         if (savedInstanceState == null) {
             val previousFragment = findNavController().previousBackStackEntry?.destination?.id
             if (!args.isNew) {  // navigating from any edit btn
-                if (!args.fromMap && args.id != "id")
-                    viewModel.setTrip(tripMap?.get(args.id)!!.copy())
+                //if (!args.fromMap && args.id != "id")
+                viewModel.setTrip(tripMap?.get(args.id)!!.copy())
             } else { // navigating from tripList FAB
                 (activity as MainActivity).supportActionBar?.title = "Create New Trip"
-                if (previousFragment != R.id.nav_map)
+                if (!args.fromMap)
                     viewModel.setTrip(Trip())
             }
         } else {
@@ -183,7 +184,8 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
         stops = trip.stops!!.toMutableList() as ArrayList<String>
         val stopEditAdapter = StopEditAdapter(stops)
-        tvDuration.text = TripUtils.calcDuration(stops)
+        if (stops.isNotEmpty() && TripUtils.checkStopsValidity(stops)) tvDuration.text =
+            TripUtils.calcDuration(stops)
         etSeats.setText(trip.seats.toString())
         etPrice.setText(trip.price.toString())
         etDescription.setText(trip.description)
@@ -210,33 +212,11 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
     }
 
-    private fun changeStateFab(fab: FloatingActionButton) {
-        if (trip.visibility) {
-            fab.setImageDrawable(
-                ContextCompat.getDrawable(
-                    requireContext(),
-                    R.drawable.ic_sharp_visibility
-                )
-            )
-            fab.backgroundTintList =
-                ContextCompat.getColorStateList(requireContext(), R.color.green_300)
-        } else {
-            fab.setImageDrawable(
-                ContextCompat.getDrawable(
-                    requireContext(),
-                    R.drawable.ic_baseline_visibility_off
-                )
-            )
-            fab.backgroundTintList =
-                ContextCompat.getColorStateList(requireContext(), R.color.red_300)
-        }
-    }
-
     private fun initFab(viewModel: TripEditViewModel, fab: FloatingActionButton) {
 
         fab.show()
 
-        changeStateFab(fab)
+        TripUtils.changeStateFab(fab, trip, requireContext())
 
         fab.setOnClickListener {
             if (trip.visibility) {
@@ -259,28 +239,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             dismissAllowingStateLoss()
         }
 
-        private fun changeStateFab(fab: FloatingActionButton) {
-            if (trip.visibility) {
-                fab.setImageDrawable(
-                    ContextCompat.getDrawable(
-                        requireContext(),
-                        R.drawable.ic_sharp_visibility
-                    )
-                )
-                fab.backgroundTintList =
-                    ContextCompat.getColorStateList(requireContext(), R.color.green_300)
-            } else {
-                fab.setImageDrawable(
-                    ContextCompat.getDrawable(
-                        requireContext(),
-                        R.drawable.ic_baseline_visibility_off
-                    )
-                )
-                fab.backgroundTintList =
-                    ContextCompat.getColorStateList(requireContext(), R.color.red_300)
-            }
-        }
-
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
             // Use the Builder class for convenient dialog construction
             val builder: AlertDialog.Builder = AlertDialog.Builder(activity)
@@ -288,7 +246,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                 .setPositiveButton("Confirm") { dialog, id ->
                     // hide the trip
                     trip.visibility = false
-                    changeStateFab(fab)
+                    TripUtils.changeStateFab(fab, trip, requireContext())
                 }
                 .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, id ->
                     // User cancelled the dialog
@@ -308,35 +266,13 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             dismissAllowingStateLoss()
         }
 
-        private fun changeStateFab(fab: FloatingActionButton) {
-            if (trip.visibility) {
-                fab.setImageDrawable(
-                    ContextCompat.getDrawable(
-                        requireContext(),
-                        R.drawable.ic_sharp_visibility
-                    )
-                )
-                fab.backgroundTintList =
-                    ContextCompat.getColorStateList(requireContext(), R.color.green_300)
-            } else {
-                fab.setImageDrawable(
-                    ContextCompat.getDrawable(
-                        requireContext(),
-                        R.drawable.ic_baseline_visibility_off
-                    )
-                )
-                fab.backgroundTintList =
-                    ContextCompat.getColorStateList(requireContext(), R.color.red_300)
-            }
-        }
-
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
             // Use the Builder class for convenient dialog construction
             val builder: AlertDialog.Builder = AlertDialog.Builder(activity)
             builder.setMessage("Do you want to show the trip?")
                 .setPositiveButton("Confirm") { dialog, id ->
                     trip.visibility = true
-                    changeStateFab(fab)
+                    TripUtils.changeStateFab(fab, trip, requireContext())
                 }
                 .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, id ->
                 })
@@ -554,29 +490,11 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
     }
 
-    private fun validateTripForm() {
-        val textWatcher = object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                validateSave()
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-            }
-
-        }
-
-        tvDuration.addTextChangedListener(textWatcher)
-        etSeats.addTextChangedListener(textWatcher)
-        etPrice.addTextChangedListener(textWatcher)
-    }
-
-    private fun validateSave() {
-        optionsMenu.findItem(R.id.nav_trip_details).isEnabled = etSeats.text.trim()
-            .isNotEmpty() && etPrice.text.trim()
-            .isNotEmpty() && ((isNew && currentPhotoPath != null) || !isNew)
+    private fun validateSave(): Boolean {
+        return etSeats.text.trim().isNotEmpty()
+                && etPrice.text.trim().isNotEmpty()
+                && ((isNew && currentPhotoPath != null) || !isNew)
+                && TripUtils.checkStopsValidity(stops)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -585,19 +503,17 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
-    override fun onPrepareOptionsMenu(menu: Menu) {
-        super.onPrepareOptionsMenu(menu)
-        validateSave()
-        validateTripForm()
-    }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.nav_trip_details -> {
                 if (currentPhotoPath != null) {
                     saveCarImage()
                 } else {
-                    updateFirestoreTrips()
+                    if (!validateSave()) {
+                        Snackbar.make(requireView(), "Please fill all the fields", Snackbar.LENGTH_SHORT).show()
+                    } else {
+                        updateFirestoreTrips()
+                    }
                 }
                 true
             }
@@ -608,9 +524,9 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     }
 
     private fun updateFirestoreTrips() {
-        val dateFormat = SimpleDateFormat("dd/MM/yyyyHH:mm")
-        //val parsedDate = dateFormat.parse(tvDate.text.toString() + tvTime.text.toString())
-        // val timestamp: Timestamp = Timestamp(parsedDate!!)
+        val dateFormat = SimpleDateFormat("yyyy-MM-ddHH:mm", Locale.getDefault())
+        val parsedDate = dateFormat.parse(stops[0].split(",")[2] + stops[0].split(",")[3])
+        val timestamp: Timestamp = Timestamp(parsedDate!!)
 
 
         val userRef =
@@ -619,13 +535,13 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         val db = Firebase.firestore
         val newDocRef = db.collection("trips").document()
 
-        //trip.timestamp = timestamp
+        trip.timestamp = timestamp
         trip.seats = etSeats.text.trim().toString().toInt()
         trip.price = etPrice.text.trim().toString().toFloat()
         trip.description = etDescription.text.trim().toString()
         trip.stops = stops
         trip.departure = stops[0].split(",")[0]
-        trip.arrival = stops[stops.size-1].split(",")[0]
+        trip.arrival = stops[stops.size - 1].split(",")[0]
 
         trip.id = if (isNew) {
             newDocRef.id
@@ -763,7 +679,8 @@ class StopEditAdapter(val stops: ArrayList<String>) :
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                     stringDate = s.toString()
                     stops[position] = formatStops(stringCity, stringAddress, stringDate, stringTime)
-                    tvDuration.text = TripUtils.calcDuration(stops)
+                    if (TripUtils.checkStopsValidity(stops)) tvDuration.text =
+                        TripUtils.calcDuration(stops)
                 }
 
                 override fun afterTextChanged(s: Editable?) {
@@ -784,7 +701,8 @@ class StopEditAdapter(val stops: ArrayList<String>) :
                     //TODO check time today: if earlier than now,
                     stringTime = s.toString()
                     stops[position] = formatStops(stringCity, stringAddress, stringDate, stringTime)
-                    tvDuration.text = TripUtils.calcDuration(stops)
+                    if (TripUtils.checkStopsValidity(stops)) tvDuration.text =
+                        TripUtils.calcDuration(stops)
                 }
 
                 override fun afterTextChanged(s: Editable?) {
@@ -826,7 +744,7 @@ class StopEditAdapter(val stops: ArrayList<String>) :
             } catch (e: DateTimeParseException) {
                 if (stringDate.isEmpty()) "" else stringDate
             }
-            val time : String = try {
+            val time: String = try {
                 LocalTime.parse(
                     stringTime,
                     DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)

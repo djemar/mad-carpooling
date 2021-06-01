@@ -319,24 +319,23 @@
                         android:textColor="?attr/colorOnBackground"
                         android:textStyle="bold"
                         app:layout_constraintBottom_toTopOf="@+id/cl_tripDetails_preferences"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/tv_title_seats"
                         app:layout_constraintEnd_toStartOf="@id/tv_tripDetails_price"
-                        app:layout_constraintHorizontal_chainStyle="packed"/>
+                        app:layout_constraintHorizontal_chainStyle="packed"
+                        app:layout_constraintStart_toStartOf="@+id/tv_title_seats"
+                        app:layout_constraintTop_toBottomOf="@+id/tv_title_seats" />
 
                     <TextView
                         android:id="@+id/tv_tripDetails_price"
                         android:layout_width="wrap_content"
                         android:layout_height="0dp"
+                        android:layout_marginStart="16dp"
                         android:fontFamily="@font/overpass"
                         android:gravity="center_vertical"
-                        android:layout_marginStart="16dp"
                         android:text="Price"
                         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                         app:layout_constraintBottom_toBottomOf="@+id/tv_title_price"
                         app:layout_constraintStart_toEndOf="@id/tv_title_price"
-                        app:layout_constraintTop_toTopOf="@+id/tv_title_price"
-                        app:layout_constraintEnd_toEndOf="parent"/>
+                        app:layout_constraintTop_toTopOf="@+id/tv_title_price" />
 
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/cl_tripDetails_preferences"
