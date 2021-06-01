@@ -213,7 +213,7 @@
                             android:rating="4.5" />
 
                         <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_end_trip"
+                            android:id="@+id/btn_endtrip_ratedriver"
                             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"

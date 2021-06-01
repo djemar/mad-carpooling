@@ -82,7 +82,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private lateinit var bsb: BottomSheetBehavior<ConstraintLayout>
     private lateinit var map: MapView;
     private lateinit var mapClickOverlay: View;
-    private lateinit var btnEndTrip: MaterialButton
+    private lateinit var btnTrip: MaterialButton
     private lateinit var ratingBar: RatingBar
     private var chattiness = false
     private var smoking = false
@@ -124,7 +124,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         ibtnMusic = view.findViewById(R.id.btn_tripDetails_music)
         tvNickname = view.findViewById(R.id.tv_tripDetails_fullName)
         profileLayout = view.findViewById(R.id.cl_tripDetails_profile)
-        btnEndTrip = view.findViewById(R.id.btn_end_trip)
+        btnTrip = view.findViewById(R.id.btn_endtrip_ratedriver)
         ratingBar = view.findViewById<RatingBar>(R.id.rb_tripDetails_driver)
         mapClickOverlay = view.findViewById<View>(R.id.mapClickOverlay)
 
@@ -258,7 +258,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         bsrv.adapter = bottomSheetAdapter
         Log.d("users:", bottomSheetAdapter.itemCount.toString())
 
-        val profileInfo = view.findViewById<TextView>(R.id.tv_tripDetails_fullName)
+        val profileInfo = view.findViewById<ConstraintLayout>(R.id.cl_tripDetails_profile)
 
         if (trip.owner?.id != model.getCurrentUser().value?.uid) {
             profileInfo.setOnClickListener {
@@ -274,7 +274,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
         initFab(db, view)
 
-        initBtnEndTripAndRatingBar(db, view)
+        initBtnTripAndRatingBar(db, view)
 
         val scrollView = view.findViewById<ScrollView>(R.id.sv_tripDetails)
         scrollView.setOnScrollChangeListener { scrollView, scrollX, scrollY, oldScrollX, oldScrollY ->
@@ -289,10 +289,10 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
     }
 
-    private fun initBtnEndTripAndRatingBar(db: FirebaseFirestore, view: View) {
+    private fun initBtnTripAndRatingBar(db: FirebaseFirestore, view: View) {
         if (trip.owner!!.id != model.getCurrentUser().value?.uid) {
             ratingBar.visibility = View.VISIBLE
-            btnEndTrip.visibility = View.GONE
+            btnTrip.visibility = View.GONE
 
             db.collection("ratings").document(trip.owner?.id!!).get()
                 .addOnSuccessListener { res ->
@@ -307,7 +307,16 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                         ratingBar.rating = 0f;
                     }
                 }
-
+            if(trip.finished){
+                ratingBar.visibility = View.GONE
+                btnTrip.visibility = View.VISIBLE
+                btnTrip.text = "rate"
+                btnTrip.setOnClickListener{
+                    val reviewDial = ReviewDialogFragment(trip, view, "driverRatings", null)
+                    reviewDial.show(requireActivity().supportFragmentManager, "driverReviewDialog")
+                }
+            }
+            /*
             ratingBar.setOnTouchListener(View.OnTouchListener { v, event ->
                 if (event.action == MotionEvent.ACTION_UP && trip.finished) {
                     // TODO perform your action here
@@ -315,13 +324,14 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                     reviewDial.show(requireActivity().supportFragmentManager, "driverReviewDialog")
                 }
                 return@OnTouchListener true
-            })
+            })*/
         } else {
             ratingBar.visibility = View.GONE
-            btnEndTrip.visibility = View.VISIBLE
-            btnEndTrip.isEnabled =
+            btnTrip.visibility = View.VISIBLE
+            btnTrip.text = "end trip"
+            btnTrip.isEnabled =
                 Calendar.getInstance().time >= trip.timestamp.toDate() && !trip.finished
-            btnEndTrip.setOnClickListener() {
+            btnTrip.setOnClickListener() {
                 val fragment = EndTripDialogFragment(trip)
                 fragment.show(requireActivity().supportFragmentManager, "endTripDialog")
             }
