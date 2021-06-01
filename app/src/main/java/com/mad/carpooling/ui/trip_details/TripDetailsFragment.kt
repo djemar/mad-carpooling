@@ -242,8 +242,8 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             }
         tvDuration.text = TripUtils.calcDuration(trip.stops)
 
-        ivProfilePic.setOnClickListener {
-            zoomImageFromThumb(ivProfilePic, trip.imageCarURL, view)
+        ivCarPic.setOnClickListener {
+            zoomImageFromThumb(ivCarPic, trip.imageCarURL, view)
         }
         // Retrieve and cache the system's default "short" animation time.
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
