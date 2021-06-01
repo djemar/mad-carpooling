@@ -25,6 +25,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -133,6 +134,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
     private fun initTrip(view: View, viewModel: TripEditViewModel, savedInstanceState: Bundle?) {
         val args: TripEditFragmentArgs by navArgs()
         val rv = view.findViewById<RecyclerView>(R.id.rv_tripEdit_stops)
+        val emptyView = view.findViewById<TextView>(R.id.no_stops_available)
         rv.layoutManager = LinearLayoutManager(context)
         rv.isNestedScrollingEnabled = false
         tripMap = sharedViewModel.getMyTrips().value
@@ -142,10 +144,12 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         if (savedInstanceState == null) {
             val previousFragment = findNavController().previousBackStackEntry?.destination?.id
             if (!args.isNew) {  // navigating from any edit btn
+                emptyView.visibility = View.GONE
                 if (!args.fromMap && args.id != "id")
                     viewModel.setTrip(tripMap?.get(args.id)!!.copy())
             } else { // navigating from tripList FAB
                 (activity as MainActivity).supportActionBar?.title = "Create New Trip"
+                emptyView.visibility = View.VISIBLE
                 if (previousFragment != R.id.nav_map)
                     viewModel.setTrip(Trip())
             }
