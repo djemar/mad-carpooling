@@ -65,6 +65,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
         if (tripAdapter.itemCount == 0) //from getItemCount
             emptyView.isVisible = true
 
+        val fab = view.findViewById<FloatingActionButton>(R.id.fab_triplist)
 
         var navController: NavController?
         fab.setOnClickListener {
@@ -75,6 +76,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
             navController = Navigation.findNavController(view)
             navController!!.navigate(action) //a new one from scratch
         }
+
         rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)

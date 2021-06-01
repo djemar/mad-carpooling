@@ -191,6 +191,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         initPreferences()
 
 
+        val fab = view.findViewById<FloatingActionButton>(R.id.fab_tripedit)
         if (!isNew) {
             initFab(viewModel, fab)
 
@@ -217,7 +218,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                 )
             )
             fab.backgroundTintList =
-                ContextCompat.getColorStateList(requireContext(), R.color.green_700)
+                ContextCompat.getColorStateList(requireContext(), R.color.green_300)
         } else {
             fab.setImageDrawable(
                 ContextCompat.getDrawable(
@@ -226,7 +227,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                 )
             )
             fab.backgroundTintList =
-                ContextCompat.getColorStateList(requireContext(), R.color.red_700)
+                ContextCompat.getColorStateList(requireContext(), R.color.red_300)
         }
     }
 
@@ -266,7 +267,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                     )
                 )
                 fab.backgroundTintList =
-                    ContextCompat.getColorStateList(requireContext(), R.color.green_700)
+                    ContextCompat.getColorStateList(requireContext(), R.color.green_300)
             } else {
                 fab.setImageDrawable(
                     ContextCompat.getDrawable(
@@ -275,7 +276,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                     )
                 )
                 fab.backgroundTintList =
-                    ContextCompat.getColorStateList(requireContext(), R.color.red_700)
+                    ContextCompat.getColorStateList(requireContext(), R.color.red_300)
             }
         }
 
@@ -315,7 +316,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                     )
                 )
                 fab.backgroundTintList =
-                    ContextCompat.getColorStateList(requireContext(), R.color.green_700)
+                    ContextCompat.getColorStateList(requireContext(), R.color.green_300)
             } else {
                 fab.setImageDrawable(
                     ContextCompat.getDrawable(
@@ -324,7 +325,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                     )
                 )
                 fab.backgroundTintList =
-                    ContextCompat.getColorStateList(requireContext(), R.color.red_700)
+                    ContextCompat.getColorStateList(requireContext(), R.color.red_300)
             }
         }
 

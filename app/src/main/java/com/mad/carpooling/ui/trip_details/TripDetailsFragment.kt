@@ -129,6 +129,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         mapClickOverlay = view.findViewById<View>(R.id.mapClickOverlay)
 
         bottomSheet = view.findViewById(R.id.bottom_sheet)
+        fab = view.findViewById(R.id.fab_tripdetails)
         bsb = BottomSheetBehavior.from(bottomSheet)
         map = view.findViewById(R.id.mapDetails)
         model.getTrips().observe(viewLifecycleOwner, { newTripsMap ->
@@ -444,6 +445,8 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                 fab.setImageDrawable(
                     ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_fullstar)
                 )
+                if (trip.acceptedPeople?.contains(model.getCurrentUser().value?.uid)!!){
+                    if(trip.finished) fab.hide()
                 }
             } else {
                 fab.setImageDrawable(

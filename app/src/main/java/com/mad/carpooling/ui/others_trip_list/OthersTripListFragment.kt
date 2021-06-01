@@ -124,6 +124,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
 
 
     private fun initFab(view: View) {
+        val fab = view.findViewById<FloatingActionButton>(R.id.fab_triplist)
 
         auth = Firebase.auth
         val currentUser = auth.currentUser
@@ -131,7 +132,6 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
             fab.hide()
         } else {
             fab.show()
-
             fab.setOnClickListener {
                 val action = OthersTripListFragmentDirections.actionNavOthersTripListToNavTripEdit(
                     "",

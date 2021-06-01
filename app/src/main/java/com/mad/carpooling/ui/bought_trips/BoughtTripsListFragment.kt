@@ -66,10 +66,11 @@ class BoughtTripsListFragment : Fragment(R.layout.fragment_trip_list) {
             // Update the UI
             emptyView.isVisible = newTripsMap.isEmpty()
             tripAdapter.submitList(newTripsMap.values.toList())
+            val fab = view.findViewById<FloatingActionButton>(R.id.fab_triplist)
+            fab.hide()
         })
 
     }
-
 
     class BoughtTripAdapter() :
         ListAdapter<Trip, BoughtTripAdapter.TripViewHolder>(TaskDiffCallback()) {
