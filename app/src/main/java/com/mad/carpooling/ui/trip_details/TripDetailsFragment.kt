@@ -120,6 +120,10 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        Configuration.getInstance().load(
+            requireContext(),
+            context?.getSharedPreferences("mad.carpooling.map", Context.MODE_PRIVATE)
+        );
         viewModelFactory = MapViewModelFactory(MapRepository())
         mapViewModel = ViewModelProvider(this, viewModelFactory)
             .get(MapViewModel::class.java)
