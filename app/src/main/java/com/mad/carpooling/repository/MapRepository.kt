@@ -1,4 +1,4 @@
-package com.mad.carpooling.ui.maps
+package com.mad.carpooling.repository
 
 import android.content.Context
 import android.location.Address

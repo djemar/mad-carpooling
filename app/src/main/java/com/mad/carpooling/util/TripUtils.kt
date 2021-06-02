@@ -1,10 +1,10 @@
-package com.mad.carpooling.ui
+package com.mad.carpooling.util
 
 import android.content.Context
 import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mad.carpooling.R
-import com.mad.carpooling.data.Trip
+import com.mad.carpooling.model.Trip
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter

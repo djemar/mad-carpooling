@@ -1,4 +1,4 @@
-package com.mad.carpooling.ui.maps
+package com.mad.carpooling.ui
 
 import android.Manifest
 import android.content.Context
@@ -16,13 +16,15 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.onNavDestinationSelected
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
-import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
-import com.mad.carpooling.data.Trip
-import com.mad.carpooling.ui.SharedViewModel
-import com.mad.carpooling.ui.trip_edit.TripEditViewModel
+import com.mad.carpooling.model.Trip
+import com.mad.carpooling.repository.MapRepository
+import com.mad.carpooling.viewmodel.SharedViewModel
+import com.mad.carpooling.viewmodel.TripEditViewModel
+import com.mad.carpooling.util.MapUtils
+import com.mad.carpooling.viewmodel.MapViewModel
+import com.mad.carpooling.viewmodel.MapViewModelFactory
 import com.vmadalin.easypermissions.EasyPermissions
 import com.vmadalin.easypermissions.dialogs.SettingsDialog
 import org.osmdroid.config.Configuration.getInstance
@@ -39,7 +41,6 @@ import org.osmdroid.views.overlay.Polyline
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
-import java.util.stream.Collectors
 
 
 class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionCallbacks {

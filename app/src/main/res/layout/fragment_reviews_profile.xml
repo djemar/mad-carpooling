@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:clipToPadding="false"
     android:orientation="vertical"
-    tools:context=".ui.profile_reviews.ReviewsProfileFragment"
+    tools:context=".ui.ReviewsProfileFragment"
     android:layout_marginTop="12dp">
 
     <TextView

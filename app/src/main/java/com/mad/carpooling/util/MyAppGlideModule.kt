@@ -1,4 +1,4 @@
-package com.mad.carpooling.ui
+package com.mad.carpooling.util
 
 import android.content.Context
 import com.bumptech.glide.Glide

@@ -1,4 +1,4 @@
-package com.mad.carpooling.ui.maps
+package com.mad.carpooling.viewmodel
 
 import android.content.Context
 import android.content.Context.CONNECTIVITY_SERVICE
@@ -9,7 +9,8 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mad.carpooling.data.Trip
+import com.mad.carpooling.model.Trip
+import com.mad.carpooling.repository.MapRepository
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker

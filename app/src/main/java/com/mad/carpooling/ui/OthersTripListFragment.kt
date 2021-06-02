@@ -1,4 +1,4 @@
-package com.mad.carpooling.ui.trip_list
+package com.mad.carpooling.ui
 
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
@@ -14,7 +14,6 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.onNavDestinationSelected
@@ -36,14 +35,12 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
-import com.mad.carpooling.data.Trip
+import com.mad.carpooling.model.Trip
 import com.mad.carpooling.repository.TripRepository
 import com.mad.carpooling.ui.DatePickerFragment
-import com.mad.carpooling.ui.SharedViewModel
+import com.mad.carpooling.viewmodel.SharedViewModel
 import com.mad.carpooling.ui.TimePickerFragment
-import com.mad.carpooling.ui.maps.MapRepository
-import com.mad.carpooling.ui.maps.MapViewModel
-import com.mad.carpooling.ui.maps.MapViewModelFactory
+import com.mad.carpooling.ui.OthersTripListFragmentDirections
 import com.mad.carpooling.viewmodel.SharedViewModelFactory
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi

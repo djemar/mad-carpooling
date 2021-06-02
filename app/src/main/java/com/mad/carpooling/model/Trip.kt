@@ -1,10 +1,8 @@
-package com.mad.carpooling.data
+package com.mad.carpooling.model
 
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.GeoPoint
-import com.google.firebase.firestore.PropertyName
-import com.google.gson.annotations.SerializedName
 
 
 data class Trip(

@@ -1,4 +1,4 @@
-package com.mad.carpooling.data
+package com.mad.carpooling.model
 
 class Rating(
     var driverRatings : Map<String, ArrayList<Any>> = mapOf(),

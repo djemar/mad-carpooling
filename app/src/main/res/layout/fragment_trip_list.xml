@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:clipToPadding="false"
     android:orientation="vertical"
-    tools:context=".ui.trip_list.TripListFragment">
+    tools:context=".ui.TripListFragment">
 
     <com.google.android.material.chip.Chip
         android:id="@+id/chip_search_results"

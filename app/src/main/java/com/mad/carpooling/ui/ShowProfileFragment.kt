@@ -1,4 +1,4 @@
-package com.mad.carpooling.ui.profile
+package com.mad.carpooling.ui
 
 import android.os.Bundle
 import android.util.Log
@@ -15,21 +15,16 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.onNavDestinationSelected
 import com.bumptech.glide.Glide
 import com.google.android.material.card.MaterialCardView
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
-import com.mad.carpooling.data.User
-import com.mad.carpooling.ui.SharedViewModel
+import com.mad.carpooling.model.User
+import com.mad.carpooling.viewmodel.SharedViewModel
 
 
 class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {

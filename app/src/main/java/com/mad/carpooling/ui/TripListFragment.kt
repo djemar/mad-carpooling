@@ -1,8 +1,7 @@
-package com.mad.carpooling.ui.trip_list
+package com.mad.carpooling.ui
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +9,6 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -22,12 +20,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.Timestamp
-import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
-import com.mad.carpooling.data.Trip
-import com.mad.carpooling.ui.SharedViewModel
+import com.mad.carpooling.model.Trip
+import com.mad.carpooling.viewmodel.SharedViewModel
 import java.text.SimpleDateFormat
-import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 

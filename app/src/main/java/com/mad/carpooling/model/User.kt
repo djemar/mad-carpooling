@@ -1,4 +1,4 @@
-package com.mad.carpooling.data
+package com.mad.carpooling.model
 
 class User(
     var uid: String = "uid",

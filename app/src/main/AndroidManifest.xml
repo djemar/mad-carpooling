@@ -39,7 +39,7 @@
         <!-- Recommended for Android 9 (API level 28) and lower. -->
         <!-- Required for Android 10 (API level 29) and higher. -->
         <service
-            android:name=".ui.maps.MapFragment"
+            android:name=".ui.MapFragment"
             android:foregroundServiceType="location">
             <!-- Any inner elements would go here. -->
         </service>

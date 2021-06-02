@@ -1,4 +1,4 @@
-package com.mad.carpooling.ui.profile_reviews
+package com.mad.carpooling.ui
 
 import android.graphics.Color
 import android.os.Bundle
@@ -16,15 +16,12 @@ import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
-import com.mad.carpooling.ui.SharedViewModel
+import com.mad.carpooling.viewmodel.SharedViewModel
 import com.taufiqrahman.reviewratings.BarLabels
 import com.taufiqrahman.reviewratings.RatingReviews
-import java.lang.Math.round
 import kotlin.math.roundToInt
 
 

@@ -1,8 +1,7 @@
-package com.mad.carpooling.ui.profile_edit
+package com.mad.carpooling.ui
 
 import android.app.Activity.RESULT_OK
 import android.content.ActivityNotFoundException
-import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -27,22 +26,17 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.onNavDestinationSelected
 import com.bumptech.glide.Glide
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
-import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
-import com.mad.carpooling.data.User
-import com.mad.carpooling.ui.SharedViewModel
-import com.mad.carpooling.ui.trip_edit.TripEditFragmentDirections
-import org.json.JSONObject
+import com.mad.carpooling.model.User
+import com.mad.carpooling.viewmodel.EditProfileViewModel
+import com.mad.carpooling.viewmodel.SharedViewModel
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException

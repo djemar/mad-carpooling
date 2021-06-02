@@ -1,7 +1,7 @@
-package com.mad.carpooling.ui.trip_edit
+package com.mad.carpooling.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.mad.carpooling.data.Trip
+import com.mad.carpooling.model.Trip
 
 class TripEditViewModel : ViewModel() {
 

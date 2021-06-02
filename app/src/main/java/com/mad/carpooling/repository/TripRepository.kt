@@ -2,12 +2,11 @@ package com.mad.carpooling.repository
 
 import android.util.Log
 import androidx.lifecycle.LiveData
-import com.google.firebase.Timestamp
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.mad.carpooling.data.Trip
-import com.mad.carpooling.data.User
+import com.mad.carpooling.model.Trip
+import com.mad.carpooling.model.User
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose

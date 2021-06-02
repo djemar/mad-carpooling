@@ -1,7 +1,8 @@
-package com.mad.carpooling.ui.maps
+package com.mad.carpooling.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.mad.carpooling.repository.MapRepository
 
 class MapViewModelFactory(private val repo: MapRepository) : ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {

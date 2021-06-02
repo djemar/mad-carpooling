@@ -1,7 +1,7 @@
-package com.mad.carpooling.ui.profile_edit
+package com.mad.carpooling.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.mad.carpooling.data.User
+import com.mad.carpooling.model.User
 
 class EditProfileViewModel : ViewModel() {
 

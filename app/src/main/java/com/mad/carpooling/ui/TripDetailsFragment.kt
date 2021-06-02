@@ -43,14 +43,14 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
-import com.mad.carpooling.data.Trip
+import com.mad.carpooling.model.Trip
 import com.mad.carpooling.repository.TripRepository
-import com.mad.carpooling.ui.SharedViewModel
-import com.mad.carpooling.ui.TripUtils
-import com.mad.carpooling.ui.maps.MapRepository
-import com.mad.carpooling.ui.maps.MapUtils
-import com.mad.carpooling.ui.maps.MapViewModel
-import com.mad.carpooling.ui.maps.MapViewModelFactory
+import com.mad.carpooling.viewmodel.SharedViewModel
+import com.mad.carpooling.util.TripUtils
+import com.mad.carpooling.repository.MapRepository
+import com.mad.carpooling.util.MapUtils
+import com.mad.carpooling.viewmodel.MapViewModel
+import com.mad.carpooling.viewmodel.MapViewModelFactory
 import com.mad.carpooling.viewmodel.SharedViewModelFactory
 import kotlinx.coroutines.*
 import org.osmdroid.config.Configuration
@@ -218,13 +218,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         })
         mapViewModel.getRoute(waypoints, requireContext())
 
-        ivMap.setOnClickListener {
-            val action = TripDetailsFragmentDirections.actionNavTripDetailsToNavMap(
-                trip.id
-            )
-            findNavController().navigate(action)
-        }
-
     }
 
     @SuppressLint("SetTextI18n")
@@ -291,6 +284,12 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                     trip.owner?.id!!
                 )
 
+                findNavController().navigate(action)
+            }
+            ivMap.setOnClickListener {
+                val action = TripDetailsFragmentDirections.actionNavTripDetailsToNavMap(
+                    trip.id
+                )
                 findNavController().navigate(action)
             }
         }

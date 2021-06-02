@@ -1,4 +1,4 @@
-package com.mad.carpooling.ui.maps
+package com.mad.carpooling.util
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -66,7 +66,7 @@ object MapUtils {
         val count: AtomicInteger = AtomicInteger(0)
         waypoints.forEach { marker ->
             marker.icon =
-                MapUtils.getNumMarker((count.incrementAndGet()).toString(), ctx)
+                getNumMarker((count.incrementAndGet()).toString(), ctx)
         }
         mapView.invalidate()
     }

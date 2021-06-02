@@ -1,4 +1,4 @@
-package com.mad.carpooling.ui
+package com.mad.carpooling.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.*
@@ -7,8 +7,8 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.mad.carpooling.data.Trip
-import com.mad.carpooling.data.User
+import com.mad.carpooling.model.Trip
+import com.mad.carpooling.model.User
 import com.mad.carpooling.repository.TripRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
