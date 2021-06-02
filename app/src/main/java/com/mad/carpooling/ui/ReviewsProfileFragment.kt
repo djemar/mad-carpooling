@@ -85,28 +85,26 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
                     val mapRatingDriver: Map<String, ArrayList<Any>> =
                         res.get("driverRatings") as Map<String, ArrayList<Any>>
                     userList = mapRatingDriver.keys.toTypedArray()
-                    Log.d("keys",userList[0].toString())
                     val reviewAdapter = ReviewAdapter(userList, mapRatingDriver)
                     rv.adapter = reviewAdapter
                     if (reviewAdapter.itemCount == 0) {//from getItemCount
                         emptyView.isVisible = true
                         tv_reviews.text = "0.0"
-                    }
-                    else {
+                    } else {
                         for (us in userList) {
-                            if (mapRatingDriver[us]?.get(0) == 1) {
+                            if (mapRatingDriver[us]?.get(0) == 1L) {
                                 stars[4]++; totStars += 1
                             }
-                            if (mapRatingDriver[us]?.get(0) == 2) {
+                            if (mapRatingDriver[us]?.get(0)  == 2L) {
                                 stars[3]++; totStars += 2
                             }
-                            if (mapRatingDriver[us]?.get(0) == 3) {
+                            if (mapRatingDriver[us]?.get(0) == 3L) {
                                 stars[2]++; totStars += 3
                             }
-                            if (mapRatingDriver[us]?.get(0) == 4) {
+                            if (mapRatingDriver[us]?.get(0) == 4L) {
                                 stars[1]++; totStars += 4
                             }
-                            if (mapRatingDriver[us]?.get(0) == 5) {
+                            if (mapRatingDriver[us]?.get(0) == 5L) {
                                 stars[0]++; totStars += 5
                             }
                         }
@@ -116,11 +114,13 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
                         rb_ratings.rating = totStars.toFloat() / mapRatingDriver.size
                     }
 
-                    val raters = intArrayOf(
-                        ((stars[0].toFloat()/mapRatingDriver.size)*100).roundToInt(), ((stars[1].toFloat()/mapRatingDriver.size)*100).roundToInt(),
-                        ((stars[2].toFloat()/mapRatingDriver.size)*100).roundToInt(), ((stars[3].toFloat()/mapRatingDriver.size)*100).roundToInt(),
-                        ((stars[4].toFloat()/mapRatingDriver.size)*100).roundToInt()
-                    )
+                    val raters =   if (mapRatingDriver.isNotEmpty()) intArrayOf(
+                        ((stars[0].toFloat() / mapRatingDriver.size) * 100).roundToInt(),
+                        ((stars[1].toFloat() / mapRatingDriver.size) * 100).roundToInt(),
+                        ((stars[2].toFloat() / mapRatingDriver.size) * 100).roundToInt(),
+                        ((stars[3].toFloat() / mapRatingDriver.size) * 100).roundToInt(),
+                        ((stars[4].toFloat() / mapRatingDriver.size) * 100).roundToInt()
+                    ) else intArrayOf(0, 0, 0, 0, 0)
 
                     ratingReviews.createRatingBars(100, BarLabels.STYPE1, colors, raters)
                 }
@@ -136,23 +136,22 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
                     if (reviewAdapter.itemCount == 0) {//from getItemCount
                         emptyView.isVisible = true
                         tv_reviews.text = "0.0"
-                    }
-                    else {
+                    } else {
                         for (us in userList) {
                             when {
-                                mapRatingPassenger[us]?.get(0) == 1 -> {
+                                mapRatingPassenger[us]?.get(0) == 1L -> {
                                     stars[4]++; totStars += 1
                                 }
-                                mapRatingPassenger[us]?.get(0) == 2 -> {
+                                mapRatingPassenger[us]?.get(0) == 2L -> {
                                     stars[3]++; totStars += 2
                                 }
-                                mapRatingPassenger[us]?.get(0) == 3 -> {
+                                mapRatingPassenger[us]?.get(0) == 3L -> {
                                     stars[2]++; totStars += 3
                                 }
-                                mapRatingPassenger[us]?.get(0) == 4 -> {
+                                mapRatingPassenger[us]?.get(0) == 4L -> {
                                     stars[1]++; totStars += 4
                                 }
-                                mapRatingPassenger[us]?.get(0) == 5 -> {
+                                mapRatingPassenger[us]?.get(0) == 5L -> {
                                     stars[0]++; totStars += 5
                                 }
                             }
@@ -162,15 +161,17 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
                         rb_ratings.rating = totStars.toFloat() / mapRatingPassenger.size
                     }
                     val raters =
-                    if(mapRatingPassenger.isNotEmpty()){
-                        intArrayOf(
-                            ((stars[0].toFloat()/mapRatingPassenger.size)*100).roundToInt(), ((stars[1].toFloat()/mapRatingPassenger.size)*100).roundToInt(),
-                            ((stars[2].toFloat()/mapRatingPassenger.size)*100).roundToInt(), ((stars[3].toFloat()/mapRatingPassenger.size)*100).roundToInt(),
-                            ((stars[4].toFloat()/mapRatingPassenger.size)*100).roundToInt()
-                        )
-                    } else {
-                        intArrayOf(0,0,0,0,0)
-                    }
+                        if (mapRatingPassenger.isNotEmpty()) {
+                            intArrayOf(
+                                ((stars[0].toFloat() / mapRatingPassenger.size) * 100).roundToInt(),
+                                ((stars[1].toFloat() / mapRatingPassenger.size) * 100).roundToInt(),
+                                ((stars[2].toFloat() / mapRatingPassenger.size) * 100).roundToInt(),
+                                ((stars[3].toFloat() / mapRatingPassenger.size) * 100).roundToInt(),
+                                ((stars[4].toFloat() / mapRatingPassenger.size) * 100).roundToInt()
+                            )
+                        } else {
+                            intArrayOf(0, 0, 0, 0, 0)
+                        }
 
                     ratingReviews.createRatingBars(100, BarLabels.STYPE1, colors, raters)
                 }

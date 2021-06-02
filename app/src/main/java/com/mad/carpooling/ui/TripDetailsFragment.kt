@@ -445,7 +445,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                     //TODO: add new value to a map into DB
                     val currentUser = model.getCurrentUser().value?.uid
                     val newArray: ArrayList<Any> =
-                        arrayListOf(rb_review!!.rating, etReview?.text?.trim().toString())
+                        arrayListOf(rb_review!!.rating.toInt(), etReview?.text?.trim().toString())
 
                     db.collection("ratings").document(uid).get()
                         .addOnSuccessListener { res ->
