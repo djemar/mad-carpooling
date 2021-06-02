@@ -7,6 +7,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.model.Trip
 import com.mad.carpooling.model.User
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 class TripRepository {
 
@@ -60,16 +62,16 @@ class TripRepository {
     }
 
     suspend fun getDataFromFireStore(childName : String)
-            : Result<User?>{
-        return try{
+            : Result<User?> = withContext(Dispatchers.IO){
+        try{
             val data = Firebase.firestore
                 .collection("users")
                 .document(childName)
                 .get()
                 .await()
-            Result.success(data.toObject(User::class.java))
+            return@withContext Result.success(data.toObject(User::class.java))
         }catch (e : Exception){
-            Result.failure(e)
+            return@withContext Result.failure(e)
         }
     }
 

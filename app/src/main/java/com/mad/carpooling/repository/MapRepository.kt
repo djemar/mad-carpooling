@@ -18,18 +18,17 @@ import java.util.stream.Collectors
 
 class MapRepository {
 
-    suspend fun getFromLocation(p: GeoPoint): Address = withContext(Dispatchers.IO) {
+    suspend fun getFromLocation(p: GeoPoint): Address? = withContext(Dispatchers.IO) {
         val geocoder = GeocoderNominatim(
             Locale.getDefault(),
             BuildConfig.APPLICATION_ID
         )
-        val address = async { geocoder.getFromLocation(p.latitude, p.longitude, 1) }
         try {
-            val a = address.await()
-            return@withContext a[0]
+            val address = geocoder.getFromLocation(p.latitude, p.longitude, 1)
+            return@withContext address[0]
         } catch (e: Throwable) {
             Log.e("Marker Location", "Error ->" + e.message)
-            return@withContext Address(Locale.getDefault())
+            return@withContext null
         }
     }
 
@@ -38,9 +37,8 @@ class MapRepository {
             val roadManager: RoadManager = OSRMRoadManager(ctx, BuildConfig.APPLICATION_ID)
             val gp = waypoints.stream().map(Marker::getPosition)
                 .collect(Collectors.toList()) as ArrayList<GeoPoint>
-            val road = async { roadManager.getRoad(gp) }
-            val r = road.await()
-            return@withContext RoadManager.buildRoadOverlay(r) as Polyline
+            val road = roadManager.getRoad(gp)
+            return@withContext RoadManager.buildRoadOverlay(road) as Polyline
         }
 
 
