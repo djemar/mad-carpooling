@@ -13,13 +13,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.R
+import com.mad.carpooling.repository.TripRepository
 import com.mad.carpooling.viewmodel.SharedViewModel
+import com.mad.carpooling.viewmodel.SharedViewModelFactory
 import com.taufiqrahman.reviewratings.BarLabels
 import com.taufiqrahman.reviewratings.RatingReviews
 import kotlin.math.roundToInt
@@ -30,7 +34,7 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
     private lateinit var tv_stars: TextView
     private lateinit var tv_reviews: TextView
     private lateinit var rb_ratings: RatingBar
-    private val model: SharedViewModel by activityViewModels()
+    private val model: SharedViewModel by activityViewModels { SharedViewModelFactory(TripRepository()) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,7 +89,7 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
                     val mapRatingDriver: Map<String, ArrayList<Any>> =
                         res.get("driverRatings") as Map<String, ArrayList<Any>>
                     userList = mapRatingDriver.keys.toTypedArray()
-                    val reviewAdapter = ReviewAdapter(userList, mapRatingDriver)
+                    val reviewAdapter = ReviewAdapter(userList, mapRatingDriver, model)
                     rv.adapter = reviewAdapter
                     if (reviewAdapter.itemCount == 0) {//from getItemCount
                         emptyView.isVisible = true
@@ -130,7 +134,7 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
                     val mapRatingPassenger: Map<String, ArrayList<Any>> =
                         res.get("passengerRatings") as Map<String, ArrayList<Any>>
                     userList = mapRatingPassenger.keys.toTypedArray()
-                    val reviewAdapter = ReviewAdapter(userList, mapRatingPassenger)
+                    val reviewAdapter = ReviewAdapter(userList, mapRatingPassenger, model)
                     rv.adapter = reviewAdapter
 
                     if (reviewAdapter.itemCount == 0) {//from getItemCount
@@ -180,12 +184,13 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
 
     class ReviewAdapter(
         private val userList: Array<String>,
-        private val map: Map<String, ArrayList<Any>>
+        private val map: Map<String, ArrayList<Any>>,
+        private val model: SharedViewModel
     ) :
         RecyclerView.Adapter<ReviewAdapter.ReviewViewHolder>() {
 
-        class ReviewViewHolder(v: View) : RecyclerView.ViewHolder(v) {
-
+        class ReviewViewHolder(v: View, private val model: SharedViewModel) :
+            RecyclerView.ViewHolder(v) {
             val ivProfile = v.findViewById<ImageView>(R.id.iv_ratings_profile_pic)
             val tvNickname = v.findViewById<TextView>(R.id.tv_ratings_nickname)
             val rb = v.findViewById<RatingBar>(R.id.rb_ratings_ratingbar)
@@ -193,11 +198,17 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
             val db = Firebase.firestore
 
             fun bind(userId: String, userReview: ArrayList<Any>?, holder: ReviewViewHolder) {
-                db.collection("users").document(userId).get().addOnSuccessListener {
+                /*db.collection("users").document(userId).get().addOnSuccessListener {
                     tvNickname.text = it.get("nickname").toString()
                     Glide.with(holder.itemView).load(it?.get("imageUserRef"))
                         .into(ivProfile)
-                }
+                }*/
+                model.getUserDoc(userId)
+                    .observe(itemView.context as LifecycleOwner, Observer { user ->
+                        tvNickname.text = user?.nickname
+                        Glide.with(holder.itemView).load(user?.imageUserRef)
+                            .into(ivProfile)
+                    })
                 rb.rating = userReview?.get(0).toString().toFloat()
                 comment.text = userReview?.get(1).toString()
                 /* if ellipsize is set
@@ -211,7 +222,7 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReviewViewHolder {
             val layout =
                 LayoutInflater.from(parent.context).inflate(R.layout.ratings_layout, parent, false)
-            return ReviewViewHolder(layout)
+            return ReviewViewHolder(layout, model)
         }
 
         override fun onBindViewHolder(holder: ReviewViewHolder, position: Int) {

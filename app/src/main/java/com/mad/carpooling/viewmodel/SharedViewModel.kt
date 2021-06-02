@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.*
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -39,6 +40,32 @@ class SharedViewModel(private val tripRepository: TripRepository) : ViewModel() 
         MutableLiveData<HashMap<String, Trip>>().also {
             loadInterestedTrips()
         }
+    }
+
+    @ExperimentalCoroutinesApi
+    @InternalCoroutinesApi
+    private val othersTrips: MutableLiveData<HashMap<String, Trip>> by lazy {
+        MutableLiveData<HashMap<String, Trip>>().also {
+            loadOthersTrips()
+        }
+    }
+
+    @InternalCoroutinesApi
+    @ExperimentalCoroutinesApi
+    private fun loadOthersTrips() {
+
+        viewModelScope.launch {
+            tripRepository.loadOthersTrips(currentUser).collect {
+                othersTrips.postValue(it)
+            }
+        }
+
+    }
+
+    @ExperimentalCoroutinesApi
+    @InternalCoroutinesApi
+    fun getOthersTrips(): LiveData<HashMap<String, Trip>> {
+        return othersTrips
     }
 
     private fun loadInterestedTrips() {
@@ -96,13 +123,7 @@ class SharedViewModel(private val tripRepository: TripRepository) : ViewModel() 
             }
     }
 
-    @ExperimentalCoroutinesApi
-    @InternalCoroutinesApi
-    private val othersTrips: MutableLiveData<HashMap<String, Trip>> by lazy {
-        MutableLiveData<HashMap<String, Trip>>().also {
-            loadOthersTrips()
-        }
-    }
+
 
 /*    private fun loadOthersTrips() {
         val db = Firebase.firestore
@@ -126,24 +147,12 @@ class SharedViewModel(private val tripRepository: TripRepository) : ViewModel() 
             }
     } */
 
-    @InternalCoroutinesApi
-    @ExperimentalCoroutinesApi
-    private fun loadOthersTrips() {
-
-        viewModelScope.launch {
-            tripRepository.loadOthersTrips(currentUser).collect {
-               othersTrips.postValue(it)
-            }
-        }
-
-    }
 
     private val currentUser: MutableLiveData<User> by lazy {
         MutableLiveData<User>().also {
             loadUser()
         }
     }
-
 
     private fun loadTrips() {
         // Do an asynchronous operation to fetch trips.
@@ -178,11 +187,6 @@ class SharedViewModel(private val tripRepository: TripRepository) : ViewModel() 
         return interestTrips
     }
 
-    @ExperimentalCoroutinesApi
-    @InternalCoroutinesApi
-    fun getOthersTrips(): LiveData<HashMap<String, Trip>> {
-        return othersTrips
-    }
 
     private fun loadUser() {
         // Do an asynchronous operation to fetch user.
@@ -205,6 +209,19 @@ class SharedViewModel(private val tripRepository: TripRepository) : ViewModel() 
 
     fun getCurrentUser(): LiveData<User> {
         return currentUser
+    }
+
+    fun getUserDoc(userId : String) : LiveData<User?>{
+        val result = MutableLiveData<User?>()
+        viewModelScope.launch {
+            val user = tripRepository.getDataFromFireStore(userId)
+            if(user.isSuccess){
+               result.postValue(user.getOrNull())
+            } else {
+                result.postValue(null)
+            }
+        }
+        return result
     }
 
 

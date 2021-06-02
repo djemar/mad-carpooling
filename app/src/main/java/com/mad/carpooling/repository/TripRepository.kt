@@ -13,6 +13,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.tasks.await
 
 class TripRepository {
 
@@ -56,6 +57,20 @@ class TripRepository {
                 }
                 return@getDataFlow tripsMap
             }
+    }
+
+    suspend fun getDataFromFireStore(childName : String)
+            : Result<User?>{
+        return try{
+            val data = Firebase.firestore
+                .collection("users")
+                .document(childName)
+                .get()
+                .await()
+            Result.success(data.toObject(User::class.java))
+        }catch (e : Exception){
+            Result.failure(e)
+        }
     }
 
     @ExperimentalCoroutinesApi

@@ -37,10 +37,7 @@ import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.model.Trip
 import com.mad.carpooling.repository.TripRepository
-import com.mad.carpooling.ui.DatePickerFragment
 import com.mad.carpooling.viewmodel.SharedViewModel
-import com.mad.carpooling.ui.TimePickerFragment
-import com.mad.carpooling.ui.OthersTripListFragmentDirections
 import com.mad.carpooling.viewmodel.SharedViewModelFactory
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -71,10 +68,8 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
     private lateinit var etSearchDate: EditText
     private lateinit var etSearchTime: EditText
     private lateinit var chipSearchResults: Chip
-    private lateinit var swipeContainer: SwipeRefreshLayout
     private lateinit var emptyView: TextView
     private var searchIsValid: Boolean = false
-    private lateinit var viewModelFactory: SharedViewModelFactory
     private val model: SharedViewModel by activityViewModels { SharedViewModelFactory(TripRepository()) }
 
     // Use the 'by activityViewModels()' Kotlin property delegate
@@ -90,9 +85,9 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
     @InternalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-       /* viewModelFactory = SharedViewModelFactory(TripRepository())
-        model = ViewModelProvider(this, viewModelFactory)
-            .get(SharedViewModel::class.java)*/
+        /* viewModelFactory = SharedViewModelFactory(TripRepository())
+         model = ViewModelProvider(this, viewModelFactory)
+             .get(SharedViewModel::class.java)*/
 
         rv = view.findViewById<RecyclerView>(R.id.triplist_rv)
         chipSearchResults = view.findViewById(R.id.chip_search_results)
@@ -334,7 +329,8 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
                     trip.timestamp.toDate().toInstant(),
                     ZoneId.systemDefault()
                 )).format(
-                    DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT))
+                    DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
+                )
                 price.text = "Price: ${("%.2f".format(trip.price))} €"
                 if (trip.imageCarURL != "") {
                     Glide.with(this.itemView).load(trip.imageCarURL).into(ivCar)
