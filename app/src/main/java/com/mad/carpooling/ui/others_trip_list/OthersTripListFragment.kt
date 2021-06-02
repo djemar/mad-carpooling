@@ -14,6 +14,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.onNavDestinationSelected
@@ -36,9 +37,16 @@ import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.data.Trip
+import com.mad.carpooling.repository.TripRepository
 import com.mad.carpooling.ui.DatePickerFragment
 import com.mad.carpooling.ui.SharedViewModel
 import com.mad.carpooling.ui.TimePickerFragment
+import com.mad.carpooling.ui.maps.MapRepository
+import com.mad.carpooling.ui.maps.MapViewModel
+import com.mad.carpooling.ui.maps.MapViewModelFactory
+import com.mad.carpooling.viewmodel.SharedViewModelFactory
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.InternalCoroutinesApi
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -69,7 +77,8 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
     private lateinit var swipeContainer: SwipeRefreshLayout
     private lateinit var emptyView: TextView
     private var searchIsValid: Boolean = false
-    private val model: SharedViewModel by activityViewModels()
+    private lateinit var viewModelFactory: SharedViewModelFactory
+    private val model: SharedViewModel by activityViewModels { SharedViewModelFactory(TripRepository()) }
 
     // Use the 'by activityViewModels()' Kotlin property delegate
     // from the fragment-ktx artifact
@@ -80,8 +89,14 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
     }
 
 
+    @ExperimentalCoroutinesApi
+    @InternalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+       /* viewModelFactory = SharedViewModelFactory(TripRepository())
+        model = ViewModelProvider(this, viewModelFactory)
+            .get(SharedViewModel::class.java)*/
+
         rv = view.findViewById<RecyclerView>(R.id.triplist_rv)
         chipSearchResults = view.findViewById(R.id.chip_search_results)
         //swipeContainer = view.findViewById(R.id.swipeContainer)
@@ -109,6 +124,8 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
 
     }
 
+    @ExperimentalCoroutinesApi
+    @InternalCoroutinesApi
     private fun initSwipeRefresh(
         swipeContainer: SwipeRefreshLayout?,
         tripAdapter: OthersTripAdapter

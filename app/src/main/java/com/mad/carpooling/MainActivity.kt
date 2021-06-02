@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -35,7 +36,9 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.data.Rating
 import com.mad.carpooling.data.User
+import com.mad.carpooling.repository.TripRepository
 import com.mad.carpooling.ui.SharedViewModel
+import com.mad.carpooling.viewmodel.SharedViewModelFactory
 
 
 class MainActivity : AppCompatActivity() {
@@ -46,7 +49,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarLayout: AppBarLayout
     private var userState: FirebaseUser? = null
     private val RC_SIGN_IN: Int = 1
-    private val model: SharedViewModel by viewModels()
+    private val model: SharedViewModel by viewModels { SharedViewModelFactory(TripRepository()) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

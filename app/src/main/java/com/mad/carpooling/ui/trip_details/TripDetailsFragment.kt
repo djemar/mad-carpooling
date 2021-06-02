@@ -7,6 +7,7 @@ import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.Dialog
+import android.content.Context
 import android.content.DialogInterface
 import android.graphics.Paint
 import android.graphics.Point
@@ -43,13 +44,16 @@ import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.data.Trip
+import com.mad.carpooling.repository.TripRepository
 import com.mad.carpooling.ui.SharedViewModel
 import com.mad.carpooling.ui.TripUtils
 import com.mad.carpooling.ui.maps.MapRepository
 import com.mad.carpooling.ui.maps.MapUtils
 import com.mad.carpooling.ui.maps.MapViewModel
 import com.mad.carpooling.ui.maps.MapViewModelFactory
+import com.mad.carpooling.viewmodel.SharedViewModelFactory
 import kotlinx.coroutines.*
+import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.MapTileProviderBasic
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.util.TileSystem
@@ -65,11 +69,12 @@ import java.time.format.FormatStyle
 import java.util.*
 import java.util.stream.Collectors
 import kotlin.collections.ArrayList
+import kotlin.math.hypot
 
 
 class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
-    private val model: SharedViewModel by activityViewModels()
+    private val model: SharedViewModel by activityViewModels { SharedViewModelFactory(TripRepository()) }
     private lateinit var mapViewModel: MapViewModel
     private lateinit var viewModelFactory: MapViewModelFactory
     private lateinit var trip: Trip
@@ -158,7 +163,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             // Update the UI
             initTripDetails(newTripsMap, view)
             initMapSnapshot()
-            //initMap()
             (activity as MainActivity).invalidateOptionsMenu()
         })
     }
@@ -610,7 +614,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         val cy = ivExpanded.height / 2
 
         // get the final radius for the clipping circle
-        val finalRadius = Math.hypot(cx.toDouble(), cy.toDouble()).toFloat()
+        val finalRadius = hypot(cx.toDouble(), cy.toDouble()).toFloat()
 
         // create the animator for this view (the start radius is zero)
         val anim = ViewAnimationUtils.createCircularReveal(ivExpanded, cx, cy, 0f, finalRadius)

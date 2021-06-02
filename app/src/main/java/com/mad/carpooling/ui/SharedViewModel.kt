@@ -1,9 +1,7 @@
 package com.mad.carpooling.ui
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -11,8 +9,13 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.data.Trip
 import com.mad.carpooling.data.User
+import com.mad.carpooling.repository.TripRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
-class SharedViewModel : ViewModel() {
+class SharedViewModel(private val tripRepository: TripRepository) : ViewModel() {
 
     private val trips: MutableLiveData<HashMap<String, Trip>> by lazy {
         MutableLiveData<HashMap<String, Trip>>().also {
@@ -52,7 +55,7 @@ class SharedViewModel : ViewModel() {
                 for (doc in value!!) {
                     tripsMap[doc.id] = doc.toObject(Trip::class.java)
                 }
-                interestTrips.postValue(tripsMap.filterValues { t -> t.timestamp>Timestamp.now() } as HashMap<String, Trip>?)
+                interestTrips.postValue(tripsMap.filterValues { t -> t.timestamp > Timestamp.now() } as HashMap<String, Trip>?)
             }
     }
 
@@ -93,13 +96,15 @@ class SharedViewModel : ViewModel() {
             }
     }
 
+    @ExperimentalCoroutinesApi
+    @InternalCoroutinesApi
     private val othersTrips: MutableLiveData<HashMap<String, Trip>> by lazy {
         MutableLiveData<HashMap<String, Trip>>().also {
             loadOthersTrips()
         }
     }
 
-    private fun loadOthersTrips() {
+/*    private fun loadOthersTrips() {
         val db = Firebase.firestore
         val currentUserRef =
             FirebaseFirestore.getInstance().document("users/${currentUser.value?.uid}" )
@@ -119,6 +124,18 @@ class SharedViewModel : ViewModel() {
                 }
                 othersTrips.postValue(tripsMap.filterValues { t -> !t.finished && t.timestamp>Timestamp.now() } as HashMap<String, Trip>?)
             }
+    } */
+
+    @InternalCoroutinesApi
+    @ExperimentalCoroutinesApi
+    private fun loadOthersTrips() {
+
+        viewModelScope.launch {
+            tripRepository.loadOthersTrips(currentUser).collect {
+               othersTrips.postValue(it)
+            }
+        }
+
     }
 
     private val currentUser: MutableLiveData<User> by lazy {
@@ -152,6 +169,7 @@ class SharedViewModel : ViewModel() {
     fun getMyTrips(): LiveData<HashMap<String, Trip>> {
         return myTrips
     }
+
     fun getBoughtTrips(): LiveData<HashMap<String, Trip>> {
         return boughtTrips
     }
@@ -160,6 +178,8 @@ class SharedViewModel : ViewModel() {
         return interestTrips
     }
 
+    @ExperimentalCoroutinesApi
+    @InternalCoroutinesApi
     fun getOthersTrips(): LiveData<HashMap<String, Trip>> {
         return othersTrips
     }
