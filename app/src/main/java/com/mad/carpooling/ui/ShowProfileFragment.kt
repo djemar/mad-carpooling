@@ -116,8 +116,10 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
                         var vote: Float = 0f
                         for (array in mapRatingDriver.values)
                             vote += array[0].toString().toFloat()
+                        Log.d("ratings:", vote.toString())
                         rbDriver.rating = (vote) / (mapRatingDriver.size.toFloat())
-                        numStarsDriver.text = "${rbDriver.rating}/5"
+                        Log.d("ratings:", rbDriver.rating.toString())
+                        numStarsDriver.text = "${("%.1f".format(rbDriver.rating))}/5"
                         numReviewsDriver.text = "${mapRatingDriver.size} reviews"
                     } else {
                         rbDriver.rating = 0f;
@@ -140,7 +142,7 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
                         for (array in mapRatingPassenger.values)
                             vote += array[0].toString().toFloat()
                         rbPassenger.rating = (vote) / (mapRatingPassenger.size.toFloat())
-                        numStarsPassenger.text = "${rbPassenger.rating}/5"
+                        numStarsPassenger.text = "${("%.1f".format(rbPassenger.rating))}/5"
                         numReviewsPassenger.text = "${mapRatingPassenger.size} reviews"
                     } else {
                         rbPassenger.rating = 0f;

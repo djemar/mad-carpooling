@@ -2,7 +2,6 @@ package com.mad.carpooling.ui
 
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,6 +25,8 @@ import com.mad.carpooling.viewmodel.SharedViewModel
 import com.mad.carpooling.viewmodel.SharedViewModelFactory
 import com.taufiqrahman.reviewratings.BarLabels
 import com.taufiqrahman.reviewratings.RatingReviews
+import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.roundToInt
 
 
@@ -99,7 +100,7 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
                             if (mapRatingDriver[us]?.get(0) == 1L) {
                                 stars[4]++; totStars += 1
                             }
-                            if (mapRatingDriver[us]?.get(0)  == 2L) {
+                            if (mapRatingDriver[us]?.get(0) == 2L) {
                                 stars[3]++; totStars += 2
                             }
                             if (mapRatingDriver[us]?.get(0) == 3L) {
@@ -114,11 +115,12 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
                         }
 
                         tv_reviews.text = mapRatingDriver.size.toString()
-                        tv_stars.text = (totStars.toFloat() / mapRatingDriver.size).toString()
+                        tv_stars.text =
+                            ("%.1f".format((totStars.toFloat() / mapRatingDriver.size)))
                         rb_ratings.rating = totStars.toFloat() / mapRatingDriver.size
                     }
 
-                    val raters =   if (mapRatingDriver.isNotEmpty()) intArrayOf(
+                    val raters = if (mapRatingDriver.isNotEmpty()) intArrayOf(
                         ((stars[0].toFloat() / mapRatingDriver.size) * 100).roundToInt(),
                         ((stars[1].toFloat() / mapRatingDriver.size) * 100).roundToInt(),
                         ((stars[2].toFloat() / mapRatingDriver.size) * 100).roundToInt(),
@@ -161,7 +163,8 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
                             }
                         }
                         tv_reviews.text = mapRatingPassenger.size.toString()
-                        tv_stars.text = (totStars.toFloat() / mapRatingPassenger.size).toString()
+                        tv_stars.text =
+                            ("%.1f".format((totStars.toFloat() / mapRatingPassenger.size)))
                         rb_ratings.rating = totStars.toFloat() / mapRatingPassenger.size
                     }
                     val raters =
