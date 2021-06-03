@@ -139,7 +139,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
                 )
                 Navigation.findNavController(holder.tripRL).navigate(action)
             }
-            holder.btnEdit.isVisible = trip.timestamp > Timestamp.now()
+            holder.btnEdit.isVisible = trip.timestamp > Timestamp.now() && !trip.finished
 
             holder.btnEdit.setOnClickListener {
                 val action = TripListFragmentDirections.actionNavTripListToNavTripEdit(
