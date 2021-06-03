@@ -331,6 +331,49 @@ class TripRepository {
         }
     }
 
+    /*    @ExperimentalCoroutinesApi
+    fun loadOthersTrips(currentUser: LiveData<User?>): Flow<HashMap<String, Trip>> {
+        val db = Firebase.firestore
+        val currentUserRef =
+            FirebaseFirestore.getInstance().document("users/${currentUser.value?.uid}")
+        val tripsMap = HashMap<String, Trip>()
 
+        return db.collection("trips").whereNotEqualTo("owner", currentUserRef)
+            .whereEqualTo("visibility", true)
+            .getDataFlow { querySnapshot ->
+                for (doc in querySnapshot!!) {
+                    tripsMap[doc.id] = doc.toObject(Trip::class.java)
+                }
+                return@getDataFlow tripsMap
+            }
+    }
+    @ExperimentalCoroutinesApi
+    fun Query.getQuerySnapshotFlow(): Flow<QuerySnapshot?> {
+        return callbackFlow {
+            val listenerRegistration =
+                addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+                    if (firebaseFirestoreException != null) {
+                        cancel(
+                            message = "error fetching collection data",
+                            cause = firebaseFirestoreException
+                        )
+                        return@addSnapshotListener
+                    }
+                    this.trySend(querySnapshot).isSuccess
+                }
+            awaitClose {
+                Log.d("Trip repo", "cancelling the listener on collection")
+                listenerRegistration.remove()
+            }
+        }
+    }
+
+    @ExperimentalCoroutinesApi
+    fun <T> Query.getDataFlow(mapper: (QuerySnapshot?) -> T): Flow<T> {
+        return getQuerySnapshotFlow()
+            .map {
+                return@map mapper(it)
+            }
+    }*/
 }
-}
+
