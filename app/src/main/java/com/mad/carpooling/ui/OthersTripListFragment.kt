@@ -368,8 +368,6 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
             val user = auth.currentUser
             holder.bind(getItem(position))
 
-
-
             holder.tripRL.setOnClickListener {
                 if (currentUser == null) {
                     Toast.makeText(

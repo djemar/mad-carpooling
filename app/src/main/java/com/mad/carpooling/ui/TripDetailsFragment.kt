@@ -469,13 +469,14 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     }
 
     private fun initFab(db: FirebaseFirestore, view: View) {
-        if (trip.owner!!.id != sharedViewModel.getCurrentUser().value?.uid) {
+        val currentUser = sharedViewModel.getCurrentUser().value?.uid!!
+        if (trip.owner!!.id != currentUser) {
 
-            if (trip.interestedPeople?.contains(sharedViewModel.getCurrentUser().value?.uid)!!) {
+            if (trip.interestedPeople?.contains(currentUser) == true) {
                 fab.setImageDrawable(
                     ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_fullstar)
                 )
-                if (trip.acceptedPeople?.contains(sharedViewModel.getCurrentUser().value?.uid)!!) {
+                if (trip.acceptedPeople?.contains(currentUser) == true) {
                     if (trip.finished) fab.hide()
                 }
             } else {
@@ -488,34 +489,15 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             }
 
             fab.setOnClickListener {
-                if (trip.interestedPeople?.contains(sharedViewModel.getCurrentUser().value?.uid) == true) {
+                if (trip.interestedPeople?.contains(currentUser) == true) {
                     fab.setImageDrawable(
                         ContextCompat.getDrawable(
                             requireContext(),
                             R.drawable.sl_favourite
                         )
                     )
-                    db.collection("trips").document(trip.id).update(
-                        "interestedPeople",
-                        FieldValue.arrayRemove(sharedViewModel.getCurrentUser().value?.uid)
-                    ).addOnSuccessListener {
-                        db.collection("users")
-                            .document(sharedViewModel.getCurrentUser().value?.uid!!)
-                            .update(
-                                "favTrips", FieldValue.arrayRemove(trip.id)
-                            )
-                    }
-
-                    if (trip.acceptedPeople?.contains(sharedViewModel.getCurrentUser().value?.uid!!) == true) {
-                        db.collection("trips").document(trip.id).update(
-                            "acceptedPeople",
-                            FieldValue.arrayRemove(sharedViewModel.getCurrentUser().value?.uid!!)
-                        ).addOnSuccessListener {
-                            db.collection("trips").document(trip.id).update(
-                                "seats", FieldValue.increment(1)
-                            )
-                        }
-                    }
+                    sharedViewModel.removeInterest(trip.id, "interestedPeople", "favTrips", currentUser)
+                    sharedViewModel.removeAccepted(trip.id, "acceptedPeople", "seats", currentUser, 1)
                 } else {
                     fab.setImageDrawable(
                         ContextCompat.getDrawable(
@@ -523,17 +505,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                             R.drawable.ic_baseline_fullstar
                         )
                     )
-
-                    db.collection("trips").document(trip.id).update(
-                        "interestedPeople",
-                        FieldValue.arrayUnion(sharedViewModel.getCurrentUser().value?.uid)
-                    ).addOnSuccessListener {
-                        db.collection("users")
-                            .document(sharedViewModel.getCurrentUser().value?.uid!!)
-                            .update(
-                                "favTrips", FieldValue.arrayUnion(trip.id)
-                            )
-                    }
+                    sharedViewModel.addInterest(trip.id, "interestedPeople", "favTrips", currentUser)
                 }
             }
         } else {
