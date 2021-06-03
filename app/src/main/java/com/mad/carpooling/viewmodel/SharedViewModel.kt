@@ -226,6 +226,19 @@ class SharedViewModel(
         return result
     }
 
+    fun getRatings(user: String, field: String): LiveData<Map<String, ArrayList<Any>>?>{
+        val result = MutableLiveData<Map<String, ArrayList<Any>>?>()
+        viewModelScope.launch {
+            val map = userRepository.getRatings(user, field)
+            if (map.isSuccess) {
+                result.postValue(map.getOrNull())
+            } else {
+                result.postValue(null)
+            }
+        }
+        return result
+    }
+
     fun addInterest(trip: String, fieldTrip: String, fieldUser: String, user: String): LiveData<Boolean>
     {
         val result = MutableLiveData<Boolean>()

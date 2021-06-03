@@ -83,21 +83,12 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
                 initProfile(currentUser, view)
             })
         } else {
-            val db = Firebase.firestore
-            db.collection("users").addSnapshotListener { value, e ->
-                if (e != null) {
-                    Log.e("loadUser() exception => ", e.toString())
-                    return@addSnapshotListener
+            sharedViewModel.getUserDoc(args.uid).observe(viewLifecycleOwner, Observer { user ->
+                if (user != null) {
+                    uid = user.uid
+                    initProfile(user, view)
                 }
-                var tmpUser = User()
-                for (doc in value!!) {
-                    if (doc.id == args.uid) {
-                        tmpUser = doc.toObject(User::class.java)
-                        uid = tmpUser.uid
-                    }
-                }
-                initProfile(tmpUser, view)
-            }
+            })
         }
     }
 
@@ -112,57 +103,51 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
         val div = view.findViewById<View>(R.id.divider4)
         div.isVisible = uid == sharedViewModel.getCurrentUser().value?.uid
 
-        val db = Firebase.firestore
-
-        db.collection("ratings").document(user.uid).get()
-            .addOnSuccessListener { res ->
-                if (res.exists()) {
-                    val mapRatingDriver: Map<String, ArrayList<Any>> =
-                        res.get("driverRatings") as Map<String, ArrayList<Any>>
-                    if (mapRatingDriver.isNotEmpty()) {
-                        Log.d("ratings:", mapRatingDriver.toString())
-                        var vote: Float = 0f
-                        for (array in mapRatingDriver.values)
-                            vote += array[0].toString().toFloat()
-                        Log.d("ratings:", vote.toString())
-                        rbDriver.rating = (vote) / (mapRatingDriver.size.toFloat())
-                        Log.d("ratings:", rbDriver.rating.toString())
-                        numStarsDriver.text = "${("%.1f".format(rbDriver.rating))}/5"
-                        numReviewsDriver.text = "${mapRatingDriver.size} reviews"
-                    } else {
-                        rbDriver.rating = 0f
-                        numStarsDriver.text = "-/5"
-                        numReviewsDriver.text = "0 reviews"
-                    }
-                } else {
+        sharedViewModel.getRatings(user.uid,"driverRatings").observe(viewLifecycleOwner, Observer { map ->
+            if (map != null) {
+                if(map.isNotEmpty()){
+                    var vote: Float = 0f
+                    for (array in map.values)
+                        vote += array[0].toString().toFloat()
+                    Log.d("ratings:", vote.toString())
+                    rbDriver.rating = (vote) / (map.size.toFloat())
+                    Log.d("ratings:", rbDriver.rating.toString())
+                    numStarsDriver.text = "${("%.1f".format(rbDriver.rating))}/5"
+                    numReviewsDriver.text = "${map.size} reviews"
+                }
+                else {
                     rbDriver.rating = 0f
                     numStarsDriver.text = "-/5"
                     numReviewsDriver.text = "0 reviews"
                 }
+            } else {
+                rbDriver.rating = 0f
+                numStarsDriver.text = "-/5"
+                numReviewsDriver.text = "0 reviews"
             }
-        db.collection("ratings").document(user.uid).get()
-            .addOnSuccessListener { res ->
-                if (res.exists()) {
-                    val mapRatingPassenger: Map<String, ArrayList<Any>> =
-                        res.get("passengerRatings") as Map<String, ArrayList<Any>>
-                    if (mapRatingPassenger.isNotEmpty()) {
-                        var vote: Float = 0f
-                        for (array in mapRatingPassenger.values)
-                            vote += array[0].toString().toFloat()
-                        rbPassenger.rating = (vote) / (mapRatingPassenger.size.toFloat())
-                        numStarsPassenger.text = "${("%.1f".format(rbPassenger.rating))}/5"
-                        numReviewsPassenger.text = "${mapRatingPassenger.size} reviews"
-                    } else {
-                        rbPassenger.rating = 0f
-                        numStarsPassenger.text = "-/5"
-                        numReviewsPassenger.text = "0 reviews"
-                    }
-                } else {
+        })
+
+        sharedViewModel.getRatings(user.uid,"passengerRatings").observe(viewLifecycleOwner, Observer { map ->
+            if (map != null) {
+                if(map.isNotEmpty()){
+                    var vote: Float = 0f
+                    for (array in map.values)
+                        vote += array[0].toString().toFloat()
+                    rbPassenger.rating = (vote) / (map.size.toFloat())
+                    numStarsPassenger.text = "${("%.1f".format(rbPassenger.rating))}/5"
+                    numReviewsPassenger.text = "${map.size} reviews"
+                }
+                else {
                     rbPassenger.rating = 0f
                     numStarsPassenger.text = "-/5"
                     numReviewsPassenger.text = "0 reviews"
                 }
+            } else {
+                rbPassenger.rating = 0f
+                numStarsPassenger.text = "-/5"
+                numReviewsPassenger.text = "0 reviews"
             }
+        })
 
         cvDriver.setOnClickListener {
             val bundle: Bundle = bundleOf()

@@ -90,6 +90,20 @@ class UserRepository {
         }
     }
 
+    suspend fun getRatings(childName: String, field: String): Result<Map<String, ArrayList<Any>>> = withContext(Dispatchers.IO){
+        try{
+            val data = Firebase.firestore
+                .collection("ratings")
+                .document(childName)
+                .get()
+                .await()
+                .get(field)
+            return@withContext Result.success(data) as Result<Map<String, ArrayList<Any>>>
+        } catch (e: Exception){
+            return@withContext Result.failure(e)
+        }
+    }
+
     @ExperimentalCoroutinesApi
     fun Query.getQuerySnapshotFlow(): Flow<QuerySnapshot?> {
         return callbackFlow {
