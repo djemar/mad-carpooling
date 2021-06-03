@@ -12,6 +12,7 @@ import com.mad.carpooling.model.Trip
 import com.mad.carpooling.model.User
 import com.mad.carpooling.repository.TripRepository
 import com.mad.carpooling.repository.UserRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
@@ -151,11 +152,6 @@ class SharedViewModel(
     } */
 
 
-    private val currentUser: MutableLiveData<User> by lazy {
-        MutableLiveData<User>().also {
-            loadUser()
-        }
-    }
 
     private fun loadTrips() {
         // Do an asynchronous operation to fetch trips.
@@ -208,9 +204,22 @@ class SharedViewModel(
             currentUser.postValue(user)
         }
 
+    @ExperimentalCoroutinesApi
+    private val currentUser = liveData<User?>(Dispatchers.IO) {
+        //emit(Result.Loading())
+        try{
+            userRepository.loadUser().collect {
+                emit(it.getOrNull())
+            }
+        }catch (e: Exception){
+            emit(null)
+            Log.e("ERROR:",e.message!!)
+        }
     }
 
-    fun getCurrentUser(): LiveData<User> {
+
+    @ExperimentalCoroutinesApi
+    fun getCurrentUserData(): LiveData<User?> {
         return currentUser
     }
 

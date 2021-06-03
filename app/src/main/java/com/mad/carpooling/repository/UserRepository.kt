@@ -1,7 +1,9 @@
 package com.mad.carpooling.repository
 
+import android.content.res.Resources
 import android.util.Log
 import androidx.lifecycle.LiveData
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -20,33 +22,39 @@ import kotlinx.coroutines.withContext
 class UserRepository {
 
     @ExperimentalCoroutinesApi
-    fun loadOthersTrips(currentUser: LiveData<User>): Flow<HashMap<String, Trip>> {
-        val db = Firebase.firestore
-        val currentUserRef =
-            FirebaseFirestore.getInstance().document("users/${currentUser.value?.uid}")
-        val tripsMap = HashMap<String, Trip>()
+    suspend fun loadUser(): Flow<Result<User?>> = callbackFlow {
+        val uid = Firebase.auth.currentUser?.uid
+        // 2.- We create a reference to our data inside Firestore
+        val eventDocument =  FirebaseFirestore
+            .getInstance()
+            .collection("users")
+            .document(uid!!)
 
-        return db.collection("trips").whereNotEqualTo("owner", currentUserRef)
-            .whereEqualTo("visibility", true)
-            .getDataFlow { querySnapshot ->
-                for (doc in querySnapshot!!) {
-                    tripsMap[doc.id] = doc.toObject(Trip::class.java)
-                }
-                return@getDataFlow tripsMap
+        // 3.- We generate a subscription that is going to let us listen for changes with
+        // .addSnapshotListener and then offer those values to the channel that will be collected in our viewmodel
+        val subscription = eventDocument.addSnapshotListener { snapshot, _ ->
+            if(snapshot!!.exists()){
+                val user = snapshot.toObject(User::class.java)
+                this.trySend(Result.success(user)).isSuccess
             }
+        }
+
+        //Finally if collect is not in use or collecting any data we cancel this channel to prevent any leak and remove the subscription listener to the database
+        awaitClose { subscription.remove() }
+
     }
 
     suspend fun getUserDoc(childName: String)
-            : Result<User?> = withContext(Dispatchers.IO) {
-        try {
+            : Result<User?> {
+        return try {
             val data = Firebase.firestore
                 .collection("users")
                 .document(childName)
                 .get()
                 .await()
-            return@withContext Result.success(data.toObject(User::class.java))
+            Result.success(data.toObject(User::class.java))
         } catch (e: Exception) {
-            return@withContext Result.failure(e)
+            Result.failure(e)
         }
     }
 

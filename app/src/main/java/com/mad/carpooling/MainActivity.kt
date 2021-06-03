@@ -177,11 +177,13 @@ class MainActivity : AppCompatActivity() {
         val tvNicknameHeader: TextView = headerView.findViewById(R.id.nav_header_nickname)
 
         if (auth.currentUser != null)
-            model.getCurrentUser().observe(this, { currentUser ->
+            model.getCurrentUserData().observe(this, { currentUser ->
                 // Update the UI
-                tvFullNameHeader.text = currentUser.fullname
-                tvNicknameHeader.text = currentUser.nickname
-                Glide.with(this).load(currentUser.imageUserRef).into(ivProfileHeader)
+                if (currentUser != null) {
+                    tvFullNameHeader.text = currentUser.fullname
+                    tvNicknameHeader.text = currentUser.nickname
+                    Glide.with(this).load(currentUser.imageUserRef).into(ivProfileHeader)
+                }
             })
     }
 

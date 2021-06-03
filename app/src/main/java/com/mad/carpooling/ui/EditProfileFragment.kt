@@ -90,7 +90,7 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
         etLocation = view.findViewById<EditText>(R.id.et_location)
         ivEditProfilePic = view.findViewById<ImageView>(R.id.et_profile_pic)
 
-        initProfile(sharedViewModel.getCurrentUser().value!!, viewModel, savedInstanceState)
+        initProfile(sharedViewModel.getCurrentUserData().value!!, viewModel, savedInstanceState)
 
         val btnCamera = view.findViewById<ImageButton>(R.id.btn_camera)
         registerForContextMenu(btnCamera)
