@@ -34,7 +34,7 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
     private lateinit var tv_stars: TextView
     private lateinit var tv_reviews: TextView
     private lateinit var rb_ratings: RatingBar
-    private val model: SharedViewModel by activityViewModels {
+    private val sharedViewModel: SharedViewModel by activityViewModels {
         SharedViewModelFactory(
             TripRepository(),
             UserRepository()
@@ -54,7 +54,7 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
 
     private fun initReviewsList(view: View) {
         val emptyView = view.findViewById<TextView>(R.id.no_reviews_available)
-        val db = Firebase.firestore
+
         val uid = arguments?.getString("uid")
         val role = arguments?.getString("role")
         rv = view.findViewById<RecyclerView>(R.id.reviews_list)
@@ -89,12 +89,11 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
         )*/
 
         if (role == "driver") {
-            db.collection("ratings").document(uid!!).get()
-                .addOnSuccessListener { res ->
-                    val mapRatingDriver: Map<String, ArrayList<Any>> =
-                        res.get("driverRatings") as Map<String, ArrayList<Any>>
+            sharedViewModel.getRatings(uid!!,"driverRatings").observe(viewLifecycleOwner, Observer { mapRatingDriver ->
+                if (mapRatingDriver != null) {
                     userList = mapRatingDriver.keys.toTypedArray()
-                    val reviewAdapter = ReviewAdapter(userList, mapRatingDriver, model)
+
+                    val reviewAdapter = ReviewAdapter(userList, mapRatingDriver, sharedViewModel)
                     rv.adapter = reviewAdapter
                     if (reviewAdapter.itemCount == 0) {//from getItemCount
                         emptyView.isVisible = true
@@ -134,58 +133,61 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
 
                     ratingReviews.createRatingBars(100, BarLabels.STYPE1, colors, raters)
                 }
+            })
         } else {
-            db.collection("ratings").document(uid!!).get()
-                .addOnSuccessListener { res ->
-                    val mapRatingPassenger: Map<String, ArrayList<Any>> =
-                        res.get("passengerRatings") as Map<String, ArrayList<Any>>
-                    userList = mapRatingPassenger.keys.toTypedArray()
-                    val reviewAdapter = ReviewAdapter(userList, mapRatingPassenger, model)
-                    rv.adapter = reviewAdapter
+            sharedViewModel.getRatings(uid!!, "passengerRatings")
+                .observe(viewLifecycleOwner, Observer { mapRatingPassenger ->
+                    if (mapRatingPassenger != null) {
+                        userList = mapRatingPassenger.keys.toTypedArray()
 
-                    if (reviewAdapter.itemCount == 0) {//from getItemCount
-                        emptyView.isVisible = true
-                        tv_reviews.text = "0.0"
-                    } else {
-                        for (us in userList) {
-                            when {
-                                mapRatingPassenger[us]?.get(0) == 1L -> {
-                                    stars[4]++; totStars += 1
-                                }
-                                mapRatingPassenger[us]?.get(0) == 2L -> {
-                                    stars[3]++; totStars += 2
-                                }
-                                mapRatingPassenger[us]?.get(0) == 3L -> {
-                                    stars[2]++; totStars += 3
-                                }
-                                mapRatingPassenger[us]?.get(0) == 4L -> {
-                                    stars[1]++; totStars += 4
-                                }
-                                mapRatingPassenger[us]?.get(0) == 5L -> {
-                                    stars[0]++; totStars += 5
+                        val reviewAdapter =
+                            ReviewAdapter(userList, mapRatingPassenger, sharedViewModel)
+                        rv.adapter = reviewAdapter
+
+                        if (reviewAdapter.itemCount == 0) {//from getItemCount
+                            emptyView.isVisible = true
+                            tv_reviews.text = "0.0"
+                        } else {
+                            for (us in userList) {
+                                when {
+                                    mapRatingPassenger[us]?.get(0) == 1L -> {
+                                        stars[4]++; totStars += 1
+                                    }
+                                    mapRatingPassenger[us]?.get(0) == 2L -> {
+                                        stars[3]++; totStars += 2
+                                    }
+                                    mapRatingPassenger[us]?.get(0) == 3L -> {
+                                        stars[2]++; totStars += 3
+                                    }
+                                    mapRatingPassenger[us]?.get(0) == 4L -> {
+                                        stars[1]++; totStars += 4
+                                    }
+                                    mapRatingPassenger[us]?.get(0) == 5L -> {
+                                        stars[0]++; totStars += 5
+                                    }
                                 }
                             }
+                            tv_reviews.text = mapRatingPassenger.size.toString()
+                            tv_stars.text =
+                                ("%.1f".format((totStars.toFloat() / mapRatingPassenger.size)))
+                            rb_ratings.rating = totStars.toFloat() / mapRatingPassenger.size
                         }
-                        tv_reviews.text = mapRatingPassenger.size.toString()
-                        tv_stars.text =
-                            ("%.1f".format((totStars.toFloat() / mapRatingPassenger.size)))
-                        rb_ratings.rating = totStars.toFloat() / mapRatingPassenger.size
-                    }
-                    val raters =
-                        if (mapRatingPassenger.isNotEmpty()) {
-                            intArrayOf(
-                                ((stars[0].toFloat() / mapRatingPassenger.size) * 100).roundToInt(),
-                                ((stars[1].toFloat() / mapRatingPassenger.size) * 100).roundToInt(),
-                                ((stars[2].toFloat() / mapRatingPassenger.size) * 100).roundToInt(),
-                                ((stars[3].toFloat() / mapRatingPassenger.size) * 100).roundToInt(),
-                                ((stars[4].toFloat() / mapRatingPassenger.size) * 100).roundToInt()
-                            )
-                        } else {
-                            intArrayOf(0, 0, 0, 0, 0)
-                        }
+                        val raters =
+                            if (mapRatingPassenger.isNotEmpty()) {
+                                intArrayOf(
+                                    ((stars[0].toFloat() / mapRatingPassenger.size) * 100).roundToInt(),
+                                    ((stars[1].toFloat() / mapRatingPassenger.size) * 100).roundToInt(),
+                                    ((stars[2].toFloat() / mapRatingPassenger.size) * 100).roundToInt(),
+                                    ((stars[3].toFloat() / mapRatingPassenger.size) * 100).roundToInt(),
+                                    ((stars[4].toFloat() / mapRatingPassenger.size) * 100).roundToInt()
+                                )
+                            } else {
+                                intArrayOf(0, 0, 0, 0, 0)
+                            }
 
-                    ratingReviews.createRatingBars(100, BarLabels.STYPE1, colors, raters)
-                }
+                        ratingReviews.createRatingBars(100, BarLabels.STYPE1, colors, raters)
+                    }
+                })
         }
     }
 
@@ -202,7 +204,6 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
             val tvNickname = v.findViewById<TextView>(R.id.tv_ratings_nickname)
             val rb = v.findViewById<RatingBar>(R.id.rb_ratings_ratingbar)
             val comment = v.findViewById<TextView>(R.id.tv_ratings_comment)
-            val db = Firebase.firestore
 
             fun bind(userId: String, userReview: ArrayList<Any>?, holder: ReviewViewHolder) {
                 /*db.collection("users").document(userId).get().addOnSuccessListener {
