@@ -25,6 +25,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -83,7 +84,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             UserRepository()
         )
     }
-    private lateinit var mapViewModel: MapViewModel
+    private val mapViewModel : MapViewModel by viewModels{ MapViewModelFactory(MapRepository())}
     private lateinit var viewModelFactory: MapViewModelFactory
     private lateinit var trip: Trip
     private lateinit var ivCarPic: ImageView
@@ -137,9 +138,6 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             requireContext(),
             context?.getSharedPreferences("mad.carpooling.map", Context.MODE_PRIVATE)
         )
-        viewModelFactory = MapViewModelFactory(MapRepository())
-        mapViewModel = ViewModelProvider(this, viewModelFactory)
-            .get(MapViewModel::class.java)
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 
@@ -180,7 +178,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         val stopsMarkers = FolderOverlay()
         val tileSystem: TileSystem = TileSystemWebMercator()
         val displayMetrics = resources.displayMetrics
-        val map = MapView(requireContext())
+        val map = MapView(requireActivity())
 
         trip.geopoints.stream().forEach { gp ->
             run {
@@ -217,7 +215,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                     overlays,
                     box,
                     zoom,
-                    MapTileProviderBasic(requireActivity()),
+                    MapTileProviderBasic(requireContext()),
                     displayMetrics.widthPixels.coerceAtMost(displayMetrics.heightPixels),
                     ivMap
                 )
@@ -227,28 +225,18 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
     }
 
+    @ExperimentalCoroutinesApi
     @SuppressLint("SetTextI18n")
     private fun initTripDetails(newTripsMap: HashMap<String, Trip>, view: View) {
 
         val args: TripDetailsFragmentArgs by navArgs()
-
 
         trip = newTripsMap[args.id]!!
 
         if (trip.imageCarURL != "") {
             Glide.with(view).load(trip.imageCarURL).into(ivCarPic)
         }
-        /*
-        val userDoc =
-            db.collection("users").document(trip.owner!!.id).addSnapshotListener { value, e ->
-                if (e != null) {
-                    Log.e("userDoc exception => ", e.toString())
-                    return@addSnapshotListener
-                }
-                tvNickname.text = value?.get("nickname").toString()
-                Glide.with(view).load(value?.get("imageUserRef"))
-                    .into(ivProfilePic)
-            }*/
+
         sharedViewModel.getUserDoc(trip.owner!!.id).observe(viewLifecycleOwner, Observer{ user ->
             tvNickname.text = user?.nickname.toString()
             Glide.with(view).load(user?.imageUserRef)

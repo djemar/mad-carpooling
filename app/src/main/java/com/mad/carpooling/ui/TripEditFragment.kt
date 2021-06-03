@@ -57,6 +57,7 @@ import com.mad.carpooling.viewmodel.SharedViewModel
 import com.mad.carpooling.viewmodel.SharedViewModelFactory
 import com.mad.carpooling.viewmodel.TripEditViewModel
 import com.mad.carpooling.viewmodel.TripEditViewModelFactory
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -541,6 +542,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         }
     }
 
+    @ExperimentalCoroutinesApi
     private fun updateFirestoreTrips() {
         val dateFormat = SimpleDateFormat("yyyy-MM-ddHH:mm", Locale.getDefault())
         val parsedDate = dateFormat.parse(stops[0].split(",")[2] + stops[0].split(",")[3])
@@ -578,17 +580,9 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                             Log.d("TEST", success.toString())
                             navigateToTripDetails(trip.id)
                             if (success) {
-                                Snackbar.make(
-                                    requireView(),
-                                    "Trip created",
-                                    Snackbar.LENGTH_SHORT
-                                ).show()
+                                Toast.makeText(requireContext(), "Trip created!", Toast.LENGTH_SHORT).show()
                             } else {
-                                Snackbar.make(
-                                    requireView(),
-                                    "Failure on create trip",
-                                    Snackbar.LENGTH_SHORT
-                                ).show()
+                                Toast.makeText(requireContext(), "Oh-oh, there was an error! Try again", Toast.LENGTH_SHORT).show()
                             }
                         })
                     Log.d("TEST", "After observe")
@@ -609,10 +603,10 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                 Log.d("TEST", success.toString())
                 navigateToTripDetails(trip.id)
                 if (success) {
-                    Snackbar.make(requireView(), "Trip updated", Snackbar.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Trip updated!", Toast.LENGTH_SHORT).show()
                 } else {
-                    Snackbar.make(requireView(), "Failure on update trip", Snackbar.LENGTH_SHORT)
-                        .show()
+                    Toast.makeText(requireContext(), "Oh-oh, there was an error! Try again", Toast.LENGTH_SHORT).show()
+
                 }
             })
             Log.d("TEST", "After observe")

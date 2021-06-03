@@ -11,6 +11,10 @@ import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.mad.carpooling.R
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.osmdroid.tileprovider.MapTileProviderBasic
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint

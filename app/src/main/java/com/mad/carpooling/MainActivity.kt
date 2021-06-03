@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -156,13 +157,11 @@ class MainActivity : AppCompatActivity() {
         AuthUI.getInstance()
             .signOut(this)
             .addOnSuccessListener {
-                Snackbar.make(
-                    findViewById(R.id.triplist_rv),
-                    "Logout successful",
-                    Snackbar.LENGTH_SHORT
-                ).show()
                 startActivity(Intent(this, MainActivity::class.java))
+                overridePendingTransition(0,0)
                 finish()
+                overridePendingTransition(0,0)
+                Toast.makeText(this, "Logout successful!", Toast.LENGTH_SHORT).show()
             }
     }
 
@@ -215,15 +214,11 @@ class MainActivity : AppCompatActivity() {
                             model.loginUser(user.uid, updates)
                                 .observe(this, Observer { isSuccess ->
                                     if (isSuccess) {
-                                        Snackbar.make(
-                                            findViewById(R.id.triplist_rv),
-                                            "Login successful",
-                                            Snackbar.LENGTH_SHORT
-                                        ).show()
                                         startActivity(Intent(this, MainActivity::class.java))
                                         overridePendingTransition(0, 0)
                                         finish()
                                         overridePendingTransition(0, 0)
+                                        Toast.makeText(this, "Welcome back!", Toast.LENGTH_SHORT).show()
                                     }
                                 })
                         } else {
@@ -239,15 +234,11 @@ class MainActivity : AppCompatActivity() {
                             model.signUpUser(newUser, newRating)
                                 .observe(this, Observer { isSuccess ->
                                     if (isSuccess) {
-                                        Snackbar.make(
-                                            findViewById(R.id.triplist_rv),
-                                            "Login successful",
-                                            Snackbar.LENGTH_SHORT
-                                        ).show()
                                         startActivity(Intent(this, MainActivity::class.java))
                                         overridePendingTransition(0, 0)
                                         finish()
                                         overridePendingTransition(0, 0)
+                                        Toast.makeText(this, "Welcome!", Toast.LENGTH_SHORT).show()
                                     }
                                 })
                         }

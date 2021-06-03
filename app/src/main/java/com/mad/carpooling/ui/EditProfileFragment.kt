@@ -42,6 +42,7 @@ import com.mad.carpooling.viewmodel.EditProfileViewModel
 import com.mad.carpooling.viewmodel.EditProfileViewModelFactory
 import com.mad.carpooling.viewmodel.SharedViewModel
 import com.mad.carpooling.viewmodel.SharedViewModelFactory
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -81,6 +82,7 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
         setHasOptionsMenu(true)
     }
 
+    @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -367,9 +369,11 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
         viewModel.updateUser(user).observe(viewLifecycleOwner, Observer{ success ->
             findNavController().navigate(EditProfileFragmentDirections.actionNavEditProfileToNavShowProfile())
             if(success)
-                Snackbar.make(requireView(), "User saved", Snackbar.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Profile saved!", Toast.LENGTH_SHORT).show()
+
             else
-                Snackbar.make(requireView(), "Error while saving user", Snackbar.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Error while saving your profile! Try again", Toast.LENGTH_SHORT).show()
+
         })
     }
 
