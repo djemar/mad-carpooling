@@ -184,30 +184,32 @@ class TripRepository {
         }
     }
 
-    suspend fun arrayAddTrip(childName: String, field: String, user: String): Boolean{
-        return try{
+    suspend fun arrayAddTrip(childName: String, field: String, user: String): Boolean {
+        return try {
             Firebase.firestore
                 .collection("trips")
                 .document(childName)
                 .update(field, FieldValue.arrayUnion(user))
                 .await()
             true
-        } catch (e: Exception){
+        } catch (e: Exception) {
             false
         }
     }
 
-    suspend fun getFieldTrip(childName: String, field: String): Result<ArrayList<String>> = withContext(Dispatchers.IO){
-        try{
-            val data = Firebase.firestore
-                .collection("trips")
-                .document(childName)
-                .get()
-                .await()
-                .get(field)
-            return@withContext Result.success(data) as Result<ArrayList<String>>
-        } catch (e: Exception){
-            return@withContext Result.failure(e)
+    suspend fun getFieldTrip(childName: String, field: String): Result<ArrayList<String>> =
+        withContext(Dispatchers.IO) {
+            try {
+                val data = Firebase.firestore
+                    .collection("trips")
+                    .document(childName)
+                    .get()
+                    .await()
+                    .get(field)
+                return@withContext Result.success(data) as Result<ArrayList<String>>
+            } catch (e: Exception) {
+                return@withContext Result.failure(e)
+            }
         }
 
     suspend fun incrementTrip(childName: String, field: String, value: Long): Boolean {
@@ -223,7 +225,7 @@ class TripRepository {
         }
     }
 
-    suspend fun terminateTrip(childName: String) : Boolean{
+    suspend fun terminateTrip(childName: String): Boolean {
         return try {
             Firebase.firestore
                 .collection("trips")
@@ -231,57 +233,13 @@ class TripRepository {
                 .update("finished", true)
                 .await()
             true
-        }catch(e: Exception){
+        } catch (e: Exception) {
             false
         }
     }
 
-    /*    @ExperimentalCoroutinesApi
-    fun loadOthersTrips(currentUser: LiveData<User?>): Flow<HashMap<String, Trip>> {
-        val db = Firebase.firestore
-        val currentUserRef =
-            FirebaseFirestore.getInstance().document("users/${currentUser.value?.uid}")
-        val tripsMap = HashMap<String, Trip>()
 
-        return db.collection("trips").whereNotEqualTo("owner", currentUserRef)
-            .whereEqualTo("visibility", true)
-            .getDataFlow { querySnapshot ->
-                for (doc in querySnapshot!!) {
-                    tripsMap[doc.id] = doc.toObject(Trip::class.java)
-                }
-                return@getDataFlow tripsMap
-            }
-    }
-    @ExperimentalCoroutinesApi
-    fun Query.getQuerySnapshotFlow(): Flow<QuerySnapshot?> {
-        return callbackFlow {
-            val listenerRegistration =
-                addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-                    if (firebaseFirestoreException != null) {
-                        cancel(
-                            message = "error fetching collection data",
-                            cause = firebaseFirestoreException
-                        )
-                        return@addSnapshotListener
-                    }
-                    this.trySend(querySnapshot).isSuccess
-                }
-            awaitClose {
-                Log.d("Trip repo", "cancelling the listener on collection")
-                listenerRegistration.remove()
-            }
-        }
-    }
-
-    @ExperimentalCoroutinesApi
-    fun <T> Query.getDataFlow(mapper: (QuerySnapshot?) -> T): Flow<T> {
-        return getQuerySnapshotFlow()
-            .map {
-                return@map mapper(it)
-            }
-    }
-
-    suspend fun updateTrip(trip: Trip) : Boolean{
+    suspend fun updateTrip(trip: Trip): Boolean {
         return try {
             Firebase.firestore
                 .collection("trips")
@@ -289,36 +247,36 @@ class TripRepository {
                 .set(trip)
                 .await()
             true
-        }catch(e: Exception){
+        } catch (e: Exception) {
             false
         }
     }
 
-    suspend fun removeFavTrip(user: String, tripId: String): Boolean{
-        return try{
+    suspend fun removeFavTrip(user: String, tripId: String): Boolean {
+        return try {
             Firebase.firestore
                 .collection("users").document(user)
                 .update("favTrips", FieldValue.arrayRemove(tripId))
                 .await()
             true
-        }catch (e: Exception){
+        } catch (e: Exception) {
             false
         }
     }
 
-    fun getNewTripId() : String{
+    fun getNewTripId(): String {
         return try {
             val data = Firebase.firestore
                 .collection("trips")
                 .document()
                 .id
             data
-        }catch(e: Exception) {
+        } catch (e: Exception) {
             e.toString()
         }
     }
 
-    suspend fun createTrip(trip: Trip) : Boolean{
+    suspend fun createTrip(trip: Trip): Boolean {
         return try {
             val data = Firebase.firestore
                 .collection("trips")
@@ -326,54 +284,98 @@ class TripRepository {
                 .set(trip)
                 .await()
             true
-        }catch(e: Exception){
+        } catch (e: Exception) {
             false
         }
     }
+/*    @ExperimentalCoroutinesApi
+fun loadOthersTrips(currentUser: LiveData<User?>): Flow<HashMap<String, Trip>> {
+    val db = Firebase.firestore
+    val currentUserRef =
+        FirebaseFirestore.getInstance().document("users/${currentUser.value?.uid}")
+    val tripsMap = HashMap<String, Trip>()
 
-    /*    @ExperimentalCoroutinesApi
-    fun loadOthersTrips(currentUser: LiveData<User?>): Flow<HashMap<String, Trip>> {
-        val db = Firebase.firestore
-        val currentUserRef =
-            FirebaseFirestore.getInstance().document("users/${currentUser.value?.uid}")
-        val tripsMap = HashMap<String, Trip>()
-
-        return db.collection("trips").whereNotEqualTo("owner", currentUserRef)
-            .whereEqualTo("visibility", true)
-            .getDataFlow { querySnapshot ->
-                for (doc in querySnapshot!!) {
-                    tripsMap[doc.id] = doc.toObject(Trip::class.java)
-                }
-                return@getDataFlow tripsMap
+    return db.collection("trips").whereNotEqualTo("owner", currentUserRef)
+        .whereEqualTo("visibility", true)
+        .getDataFlow { querySnapshot ->
+            for (doc in querySnapshot!!) {
+                tripsMap[doc.id] = doc.toObject(Trip::class.java)
             }
-    }
-    @ExperimentalCoroutinesApi
-    fun Query.getQuerySnapshotFlow(): Flow<QuerySnapshot?> {
-        return callbackFlow {
-            val listenerRegistration =
-                addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-                    if (firebaseFirestoreException != null) {
-                        cancel(
-                            message = "error fetching collection data",
-                            cause = firebaseFirestoreException
-                        )
-                        return@addSnapshotListener
-                    }
-                    this.trySend(querySnapshot).isSuccess
+            return@getDataFlow tripsMap
+        }
+}
+@ExperimentalCoroutinesApi
+fun Query.getQuerySnapshotFlow(): Flow<QuerySnapshot?> {
+    return callbackFlow {
+        val listenerRegistration =
+            addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+                if (firebaseFirestoreException != null) {
+                    cancel(
+                        message = "error fetching collection data",
+                        cause = firebaseFirestoreException
+                    )
+                    return@addSnapshotListener
                 }
-            awaitClose {
-                Log.d("Trip repo", "cancelling the listener on collection")
-                listenerRegistration.remove()
+                this.trySend(querySnapshot).isSuccess
             }
+        awaitClose {
+            Log.d("Trip repo", "cancelling the listener on collection")
+            listenerRegistration.remove()
         }
     }
+}
 
+@ExperimentalCoroutinesApi
+fun <T> Query.getDataFlow(mapper: (QuerySnapshot?) -> T): Flow<T> {
+    return getQuerySnapshotFlow()
+        .map {
+            return@map mapper(it)
+        }
+}
     @ExperimentalCoroutinesApi
-    fun <T> Query.getDataFlow(mapper: (QuerySnapshot?) -> T): Flow<T> {
-        return getQuerySnapshotFlow()
-            .map {
-                return@map mapper(it)
+fun loadOthersTrips(currentUser: LiveData<User?>): Flow<HashMap<String, Trip>> {
+    val db = Firebase.firestore
+    val currentUserRef =
+        FirebaseFirestore.getInstance().document("users/${currentUser.value?.uid}")
+    val tripsMap = HashMap<String, Trip>()
+
+    return db.collection("trips").whereNotEqualTo("owner", currentUserRef)
+        .whereEqualTo("visibility", true)
+        .getDataFlow { querySnapshot ->
+            for (doc in querySnapshot!!) {
+                tripsMap[doc.id] = doc.toObject(Trip::class.java)
             }
-    }*/
+            return@getDataFlow tripsMap
+        }
+}
+@ExperimentalCoroutinesApi
+fun Query.getQuerySnapshotFlow(): Flow<QuerySnapshot?> {
+    return callbackFlow {
+        val listenerRegistration =
+            addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+                if (firebaseFirestoreException != null) {
+                    cancel(
+                        message = "error fetching collection data",
+                        cause = firebaseFirestoreException
+                    )
+                    return@addSnapshotListener
+                }
+                this.trySend(querySnapshot).isSuccess
+            }
+        awaitClose {
+            Log.d("Trip repo", "cancelling the listener on collection")
+            listenerRegistration.remove()
+        }
+    }
+}
+
+@ExperimentalCoroutinesApi
+fun <T> Query.getDataFlow(mapper: (QuerySnapshot?) -> T): Flow<T> {
+    return getQuerySnapshotFlow()
+        .map {
+            return@map mapper(it)
+        }
+}*/
+
 }
 

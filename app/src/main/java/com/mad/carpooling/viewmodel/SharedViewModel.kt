@@ -2,12 +2,7 @@ package com.mad.carpooling.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.*
-import com.google.firebase.Timestamp
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.model.Rating
 import com.mad.carpooling.model.Trip
 import com.mad.carpooling.model.User
@@ -151,16 +146,16 @@ class SharedViewModel(
         return result
     }
 
-    fun getUserRef(currentUserUid: String) : LiveData<DocumentReference> {
+    fun getUserRef(currentUserUid: String): LiveData<DocumentReference> {
         val res = MutableLiveData<DocumentReference>()
-        viewModelScope.launch{
+        viewModelScope.launch {
             val result = userRepository.getUserRef(currentUserUid)
             res.postValue(result.getOrNull())
         }
         return res
     }
-    
-    fun getRatings(user: String, field: String): LiveData<Map<String, ArrayList<Any>>?>{
+
+    fun getRatings(user: String, field: String): LiveData<Map<String, ArrayList<Any>>?> {
         val result = MutableLiveData<Map<String, ArrayList<Any>>?>()
         viewModelScope.launch {
             val map = userRepository.getRatings(user, field)
@@ -173,8 +168,12 @@ class SharedViewModel(
         return result
     }
 
-    fun addInterest(trip: String, fieldTrip: String, fieldUser: String, user: String): LiveData<Boolean>
-    {
+    fun addInterest(
+        trip: String,
+        fieldTrip: String,
+        fieldUser: String,
+        user: String
+    ): LiveData<Boolean> {
         val result = MutableLiveData<Boolean>()
         viewModelScope.launch {
             if (tripRepository.arrayUnionTrip(trip, fieldTrip, user))
@@ -252,93 +251,93 @@ class SharedViewModel(
                 result.postValue(false)
             }
 
-    fun getUserDoc(userId: String): LiveData<User?> {
-        val result = MutableLiveData<User?>()
-        viewModelScope.launch {
-            val user = userRepository.getUserDoc(userId)
-            if (user.isSuccess) {
-                result.postValue(user.getOrNull())
-            } else {
-                result.postValue(null)
-            }
         }
         return result
     }
 
-    fun terminateTrip(trip: String): LiveData<Boolean>
-    {
-        val res = MutableLiveData<Boolean>()
-        viewModelScope.launch{
-            val result = tripRepository.terminateTrip(trip)
-    fun signUpUser(newUser: User, newRating: Rating) : LiveData<Boolean>
-    {
-        val res = MutableLiveData<Boolean>()
-        viewModelScope.launch {
-            val result = userRepository.signUpUser(newUser.uid, newUser, newRating)
-            res.postValue(result)
+        fun terminateTrip(trip: String): LiveData<Boolean> {
+            val res = MutableLiveData<Boolean>()
+            viewModelScope.launch{
+                val result = tripRepository.terminateTrip(trip)
+                res.postValue(result)
+            }
+            return res
         }
-        return res
-    }
 
-    fun loginUser(uid: String, updates: HashMap<String,Any>) : LiveData<Boolean>
-    {
-        val res = MutableLiveData<Boolean>()
-        viewModelScope.launch {
-            val result = userRepository.loginUser(uid, updates)
-            res.postValue(result)
+        fun signUpUser(newUser: User, newRating: Rating): LiveData<Boolean> {
+            val res = MutableLiveData<Boolean>()
+            viewModelScope.launch {
+                val result = userRepository.signUpUser(newUser.uid, newUser, newRating)
+                res.postValue(result)
+            }
+            return res
         }
-        return res
-    }
 
-    fun updateRatings(uid: String, role: String, currentUser: String, newArray: ArrayList<Any>): LiveData<Boolean>{
-        val res = MutableLiveData<Boolean>()
-        viewModelScope.launch{
-            val result = userRepository.updateRatings(uid, role, currentUser, newArray)
-            res.postValue(result)
+        fun loginUser(uid: String, updates: HashMap<String, Any>): LiveData<Boolean> {
+                val res = MutableLiveData<Boolean>()
+                viewModelScope.launch {
+                    val result = userRepository.loginUser(uid, updates)
+                    res.postValue(result)
+                }
+                return res
+            }
+
+            fun updateRatings(
+                uid: String,
+                role: String,
+                currentUser: String,
+                newArray: ArrayList<Any>
+            ): LiveData<Boolean> {
+                val res = MutableLiveData<Boolean>()
+                viewModelScope.launch {
+                    val result =
+                        userRepository.updateRatings(uid, role, currentUser, newArray)
+                    res.postValue(result)
+                }
+                return res
+            }
+
+            fun checkExistingUser(uid: String): LiveData<Boolean> {
+                val res = MutableLiveData<Boolean>()
+                viewModelScope.launch {
+                    val result = userRepository.checkExistingUser(uid)
+                    res.postValue(result)
+                }
+                return res
+            }
+
+            /** Getters **/
+
+            @ExperimentalCoroutinesApi
+            fun getTrips(): LiveData<HashMap<String, Trip>> {
+                return trips
+            }
+
+            @ExperimentalCoroutinesApi
+            @InternalCoroutinesApi
+            fun getOthersTrips(): LiveData<HashMap<String, Trip>> {
+                return othersTrips
+            }
+
+            @ExperimentalCoroutinesApi
+            fun getMyTrips(): LiveData<HashMap<String, Trip>> {
+                return myTrips
+            }
+
+            @ExperimentalCoroutinesApi
+            fun getInterestedTrips(): LiveData<HashMap<String, Trip>> {
+                return interestTrips
+            }
+
+            @ExperimentalCoroutinesApi
+            fun getBoughtTrips(): LiveData<HashMap<String, Trip>> {
+                return boughtTrips
+            }
+
+            @ExperimentalCoroutinesApi
+            fun getCurrentUser(): LiveData<User?> {
+                return currentUser
+            }
+
         }
-        return res
-    fun checkExistingUser(uid: String) : LiveData<Boolean>
-    {
-        val res = MutableLiveData<Boolean>()
-        viewModelScope.launch {
-            val result = userRepository.checkExistingUser(uid)
-            res.postValue(result)
-        }
-        return res
-    }
-
-    /** Getters **/
-
-    @ExperimentalCoroutinesApi
-    fun getTrips(): LiveData<HashMap<String, Trip>> {
-        return trips
-    }
-
-    @ExperimentalCoroutinesApi
-    @InternalCoroutinesApi
-    fun getOthersTrips(): LiveData<HashMap<String, Trip>> {
-        return othersTrips
-    }
-
-    @ExperimentalCoroutinesApi
-    fun getMyTrips(): LiveData<HashMap<String, Trip>> {
-        return myTrips
-    }
-
-    @ExperimentalCoroutinesApi
-    fun getInterestedTrips(): LiveData<HashMap<String, Trip>> {
-        return interestTrips
-    }
-
-    @ExperimentalCoroutinesApi
-    fun getBoughtTrips(): LiveData<HashMap<String, Trip>> {
-        return boughtTrips
-    }
-
-    @ExperimentalCoroutinesApi
-    fun getCurrentUser(): LiveData<User?> {
-        return currentUser
-    }
-
-}
 

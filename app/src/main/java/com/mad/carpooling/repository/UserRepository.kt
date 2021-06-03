@@ -40,7 +40,7 @@ class UserRepository {
                 this.trySend(Result.success(user)).isSuccess
             } else{
                 cancel(
-                    message = "error fetching collection myTrips data",
+                    message = "error fetching collection loadUser data",
                     cause = e
                 )
             }
@@ -136,8 +136,10 @@ class UserRepository {
                 .update("${role}.${currentUser}", newArray)
                 .await()
             true
-        }catch(e: Exception){
+        }catch(e: Exception) {
             return false
+        }
+    }
     suspend fun signUpUser(uid: String, newUser: User, newRating: Rating): Boolean {
         return try{
             Firebase.firestore
