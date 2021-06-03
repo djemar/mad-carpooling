@@ -226,9 +226,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="end trip"
-                            app:cornerRadius="50dp"
-                            app:strokeColor="?attr/colorPrimary"
-                            app:strokeWidth="1dp" />
+                            app:cornerRadius="50dp" />
                     </FrameLayout>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
