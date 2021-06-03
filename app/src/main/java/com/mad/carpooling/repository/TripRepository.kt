@@ -1,9 +1,8 @@
 package com.mad.carpooling.repository
 
-import android.util.Log
-import android.view.View
 import androidx.lifecycle.LiveData
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -15,7 +14,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 class TripRepository {
 
@@ -39,7 +39,83 @@ class TripRepository {
                             tripsMap.filterValues { t -> !t.finished && t.timestamp > Timestamp.now() } as HashMap<String, Trip>
                         this.trySend(Result.success(filteredMap)).isSuccess
                     } else {
-                        this.trySend(Result.success(HashMap<String, Trip>())).isFailure
+                        cancel(
+                            message = "error fetching collection othersTrip data",
+                            cause = e
+                        )
+                    }
+                }
+            awaitClose { subscription.remove() }
+        }
+
+    @ExperimentalCoroutinesApi
+    suspend fun loadMyTrips(currentUser: LiveData<User?>): Flow<Result<HashMap<String, Trip>>> =
+        callbackFlow {
+            val db = Firebase.firestore
+            val currentUserRef =
+                FirebaseFirestore.getInstance().document("users/${currentUser.value?.uid}")
+
+            val subscription = db.collection("trips").whereEqualTo("owner", currentUserRef)
+                .addSnapshotListener { snapshot, e ->
+                    if (e == null) {
+                        val tripsMap: HashMap<String, Trip> = HashMap()
+                        for (doc in snapshot!!) {
+                            tripsMap[doc.id] = doc.toObject(Trip::class.java)
+                        }
+                        this.trySend(Result.success(tripsMap)).isSuccess
+                    } else {
+                        cancel(
+                            message = "error fetching collection myTrips data",
+                            cause = e
+                        )
+                    }
+                }
+            awaitClose { subscription.remove() }
+        }
+
+    @ExperimentalCoroutinesApi
+    suspend fun loadInterestedTrips(): Flow<Result<HashMap<String, Trip>>> =
+        callbackFlow {
+            val db = Firebase.firestore
+
+            val subscription = db.collection("trips")
+                .whereArrayContains("interestedPeople", Firebase.auth.uid.toString())
+                .addSnapshotListener { snapshot, e ->
+                    if (e == null) {
+                        val tripsMap: HashMap<String, Trip> = HashMap()
+                        for (doc in snapshot!!) {
+                            tripsMap[doc.id] = doc.toObject(Trip::class.java)
+                        }
+                        this.trySend(Result.success(tripsMap)).isSuccess
+                    } else {
+                        cancel(
+                            message = "error fetching collection interestedTrips data",
+                            cause = e
+                        )
+                    }
+                }
+            awaitClose { subscription.remove() }
+        }
+
+    @ExperimentalCoroutinesApi
+    suspend fun loadBoughtTrips(): Flow<Result<HashMap<String, Trip>>> =
+        callbackFlow {
+            val db = Firebase.firestore
+
+            val subscription = db.collection("trips")
+                .whereArrayContains("acceptedPeople", Firebase.auth.uid.toString())
+                .addSnapshotListener { snapshot, e ->
+                    if (e == null) {
+                        val tripsMap: HashMap<String, Trip> = HashMap()
+                        for (doc in snapshot!!) {
+                            tripsMap[doc.id] = doc.toObject(Trip::class.java)
+                        }
+                        this.trySend(Result.success(tripsMap)).isSuccess
+                    } else {
+                        cancel(
+                            message = "error fetching collection boughtTrips data",
+                            cause = e
+                        )
                     }
                 }
             awaitClose { subscription.remove() }
@@ -60,44 +136,16 @@ class TripRepository {
                         }
                         this.trySend(Result.success(tripsMap)).isSuccess
                     } else {
-                        this.trySend(Result.success(HashMap<String, Trip>())).isFailure
+                        cancel(
+                            message = "error fetching collection myTrips data",
+                            cause = e
+                        )
                     }
                 }
             awaitClose { subscription.remove() }
         }
 
-/*    @ExperimentalCoroutinesApi
-    fun loadOthersTrips(currentUser: LiveData<User?>): Flow<HashMap<String, Trip>> {
-        val db = Firebase.firestore
-        val currentUserRef =
-            FirebaseFirestore.getInstance().document("users/${currentUser.value?.uid}")
-        val tripsMap = HashMap<String, Trip>()
-
-        return db.collection("trips").whereNotEqualTo("owner", currentUserRef)
-            .whereEqualTo("visibility", true)
-            .getDataFlow { querySnapshot ->
-                for (doc in querySnapshot!!) {
-                    tripsMap[doc.id] = doc.toObject(Trip::class.java)
-                }
-                return@getDataFlow tripsMap
-            }
-    }
-
-    suspend fun getUserDoc(childName: String)
-            : Result<User?> = withContext(Dispatchers.IO) {
-        try {
-            val data = Firebase.firestore
-                .collection("users")
-                .document(childName)
-                .get()
-                .await()
-            return@withContext Result.success(data.toObject(User::class.java))
-        } catch (e: Exception) {
-            return@withContext Result.failure(e)
-        }
-    }
-
-    suspend fun getTrip(childName: String) : Result<Trip?> = withContext(Dispatchers.IO){
+    suspend fun getTrip(childName: String): Result<Trip?> = withContext(Dispatchers.IO) {
         try {
             val data = Firebase.firestore
                 .collection("trips")
@@ -110,28 +158,28 @@ class TripRepository {
         }
     }
 
-    suspend fun arrayUnionTrip(childName: String, field: String, user: String): Boolean{
-        return try{
+    suspend fun arrayUnionTrip(childName: String, field: String, user: String): Boolean {
+        return try {
             Firebase.firestore
                 .collection("trips")
                 .document(childName)
                 .update(field, FieldValue.arrayUnion(user))
                 .await()
             true
-        } catch (e: Exception){
+        } catch (e: Exception) {
             false
         }
     }
 
-    suspend fun arrayRemoveTrip(childName: String, field: String, user: String): Boolean{
-        return try{
+    suspend fun arrayRemoveTrip(childName: String, field: String, user: String): Boolean {
+        return try {
             Firebase.firestore
                 .collection("trips")
                 .document(childName)
                 .update(field, FieldValue.arrayRemove(user))
                 .await()
             true
-        } catch (e: Exception){
+        } catch (e: Exception) {
             false
         }
     }
@@ -161,17 +209,16 @@ class TripRepository {
         } catch (e: Exception){
             return@withContext Result.failure(e)
         }
-    }
 
-    suspend fun incrementTrip(childName: String, field: String, value: Long) : Boolean{
-        return try{
+    suspend fun incrementTrip(childName: String, field: String, value: Long): Boolean {
+        return try {
             Firebase.firestore
                 .collection("trips")
                 .document(childName)
                 .update(field, FieldValue.increment(value))
                 .await()
             true
-        } catch (e: Exception){
+        } catch (e: Exception) {
             false
         }
     }
@@ -189,6 +236,22 @@ class TripRepository {
         }
     }
 
+    /*    @ExperimentalCoroutinesApi
+    fun loadOthersTrips(currentUser: LiveData<User?>): Flow<HashMap<String, Trip>> {
+        val db = Firebase.firestore
+        val currentUserRef =
+            FirebaseFirestore.getInstance().document("users/${currentUser.value?.uid}")
+        val tripsMap = HashMap<String, Trip>()
+
+        return db.collection("trips").whereNotEqualTo("owner", currentUserRef)
+            .whereEqualTo("visibility", true)
+            .getDataFlow { querySnapshot ->
+                for (doc in querySnapshot!!) {
+                    tripsMap[doc.id] = doc.toObject(Trip::class.java)
+                }
+                return@getDataFlow tripsMap
+            }
+    }
     @ExperimentalCoroutinesApi
     fun Query.getQuerySnapshotFlow(): Flow<QuerySnapshot?> {
         return callbackFlow {

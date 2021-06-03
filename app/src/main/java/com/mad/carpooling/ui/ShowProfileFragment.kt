@@ -77,7 +77,7 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
         cvPassenger = view.findViewById(R.id.ll_rating_passenger)
 
         if (args.uid == "uid") {
-            sharedViewModel.getCurrentUserData()
+            sharedViewModel.getCurrentUser()
                 .observe(viewLifecycleOwner, Observer { currentUser ->
                     // Update the UI
                     if (currentUser != null) {
@@ -102,9 +102,9 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
         tvEmail.text = user.email
         tvLocation.text = user.location
         Glide.with(view).load(user.imageUserRef).into(ivProfilePic)
-        llEmail.isVisible = uid == sharedViewModel.getCurrentUserData().value?.uid
+        llEmail.isVisible = uid == sharedViewModel.getCurrentUser().value?.uid
         val div = view.findViewById<View>(R.id.divider4)
-        div.isVisible = uid == sharedViewModel.getCurrentUserData().value?.uid
+        div.isVisible = uid == sharedViewModel.getCurrentUser().value?.uid
 
         sharedViewModel.getRatings(user.uid,"driverRatings").observe(viewLifecycleOwner, Observer { map ->
             if (map != null) {
@@ -157,7 +157,7 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
             bundle.putString("uid", uid)
             bundle.putString("role", "driver")
 
-            if (uid != sharedViewModel.getCurrentUserData().value?.uid!!) {
+            if (uid != sharedViewModel.getCurrentUser().value?.uid!!) {
                 findNavController().navigate(
                     R.id.action_nav_show_profile_others_to_nav_reviews_profile,
                     bundle
@@ -175,7 +175,7 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
             bundle.putString("uid", uid)
             bundle.putString("role", "passenger")
 
-            if (uid != sharedViewModel.getCurrentUserData().value?.uid!!) {
+            if (uid != sharedViewModel.getCurrentUser().value?.uid!!) {
                 findNavController().navigate(
                     R.id.action_nav_show_profile_others_to_nav_reviews_profile,
                     bundle
@@ -215,7 +215,7 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
         optionsMenu.findItem(R.id.nav_edit_profile).isVisible =
-            uid == sharedViewModel.getCurrentUserData().value?.uid
+            uid == sharedViewModel.getCurrentUser().value?.uid
     }
 
 }

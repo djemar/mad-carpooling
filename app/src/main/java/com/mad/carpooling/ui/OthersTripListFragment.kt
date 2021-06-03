@@ -110,9 +110,9 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
 
         //initSwipeRefresh(swipeContainer, tripAdapter)
 
-        model.getCurrentUserData().observe(viewLifecycleOwner, Observer { currentUser ->
+        sharedViewModel.getCurrentUser().observe(viewLifecycleOwner, Observer { currentUser ->
             // update after login/logout
-            model.getOthersTripsData().observe(viewLifecycleOwner, Observer { newTripsMap ->
+            sharedViewModel.getOthersTrips().observe(viewLifecycleOwner, Observer { newTripsMap ->
                 // Update the UI
                 emptyView.isVisible = newTripsMap.isEmpty()
                 tripAdapter.submitList(newTripsMap.values.toList())
@@ -130,7 +130,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
         tripAdapter: OthersTripAdapter
     ) {
         swipeContainer?.setOnRefreshListener {
-            tripMap = model.getOthersTripsData().value!!
+            tripMap = sharedViewModel.getOthersTrips().value!!
             emptyView.isVisible = tripMap.isEmpty()
             tripAdapter.submitList(tripMap.values.toList())
             initSearch(tripMap, tripAdapter)

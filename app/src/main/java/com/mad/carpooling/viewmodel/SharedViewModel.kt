@@ -22,40 +22,23 @@ class SharedViewModel(
     private val tripRepository: TripRepository,
     private val userRepository: UserRepository
 ) : ViewModel() {
-
-    private val trips: MutableLiveData<HashMap<String, Trip>> by lazy {
+/*
+    /** Alternative implementation **/
+    private val othersTrips: MutableLiveData<HashMap<String, Trip>> by lazy {
         MutableLiveData<HashMap<String, Trip>>().also {
-            loadTrips()
+            loadOthersTrips()
         }
     }
 
-    private val myTrips: MutableLiveData<HashMap<String, Trip>> by lazy {
-        MutableLiveData<HashMap<String, Trip>>().also {
-            loadMyTrips()
-        }
-    }
-
-    private val boughtTrips: MutableLiveData<HashMap<String, Trip>> by lazy {
-        MutableLiveData<HashMap<String, Trip>>().also {
-            loadBoughtTrips()
-        }
-    }
-
-    private val interestTrips: MutableLiveData<HashMap<String, Trip>> by lazy {
-        MutableLiveData<HashMap<String, Trip>>().also {
-            loadInterestedTrips()
-        }
-    }
-
-/*    @ExperimentalCoroutinesApi
+    @ExperimentalCoroutinesApi
     @InternalCoroutinesApi
     private val othersTrips: MutableLiveData<HashMap<String, Trip>> by lazy {
         MutableLiveData<HashMap<String, Trip>>().also {
             loadOthersTrips()
         }
-    }*/
+    }
 
-/*    @InternalCoroutinesApi
+    @InternalCoroutinesApi
     @ExperimentalCoroutinesApi
     private fun loadOthersTrips() {
         if(currentUser.value != null){
@@ -69,122 +52,81 @@ class SharedViewModel(
     }*/
 
     @ExperimentalCoroutinesApi
-    @InternalCoroutinesApi
-    fun getOthersTripsData(): LiveData<HashMap<String, Trip>> {
-        return othersTrips
-    }
-
-    private fun loadInterestedTrips() {
-        val db = Firebase.firestore
-
-        db.collection("trips").whereArrayContains("interestedPeople", currentUser.value?.uid!!)
-            .addSnapshotListener { value, e ->
-                if (e != null) {
-                    interestTrips.postValue(HashMap())
-                    Log.e("loadInterestedTrips() exception => ", e.toString())
-                    return@addSnapshotListener
-                }
-                val tripsMap: HashMap<String, Trip> = HashMap()
-                for (doc in value!!) {
-                    tripsMap[doc.id] = doc.toObject(Trip::class.java)
-                }
-                interestTrips.postValue(tripsMap.filterValues { t -> t.timestamp > Timestamp.now() } as HashMap<String, Trip>?)
-            }
-    }
-
-    private fun loadBoughtTrips() {
-        val db = Firebase.firestore
-
-        db.collection("trips").whereArrayContains("acceptedPeople", currentUser.value?.uid!!)
-            .addSnapshotListener { value, e ->
-                if (e != null) {
-                    boughtTrips.postValue(HashMap())
-                    Log.e("loadBoughtTrips() exception => ", e.toString())
-                    return@addSnapshotListener
-                }
-                val tripsMap: HashMap<String, Trip> = HashMap()
-                for (doc in value!!) {
-                    tripsMap[doc.id] = doc.toObject(Trip::class.java)
-                }
-                boughtTrips.postValue(tripsMap)
-            }
-    }
-
-    private fun loadMyTrips() {
-        val db = Firebase.firestore
-        val currentUserRef =
-            FirebaseFirestore.getInstance().document("users/${currentUser.value?.uid}")
-        db.collection("trips").whereEqualTo("owner", currentUserRef)
-            .addSnapshotListener { value, e ->
-                if (e != null) {
-                    myTrips.postValue(HashMap())
-                    Log.e("loadMyTrips() exception => ", e.toString())
-                    return@addSnapshotListener
-                }
-                val tripsMap: HashMap<String, Trip> = HashMap()
-                for (doc in value!!) {
-                    tripsMap[doc.id] = doc.toObject(Trip::class.java)
-                }
-                myTrips.postValue(tripsMap)
-            }
-    }
-
-    private fun loadTrips() {
-        // Do an asynchronous operation to fetch trips.
-        val db = Firebase.firestore
-        db.collection("trips").addSnapshotListener { value, e ->
-            if (e != null) {
-                trips.postValue(HashMap())
-                Log.e("loadTrips() exception => ", e.toString())
-                return@addSnapshotListener
-            }
-            val tripsMap: HashMap<String, Trip> = HashMap()
-            for (doc in value!!) {
-                tripsMap[doc.id] = doc.toObject(Trip::class.java)
-            }
-            trips.postValue(tripsMap)
-        }
-    }
-
-    fun getTrips(): LiveData<HashMap<String, Trip>> {
-        return trips
-    }
-
-    fun getMyTrips(): LiveData<HashMap<String, Trip>> {
-        return myTrips
-    }
-
-    fun getBoughtTrips(): LiveData<HashMap<String, Trip>> {
-        return boughtTrips
-    }
-
-    fun getInterestedTrips(): LiveData<HashMap<String, Trip>> {
-        return interestTrips
-    }
-
-    @ExperimentalCoroutinesApi
     private val othersTrips = liveData<HashMap<String, Trip>>(Dispatchers.IO) {
         //emit(Result.Loading())
-        try{
+        try {
             tripRepository.loadOthersTrips(currentUser).collect {
                 emit(it.getOrDefault(HashMap()))
             }
-        }catch (e: Exception){
+        } catch (e: Exception) {
             emit(HashMap())
-            Log.e("ERROR:",e.message!!)
+            Log.e("ERROR:", e.message!!)
+        }
+    }
+
+    @ExperimentalCoroutinesApi
+    private val myTrips = liveData<HashMap<String, Trip>>(Dispatchers.IO) {
+        //emit(Result.Loading())
+        try {
+            tripRepository.loadMyTrips(currentUser).collect {
+                emit(it.getOrDefault(HashMap()))
+            }
+        } catch (e: Exception) {
+            emit(HashMap())
+            Log.e("ERROR:", e.message!!)
+        }
+    }
+
+    @ExperimentalCoroutinesApi
+    private val interestTrips = liveData<HashMap<String, Trip>>(Dispatchers.IO) {
+        //emit(Result.Loading())
+        try {
+            tripRepository.loadInterestedTrips().collect {
+                emit(it.getOrDefault(HashMap()))
+            }
+        } catch (e: Exception) {
+            emit(HashMap())
+            Log.e("ERROR:", e.message!!)
+        }
+    }
+
+    @ExperimentalCoroutinesApi
+    private val boughtTrips = liveData<HashMap<String, Trip>>(Dispatchers.IO) {
+        //emit(Result.Loading())
+        try {
+            tripRepository.loadBoughtTrips().collect {
+                emit(it.getOrDefault(HashMap()))
+            }
+        } catch (e: Exception) {
+            emit(HashMap())
+            Log.e("ERROR:", e.message!!)
+        }
+    }
+
+    @ExperimentalCoroutinesApi
+    private val trips = liveData<HashMap<String, Trip>>(Dispatchers.IO) {
+        //emit(Result.Loading())
+        try {
+            tripRepository.loadTrips().collect {
+                emit(it.getOrDefault(HashMap()))
+                Log.d("TRIPS: ", it.getOrNull().toString())
+            }
+        } catch (e: Exception) {
+            emit(HashMap())
+            Log.e("ERROR:", e.message!!)
         }
     }
 
     @ExperimentalCoroutinesApi
     private val currentUser = liveData<User?>(Dispatchers.IO) {
         //emit(Result.Loading())
-        try{
+        try {
             userRepository.loadUser().collect {
                 emit(it.getOrNull())
             }
-        }catch (e: Exception){
+        } catch (e: Exception) {
             emit(null)
-            Log.e("ERROR:",e.message!!)
+            Log.e("ERROR:", e.message!!)
         }
     }
 
@@ -233,9 +175,9 @@ class SharedViewModel(
     fun addInterest(trip: String, fieldTrip: String, fieldUser: String, user: String): LiveData<Boolean>
     {
         val result = MutableLiveData<Boolean>()
-        viewModelScope.launch{
-            if(tripRepository.arrayUnionTrip(trip, fieldTrip, user))
-                launch{
+        viewModelScope.launch {
+            if (tripRepository.arrayUnionTrip(trip, fieldTrip, user))
+                launch {
                     val res = userRepository.arrayUnionUser(user, fieldUser, trip)
                     result.postValue(res)
                 }
@@ -243,12 +185,16 @@ class SharedViewModel(
         return result
     }
 
-    fun removeInterest(trip: String, fieldTrip: String, fieldUser: String, user: String): LiveData<Boolean>
-    {
+    fun removeInterest(
+        trip: String,
+        fieldTrip: String,
+        fieldUser: String,
+        user: String
+    ): LiveData<Boolean> {
         val result = MutableLiveData<Boolean>()
-        viewModelScope.launch{
-            if(tripRepository.arrayRemoveTrip(trip, fieldTrip, user))
-                launch{
+        viewModelScope.launch {
+            if (tripRepository.arrayRemoveTrip(trip, fieldTrip, user))
+                launch {
                     val res = userRepository.arrayRemoveUser(user, fieldUser, trip)
                     result.postValue(res)
                 }
@@ -256,10 +202,15 @@ class SharedViewModel(
         return result
     }
 
-    fun removeAccepted(trip: String, fieldTrip: String, incrementField: String, user: String, value: Long): LiveData<Boolean>
-    {
+    fun removeAccepted(
+        trip: String,
+        fieldTrip: String,
+        incrementField: String,
+        user: String,
+        value: Long
+    ): LiveData<Boolean> {
         val result = MutableLiveData<Boolean>()
-        viewModelScope.launch{
+        viewModelScope.launch {
             val res = tripRepository.getFieldTrip(trip, fieldTrip)
             if (res.isSuccess) {
                 val tmpArray = res.getOrNull()
@@ -300,6 +251,15 @@ class SharedViewModel(
                 result.postValue(false)
             }
 
+    fun getUserDoc(userId: String): LiveData<User?> {
+        val result = MutableLiveData<User?>()
+        viewModelScope.launch {
+            val user = userRepository.getUserDoc(userId)
+            if (user.isSuccess) {
+                result.postValue(user.getOrNull())
+            } else {
+                result.postValue(null)
+            }
         }
         return result
     }
@@ -321,6 +281,38 @@ class SharedViewModel(
             res.postValue(result)
         }
         return res
+
+    /** Getters **/
+
+    @ExperimentalCoroutinesApi
+    fun getTrips(): LiveData<HashMap<String, Trip>> {
+        return trips
+    }
+
+    @ExperimentalCoroutinesApi
+    @InternalCoroutinesApi
+    fun getOthersTrips(): LiveData<HashMap<String, Trip>> {
+        return othersTrips
+    }
+
+    @ExperimentalCoroutinesApi
+    fun getMyTrips(): LiveData<HashMap<String, Trip>> {
+        return myTrips
+    }
+
+    @ExperimentalCoroutinesApi
+    fun getInterestedTrips(): LiveData<HashMap<String, Trip>> {
+        return interestTrips
+    }
+
+    @ExperimentalCoroutinesApi
+    fun getBoughtTrips(): LiveData<HashMap<String, Trip>> {
+        return boughtTrips
+    }
+
+    @ExperimentalCoroutinesApi
+    fun getCurrentUser(): LiveData<User?> {
+        return currentUser
     }
 
 }

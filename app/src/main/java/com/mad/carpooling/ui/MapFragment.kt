@@ -125,7 +125,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
 
         selectedMarker.observe(viewLifecycleOwner, { marker ->
             btnDeleteMarker.isVisible =
-                marker != null && trip.owner?.id == sharedViewModel.getCurrentUserData().value?.uid
+                marker != null && trip.owner?.id == sharedViewModel.getCurrentUser().value?.uid
             if (marker != null) {
                 map.controller.animateTo(marker.position)
             }

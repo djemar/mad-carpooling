@@ -143,9 +143,9 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 
+    @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         ivCarPic = view.findViewById(R.id.iv_tripDetails_car_pic)
         ivExpanded = view.findViewById(R.id.expanded_image)
         ivMap = view.findViewById(R.id.iv_map)
@@ -162,11 +162,10 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         profileLayout = view.findViewById(R.id.cl_tripDetails_profile)
         btnTrip = view.findViewById(R.id.btn_endtrip_ratedriver)
         ratingBar = view.findViewById<RatingBar>(R.id.rb_tripDetails_driver)
-
         bottomSheet = view.findViewById(R.id.bottom_sheet)
         fab = view.findViewById(R.id.fab_tripdetails)
         bsb = BottomSheetBehavior.from(bottomSheet)
-        // map = view.findViewById(R.id.mapDetails)
+
         sharedViewModel.getTrips().observe(viewLifecycleOwner, { newTripsMap ->
             // Update the UI
             initTripDetails(newTripsMap, view)
@@ -291,7 +290,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
         val profileInfo = view.findViewById<ConstraintLayout>(R.id.cl_tripDetails_profile)
 
-        if (trip.owner?.id != sharedViewModel.getCurrentUserData().value?.uid) {
+        if (trip.owner?.id != sharedViewModel.getCurrentUser().value?.uid) {
             profileInfo.setOnClickListener {
                 val action = TripDetailsFragmentDirections.actionNavTripDetailsToNavShowProfile(
                     trip.owner?.id!!
@@ -452,7 +451,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             builder.setTitle("Add a review")
                 .setPositiveButton("Confirm", DialogInterface.OnClickListener { dialog, id ->
                     //TODO: add new value to a map into DB
-                    val currentUser = model.getCurrentUserData().value?.uid
+                    val currentUser = model.getCurrentUser().value?.uid
                     val newArray: ArrayList<Any> =
                         arrayListOf(rb_review!!.rating.toInt(), etReview?.text?.trim().toString())
 
@@ -731,22 +730,21 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         }
     }
 
+    @ExperimentalCoroutinesApi
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
+            optionsMenu.findItem(R.id.edit_trip).isVisible =
+                trip.owner!!.id == sharedViewModel.getCurrentUser().value?.uid && !trip.finished && trip.timestamp > Timestamp.now()
 
+            optionsMenu.findItem(R.id.visibility_trip).isVisible =
+                trip.owner!!.id == sharedViewModel.getCurrentUser().value?.uid && !trip.finished
 
-        optionsMenu.findItem(R.id.edit_trip).isVisible =
-            trip.owner!!.id == sharedViewModel.getCurrentUserData().value?.uid && !trip.finished && trip.timestamp > Timestamp.now()
-
-        optionsMenu.findItem(R.id.visibility_trip).isVisible =
-            trip.owner!!.id == sharedViewModel.getCurrentUserData().value?.uid && !trip.finished
-
-        if (trip.visibility) {
-            optionsMenu.findItem(R.id.visibility_trip).setIcon(R.drawable.ic_sharp_visibility)
-        } else {
-            optionsMenu.findItem(R.id.visibility_trip)
-                .setIcon(R.drawable.ic_baseline_visibility_off)
-        }
+            if (trip.visibility) {
+                optionsMenu.findItem(R.id.visibility_trip).setIcon(R.drawable.ic_sharp_visibility)
+            } else {
+                optionsMenu.findItem(R.id.visibility_trip)
+                    .setIcon(R.drawable.ic_baseline_visibility_off)
+            }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

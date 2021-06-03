@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -37,6 +38,7 @@ import com.mad.carpooling.repository.TripRepository
 import com.mad.carpooling.repository.UserRepository
 import com.mad.carpooling.viewmodel.SharedViewModel
 import com.mad.carpooling.viewmodel.SharedViewModelFactory
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 
 class MainActivity : AppCompatActivity() {
@@ -54,6 +56,7 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+    @ExperimentalCoroutinesApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -94,7 +97,10 @@ class MainActivity : AppCompatActivity() {
             if (userState == null) {
                 Log.d("AuthListener", "null user")
             } else {
-                model.getTrips()
+                model.getTrips().observe(this, Observer {
+                    model.getTrips().removeObservers(this)
+                    }
+                )
                 initDrawerHeader(navView)
             }
         }
@@ -177,7 +183,7 @@ class MainActivity : AppCompatActivity() {
         val tvNicknameHeader: TextView = headerView.findViewById(R.id.nav_header_nickname)
 
         if (auth.currentUser != null)
-            model.getCurrentUserData().observe(this, { currentUser ->
+            model.getCurrentUser().observe(this, { currentUser ->
                 // Update the UI
                 if (currentUser != null) {
                     tvFullNameHeader.text = currentUser.fullname
