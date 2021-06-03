@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
@@ -71,7 +72,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
     private lateinit var chipSearchResults: Chip
     private lateinit var emptyView: TextView
     private var searchIsValid: Boolean = false
-    private val model: SharedViewModel by activityViewModels {
+    private val sharedViewModel: SharedViewModel by activityViewModels {
         SharedViewModelFactory(
             TripRepository(),
             UserRepository()
@@ -102,16 +103,16 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
         rv.layoutManager = LinearLayoutManager(context)
         rv.isNestedScrollingEnabled = false //prevent toolbar to expand on scroll
         emptyView = view.findViewById<TextView>(R.id.no_trips_available)
-        val tripAdapter = OthersTripAdapter()
+        val tripAdapter = OthersTripAdapter(sharedViewModel)
         rv.adapter = tripAdapter
 
         initFab(view)
 
         //initSwipeRefresh(swipeContainer, tripAdapter)
 
-        model.getCurrentUser().observe(viewLifecycleOwner, Observer { currentUser ->
+        sharedViewModel.getCurrentUser().observe(viewLifecycleOwner, Observer { currentUser ->
             // update after login/logout
-            model.getOthersTrips().observe(viewLifecycleOwner, Observer { newTripsMap ->
+            sharedViewModel.getOthersTrips().observe(viewLifecycleOwner, Observer { newTripsMap ->
                 // Update the UI
                 emptyView.isVisible = newTripsMap.isEmpty()
                 tripAdapter.submitList(newTripsMap.values.toList())
@@ -129,7 +130,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
         tripAdapter: OthersTripAdapter
     ) {
         swipeContainer?.setOnRefreshListener {
-            tripMap = model.getOthersTrips().value!!
+            tripMap = sharedViewModel.getOthersTrips().value!!
             emptyView.isVisible = tripMap.isEmpty()
             tripAdapter.submitList(tripMap.values.toList())
             initSearch(tripMap, tripAdapter)
@@ -303,7 +304,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
         etSearchTime.addTextChangedListener(textWatcher)
     }
 
-    class OthersTripAdapter :
+    class OthersTripAdapter(private val sharedViewModel: SharedViewModel) :
         ListAdapter<Trip, OthersTripAdapter.TripViewHolder>(TaskDiffCallback()) {
 
         class TaskDiffCallback : DiffUtil.ItemCallback<Trip>() {
@@ -317,7 +318,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
             }
         }
 
-        class TripViewHolder(v: View) : RecyclerView.ViewHolder(v) {
+        class TripViewHolder(v: View, sharedViewModel: Any?) : RecyclerView.ViewHolder(v) {
 
             val tripRL: RelativeLayout = v.findViewById<RelativeLayout>(R.id.trip_rl)
             val btnStar: CheckBox = v.findViewById(R.id.trip_star)
@@ -357,7 +358,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TripViewHolder {
             val layout =
                 LayoutInflater.from(parent.context).inflate(R.layout.triplist_layout, parent, false)
-            return TripViewHolder(layout)
+            return TripViewHolder(layout, sharedViewModel)
         }
 
         override fun onBindViewHolder(holder: TripViewHolder, position: Int) {
@@ -365,7 +366,6 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
             var auth = Firebase.auth
             val currentUser = auth.currentUser
             val user = auth.currentUser
-            val db = Firebase.firestore
             holder.bind(getItem(position))
 
 
@@ -393,36 +393,10 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
                 holder.btnStar.visibility = View.VISIBLE
                 holder.btnStar.setOnCheckedChangeListener { it, isChecked ->
                     if (isChecked) {
-                        db.collection("trips").document(getItem(position).id).update(
-                            "interestedPeople", FieldValue.arrayUnion(user?.uid)
-                        ).addOnSuccessListener {
-                            db.collection("users").document(user?.uid!!).update(
-                                "favTrips", FieldValue.arrayUnion(getItem(position).id)
-                            )
-                        }
+                        sharedViewModel.addInterest(getItem(position).id,"interestedPeople","favTrips",user?.uid!!)
                     } else {
-                        db.collection("trips").document(getItem(position).id).update(
-                            "interestedPeople", FieldValue.arrayRemove(user?.uid)
-                        ).addOnSuccessListener {
-                            db.collection("users").document(user?.uid!!).update(
-                                "favTrips", FieldValue.arrayRemove(getItem(position).id)
-                            )
-                        }
-                        db.collection("trips").document(getItem(position).id).get()
-                            .addOnSuccessListener {
-                                val tmpArray =
-                                    it.get("acceptedPeople") as java.util.ArrayList<String>
-                                if (tmpArray.contains(user?.uid!!)) {
-                                    db.collection("trips").document(getItem(position).id).update(
-                                        "acceptedPeople", FieldValue.arrayRemove(user.uid)
-                                    ).addOnSuccessListener {
-                                        db.collection("trips").document(getItem(position).id)
-                                            .update(
-                                                "seats", FieldValue.increment(1)
-                                            )
-                                    }
-                                }
-                            }
+                        sharedViewModel.removeInterest(getItem(position).id,"interestedPeople","favTrips",user?.uid!!)
+                        sharedViewModel.removeAccepted(getItem(position).id, "acceptedPeople", "seats", user.uid, 1)
                     }
                 }
             }

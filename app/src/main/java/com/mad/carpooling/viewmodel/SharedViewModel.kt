@@ -226,6 +226,56 @@ class SharedViewModel(
         return result
     }
 
+    fun addInterest(trip: String, fieldTrip: String, fieldUser: String, user: String): LiveData<Boolean>
+    {
+        val result = MutableLiveData<Boolean>()
+        viewModelScope.launch{
+            if(tripRepository.arrayUnionTrip(trip, fieldTrip, user))
+                launch{
+                    val res = userRepository.arrayUnionUser(user, fieldUser, trip)
+                    result.postValue(res)
+                }
+        }
+        return result
+    }
+
+    fun removeInterest(trip: String, fieldTrip: String, fieldUser: String, user: String): LiveData<Boolean>
+    {
+        val result = MutableLiveData<Boolean>()
+        viewModelScope.launch{
+            if(tripRepository.arrayRemoveTrip(trip, fieldTrip, user))
+                launch{
+                    val res = userRepository.arrayRemoveUser(user, fieldUser, trip)
+                    result.postValue(res)
+                }
+        }
+        return result
+    }
+
+    fun removeAccepted(trip: String, fieldTrip: String, incrementField: String, user: String, value: Long): LiveData<Boolean>
+    {
+        val result = MutableLiveData<Boolean>()
+        viewModelScope.launch{
+            val res = tripRepository.getFieldTrip(trip, fieldTrip)
+            if (res.isSuccess) {
+                val tmpArray = res.getOrNull()
+                if (tmpArray != null) {
+                    if (tmpArray.contains(user)) {
+                        if (tripRepository.arrayRemoveTrip(trip, fieldTrip, user))
+                            launch {
+                                val res = tripRepository.incrementTrip(trip, incrementField, value)
+                                result.postValue(res)
+                            }
+                    }
+                }
+            } else {
+                result.postValue(false)
+            }
+
+        }
+        return result
+    }
+
 
 }
 

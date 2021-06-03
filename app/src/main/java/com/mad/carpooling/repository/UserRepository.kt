@@ -53,13 +53,39 @@ class UserRepository {
     suspend fun setUserDoc(childName: String, newUser: User) : Boolean
     {
         return try{
-            val data = Firebase.firestore
+            Firebase.firestore
                 .collection("users")
                 .document(childName)
                 .set(newUser)
                 .await()
             true
         }catch (e: Exception){
+            false
+        }
+    }
+
+    suspend fun arrayUnionUser(childName: String, field: String, trip: String): Boolean{
+        return try{
+            Firebase.firestore
+                .collection("users")
+                .document(childName)
+                .update(field, FieldValue.arrayUnion(trip))
+                .await()
+            true
+        } catch (e: Exception){
+            false
+        }
+    }
+
+    suspend fun arrayRemoveUser(childName: String, field: String, trip: String): Boolean{
+        return try{
+            Firebase.firestore
+                .collection("users")
+                .document(childName)
+                .update(field, FieldValue.arrayRemove(trip))
+                .await()
+            true
+        } catch (e: Exception){
             false
         }
     }

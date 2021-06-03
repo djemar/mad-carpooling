@@ -75,6 +75,72 @@ class TripRepository {
         }
     }
 
+    suspend fun getTrip(childName: String) : Result<Trip?> = withContext(Dispatchers.IO){
+        try {
+            val data = Firebase.firestore
+                .collection("trips")
+                .document(childName)
+                .get()
+                .await()
+            return@withContext Result.success(data.toObject(Trip::class.java))
+        } catch (e: Exception) {
+            return@withContext Result.failure(e)
+        }
+    }
+
+    suspend fun arrayUnionTrip(childName: String, field: String, user: String): Boolean{
+        return try{
+            Firebase.firestore
+                .collection("trips")
+                .document(childName)
+                .update(field, FieldValue.arrayUnion(user))
+                .await()
+            true
+        } catch (e: Exception){
+            false
+        }
+    }
+
+    suspend fun arrayRemoveTrip(childName: String, field: String, user: String): Boolean{
+        return try{
+            Firebase.firestore
+                .collection("trips")
+                .document(childName)
+                .update(field, FieldValue.arrayRemove(user))
+                .await()
+            true
+        } catch (e: Exception){
+            false
+        }
+    }
+
+    suspend fun getFieldTrip(childName: String, field: String): Result<ArrayList<String>> = withContext(Dispatchers.IO){
+        try{
+            val data = Firebase.firestore
+                .collection("trips")
+                .document(childName)
+                .get()
+                .await()
+                .get(field)
+            return@withContext Result.success(data) as Result<ArrayList<String>>
+        } catch (e: Exception){
+            return@withContext Result.failure(e)
+        }
+    }
+
+    suspend fun incrementTrip(childName: String, field: String, value: Long) : Boolean{
+        return try{
+            Firebase.firestore
+                .collection("trips")
+                .document(childName)
+                .update(field, FieldValue.increment(value))
+                .await()
+            true
+        } catch (e: Exception){
+            false
+        }
+    }
+
     @ExperimentalCoroutinesApi
     fun Query.getQuerySnapshotFlow(): Flow<QuerySnapshot?> {
         return callbackFlow {
