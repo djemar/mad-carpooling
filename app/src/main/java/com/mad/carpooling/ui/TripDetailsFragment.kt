@@ -14,6 +14,7 @@ import android.graphics.Point
 import android.graphics.Rect
 import android.graphics.RectF
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.util.Log
 import android.util.TypedValue
 import android.view.*
@@ -73,6 +74,7 @@ import java.time.format.FormatStyle
 import java.util.*
 import java.util.stream.Collectors
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 import kotlin.math.hypot
 
 
@@ -123,6 +125,13 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     // very frequently.
     private var shortAnimationDuration: Int = 0
 
+    private lateinit var overlays :  ArrayList<Overlay>
+    private lateinit var waypoints : ArrayList<Marker>
+    private lateinit var stopsMarkers : FolderOverlay
+    private lateinit var tileSystem: TileSystem
+    private lateinit var displayMetrics : DisplayMetrics
+    private lateinit var map :  MapView
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -163,22 +172,29 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         bottomSheet = view.findViewById(R.id.bottom_sheet)
         fab = view.findViewById(R.id.fab_tripdetails)
         bsb = BottomSheetBehavior.from(bottomSheet)
+        var oldTripsMap : HashMap<String, Trip> = HashMap()
+        overlays  = ArrayList<Overlay>()
+        waypoints  = ArrayList<Marker>()
+        stopsMarkers = FolderOverlay()
+        tileSystem= TileSystemWebMercator()
+        displayMetrics = resources.displayMetrics
+        map   = MapView(requireContext())
 
         sharedViewModel.getTrips().observe(viewLifecycleOwner, { newTripsMap ->
             // Update the UI
-            initTripDetails(newTripsMap, view)
-            initMapSnapshot()
-            (activity as MainActivity).invalidateOptionsMenu()
+            if(!newTripsMap.equals(oldTripsMap)) {
+                oldTripsMap = newTripsMap
+                initTripDetails(newTripsMap, view)
+                initMapSnapshot()
+                (activity as MainActivity).invalidateOptionsMenu()
+            }
         })
     }
 
     private fun initMapSnapshot() {
-        val overlays = ArrayList<Overlay>()
-        val waypoints = ArrayList<Marker>()
-        val stopsMarkers = FolderOverlay()
-        val tileSystem: TileSystem = TileSystemWebMercator()
-        val displayMetrics = resources.displayMetrics
-        val map = MapView(requireActivity())
+        overlays.clear()
+        waypoints.clear()
+        stopsMarkers.items.clear()
 
         trip.geopoints.stream().forEach { gp ->
             run {
@@ -204,6 +220,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         var routeOverlay: Polyline
         mapViewModel.route.observe(viewLifecycleOwner, { newRouteOverlay ->
             if (newRouteOverlay != null) {
+                overlays.clear()
                 routeOverlay = newRouteOverlay
                 routeOverlay.outlinePaint.strokeWidth = 10f
                 routeOverlay.outlinePaint.style = Paint.Style.FILL_AND_STROKE
