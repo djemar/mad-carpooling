@@ -25,6 +25,7 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.onNavDestinationSelected
 import com.bumptech.glide.Glide
@@ -38,6 +39,7 @@ import com.mad.carpooling.model.User
 import com.mad.carpooling.repository.TripRepository
 import com.mad.carpooling.repository.UserRepository
 import com.mad.carpooling.viewmodel.EditProfileViewModel
+import com.mad.carpooling.viewmodel.EditProfileViewModelFactory
 import com.mad.carpooling.viewmodel.SharedViewModel
 import com.mad.carpooling.viewmodel.SharedViewModelFactory
 import java.io.File
@@ -57,7 +59,11 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
     private lateinit var optionsMenu: Menu
     private lateinit var user: User
     private var currentPhotoPath: String? = null
-    private val viewModel: EditProfileViewModel by viewModels()
+    private val viewModel: EditProfileViewModel by viewModels {
+        EditProfileViewModelFactory(
+            UserRepository()
+        )
+    }
     private val sharedViewModel: SharedViewModel by activityViewModels {
         SharedViewModelFactory(
             TripRepository(),
@@ -353,19 +359,18 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
     }
 
     private fun updateFirestoreUser() {
-        val db = Firebase.firestore
-        val docUser = db.collection("users").document(user.uid)
-
         user.fullname = etFullName.text.trim().toString()
         user.nickname = etNickname.text.trim().toString()
         user.email = etEmail.text.trim().toString()
         user.location = etLocation.text.trim().toString()
 
-        docUser.set(user).addOnSuccessListener {
-            Snackbar.make(requireView(), "User updated", Snackbar.LENGTH_SHORT).show()
+        viewModel.updateUser(user).observe(viewLifecycleOwner, Observer{ success ->
             findNavController().navigate(EditProfileFragmentDirections.actionNavEditProfileToNavShowProfile())
-            Snackbar.make(requireView(), "User saved", Snackbar.LENGTH_SHORT).show()
-        }
+            if(success)
+                Snackbar.make(requireView(), "User saved", Snackbar.LENGTH_SHORT).show()
+            else
+                Snackbar.make(requireView(), "Error while saving user", Snackbar.LENGTH_SHORT).show()
+        })
     }
 
     override fun onCreateContextMenu(

@@ -50,6 +50,20 @@ class UserRepository {
         }
     }
 
+    suspend fun setUserDoc(childName: String, newUser: User) : Boolean
+    {
+        return try{
+            val data = Firebase.firestore
+                .collection("users")
+                .document(childName)
+                .set(newUser)
+                .await()
+            true
+        }catch (e: Exception){
+            false
+        }
+    }
+
     @ExperimentalCoroutinesApi
     fun Query.getQuerySnapshotFlow(): Flow<QuerySnapshot?> {
         return callbackFlow {

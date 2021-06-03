@@ -125,10 +125,6 @@ class BoughtTripsListFragment : Fragment(R.layout.fragment_trip_list) {
 
         override fun onBindViewHolder(holder: TripViewHolder, position: Int) {
             val trip = getItem(position)
-            val db = Firebase.firestore
-            val auth = Firebase.auth
-            val currentUser = auth.currentUser
-            val user = auth.currentUser
 
             trip.let { holder.bind(it) }
             holder.tripRL.setOnClickListener {
@@ -137,41 +133,6 @@ class BoughtTripsListFragment : Fragment(R.layout.fragment_trip_list) {
                 )
                 Navigation.findNavController(holder.tripRL).navigate(action)
             }
-/*            holder.btnStar.visibility = View.VISIBLE
-            holder.btnStar.setOnCheckedChangeListener { it, isChecked ->
-                if (isChecked) {
-                    db.collection("trips").document(getItem(position).id).update(
-                        "interestedPeople", FieldValue.arrayUnion(user?.uid)
-                    ).addOnSuccessListener {
-                        db.collection("users").document(user?.uid!!).update(
-                            "favTrips", FieldValue.arrayUnion(getItem(position).id)
-                        )
-                    }
-                } else {
-                    db.collection("trips").document(getItem(position).id).update(
-                        "interestedPeople", FieldValue.arrayRemove(user?.uid)
-                    ).addOnSuccessListener {
-                        db.collection("users").document(user?.uid!!).update(
-                            "favTrips", FieldValue.arrayRemove(getItem(position).id)
-                        )
-                    }
-                    db.collection("trips").document(getItem(position).id).get()
-                        .addOnSuccessListener {
-                            val tmpArray =
-                                it.get("acceptedPeople") as java.util.ArrayList<String>
-                            if (tmpArray.contains(user?.uid!!)) {
-                                db.collection("trips").document(getItem(position).id).update(
-                                    "acceptedPeople", FieldValue.arrayRemove(user?.uid)
-                                ).addOnSuccessListener {
-                                    db.collection("trips").document(getItem(position).id)
-                                        .update(
-                                            "seats", FieldValue.increment(1)
-                                        )
-                                }
-                            }
-                        }
-                }
-            }*/
         }
     }
 }
