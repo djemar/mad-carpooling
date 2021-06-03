@@ -1,12 +1,16 @@
 package com.mad.carpooling.repository
 
 import android.util.Log
+import android.view.View
 import androidx.lifecycle.LiveData
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.model.Trip
 import com.mad.carpooling.model.User
+import com.mad.carpooling.ui.trip_edit.TripEditFragment
+import com.mad.carpooling.viewmodel.SharedViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
@@ -169,4 +173,56 @@ class TripRepository {
                 return@map mapper(it)
             }
     }
+
+    suspend fun updateTrip(trip: Trip) : Boolean{
+        return try {
+            val data = Firebase.firestore
+                .collection("trips")
+                .document(trip.id)
+                .set(trip)
+                .await()
+            true
+        }catch(e: Exception){
+            false
+        }
+    }
+
+    suspend fun removeFavTrip(user: String, tripId: String): Boolean{
+        return try{
+            val data = Firebase.firestore
+                .collection("users").document(user)
+                .update("favTrips", FieldValue.arrayRemove(tripId))
+                .await()
+            true
+        }catch (e: Exception){
+            false
+        }
+    }
+
+    fun getNewTripId() : String{
+        return try {
+            val data = Firebase.firestore
+                .collection("trips")
+                .document()
+                .id
+            data
+        }catch(e: Exception) {
+            e.toString()
+        }
+    }
+
+    suspend fun createTrip(trip: Trip) : Boolean{
+        return try {
+            val data = Firebase.firestore
+                .collection("trips")
+                .document()
+                .set(trip)
+                .await()
+            true
+        }catch(e: Exception){
+            false
+        }
+    }
+
+
 }

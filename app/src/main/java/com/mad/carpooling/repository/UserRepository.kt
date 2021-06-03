@@ -50,6 +50,15 @@ class UserRepository {
         }
     }
 
+    suspend fun getUserRef(currentUserUid: String) : Result<DocumentReference?> = withContext(Dispatchers.IO) {
+        try {
+            val data = FirebaseFirestore.getInstance()
+                .document("users/${currentUserUid}")
+            return@withContext Result.success(data)
+        }catch(e: Exception) {
+          return@withContext Result.failure(e)
+          }
+    }
     suspend fun setUserDoc(childName: String, newUser: User) : Boolean
     {
         return try{

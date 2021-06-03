@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.*
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -226,6 +227,15 @@ class SharedViewModel(
         return result
     }
 
+    fun getUserRef(currentUserUid: String) : LiveData<DocumentReference> {
+        val res = MutableLiveData<DocumentReference>()
+        viewModelScope.launch{
+            val result = userRepository.getUserRef(currentUserUid)
+            res.postValue(result.getOrNull())
+        }
+        return res
+    }
+    
     fun getRatings(user: String, field: String): LiveData<Map<String, ArrayList<Any>>?>{
         val result = MutableLiveData<Map<String, ArrayList<Any>>?>()
         viewModelScope.launch {

@@ -29,6 +29,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.onNavDestinationSelected
@@ -55,6 +56,7 @@ import com.mad.carpooling.util.TripUtils
 import com.mad.carpooling.viewmodel.SharedViewModel
 import com.mad.carpooling.viewmodel.SharedViewModelFactory
 import com.mad.carpooling.viewmodel.TripEditViewModel
+import com.mad.carpooling.viewmodel.TripEditViewModelFactory
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -78,7 +80,12 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             UserRepository()
         )
     }
-    private val tripEditViewModel: TripEditViewModel by activityViewModels()
+    private val tripEditViewModel: TripEditViewModel by activityViewModels {
+        TripEditViewModelFactory(
+            TripRepository(),
+            UserRepository()
+        )
+    }
     private lateinit var optionsMenu: Menu
     private lateinit var ivCarPic: ImageView
     private lateinit var etSeats: EditText
@@ -540,12 +547,6 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         val timestamp: Timestamp = Timestamp(parsedDate!!)
 
 
-        val userRef =
-            FirebaseFirestore.getInstance()
-                .document("users/${sharedViewModel.getCurrentUser().value?.uid}")
-        val db = Firebase.firestore
-        val newDocRef = db.collection("trips").document()
-
         trip.timestamp = timestamp
         trip.seats = etSeats.text.trim().toString().toInt()
         trip.price = etPrice.text.trim().toString().toFloat()
@@ -555,39 +556,53 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         trip.arrival = stops[stops.size - 1].split(",")[0]
 
         trip.id = if (isNew) {
-            newDocRef.id
+            tripEditViewModel.getNewTripId()
         } else {
             trip.id
         }
 
         if (isNew) {
+            /*
             trip.owner = userRef
             newDocRef.set(trip).addOnSuccessListener {
                 Snackbar.make(requireView(), "Trip created", Snackbar.LENGTH_SHORT).show()
                 navigateToTripDetails(trip.id)
-            }
+            }*/
+            sharedViewModel
+                .getUserRef(sharedViewModel.getCurrentUser().value?.uid!!)
+                .observe(viewLifecycleOwner, Observer{ tripOwner ->
+                    trip.owner = tripOwner
+                    tripEditViewModel.createTrip(trip).observe(viewLifecycleOwner, Observer { success ->
+                        if(success)
+                            Snackbar.make(requireView(), "Trip created", Snackbar.LENGTH_SHORT).show()
+                        else
+                            Snackbar.make(requireView(), "Failure on create trip", Snackbar.LENGTH_SHORT).show()
+                        navigateToTripDetails(trip.id)
+                    })
+                })
         } else {
             if (!trip.visibility) {
                 for (user in trip.interestedPeople!!) {
                     if (trip.acceptedPeople?.contains(user)!!) {
                         trip.seats++
                     }
-                    db.collection("users").document(user).update(
-                        "favTrips", FieldValue.arrayRemove(trip.id)
-                    )
+                    tripEditViewModel.removeFavTrip(user, trip.id)
                 }
                 trip.acceptedPeople = ArrayList<String>()
                 trip.interestedPeople = ArrayList<String>()
             }
-            db.collection("trips").document(trip.id).set(trip).addOnSuccessListener {
-                Snackbar.make(requireView(), "Trip updated", Snackbar.LENGTH_SHORT).show()
+            tripEditViewModel.updateTrip(trip).observe(viewLifecycleOwner, Observer { success ->
+                if(success)
+                    Snackbar.make(requireView(), "Trip updated", Snackbar.LENGTH_SHORT).show()
+                else
+                    Snackbar.make(requireView(), "Failure on update trip", Snackbar.LENGTH_SHORT).show()
                 navigateToTripDetails(trip.id)
-            }
+            })
         }
 
     }
 
-    private fun navigateToTripDetails(newId: String) {
+    fun navigateToTripDetails(newId: String) {
         val action = TripEditFragmentDirections.actionNavTripEditToNavTripDetails(
             id = newId
         )
