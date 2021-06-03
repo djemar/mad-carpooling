@@ -40,7 +40,6 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Timestamp
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -69,6 +68,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.time.format.FormatStyle
 import java.util.*
+import kotlin.collections.HashMap
 
 
 private lateinit var tvDuration: TextView
@@ -113,6 +113,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         setHasOptionsMenu(true)
     }
 
+    @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -127,42 +128,35 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         ibtnMusic = view.findViewById(R.id.btn_edit_music)
         btnMap = view.findViewById(R.id.btn_tripEdit_map)
 
-        initTrip(view, tripEditViewModel, savedInstanceState)
-
-        ibtnChattiness.setOnClickListener {
-            trip.chattiness = changeStatePreference(!trip.chattiness, ibtnChattiness)
-        }
-        ibtnSmoking.setOnClickListener {
-            trip.smoking = changeStatePreference(!trip.smoking, ibtnSmoking)
-        }
-        ibtnPets.setOnClickListener {
-            trip.pets = changeStatePreference(!trip.pets, ibtnPets)
-        }
-        ibtnMusic.setOnClickListener {
-            trip.music = changeStatePreference(!trip.music, ibtnMusic)
-        }
-
         val btnCamera = view.findViewById<MaterialButton>(R.id.btn_tripEdit_camera)
         registerForContextMenu(btnCamera)
         btnCamera.setOnClickListener { activity?.openContextMenu(btnCamera) }
 
+        sharedViewModel.getMyTrips().observe(viewLifecycleOwner, Observer { map ->
+            tripMap = map
+            initTrip(view, tripEditViewModel, savedInstanceState)
+        })
+
     }
 
-    private fun initTrip(view: View, viewModel: TripEditViewModel, savedInstanceState: Bundle?) {
+    @ExperimentalCoroutinesApi
+    private fun initTrip(
+        view: View,
+        viewModel: TripEditViewModel,
+        savedInstanceState: Bundle?
+    ) {
         val args: TripEditFragmentArgs by navArgs()
         val rv = view.findViewById<RecyclerView>(R.id.rv_tripEdit_stops)
         val emptyView = view.findViewById<TextView>(R.id.no_stops_available)
         rv.layoutManager = LinearLayoutManager(context)
         rv.isNestedScrollingEnabled = false
-        tripMap = sharedViewModel.getMyTrips().value
+
         isNew = args.isNew
 
-
         if (savedInstanceState == null) {
-            val previousFragment = findNavController().previousBackStackEntry?.destination?.id
             if (!args.isNew) {  // navigating from any edit btn
                 if (!args.fromMap && args.id != "id")
-                    viewModel.setTrip(tripMap?.get(args.id)!!.copy())
+                    viewModel.setTrip(tripMap?.get(args.id)!!)
             } else { // navigating from tripList FAB
                 (activity as MainActivity).supportActionBar?.title = "Create New Trip"
                 if (!args.fromMap)
