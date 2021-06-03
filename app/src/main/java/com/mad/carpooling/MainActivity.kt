@@ -29,8 +29,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.SetOptions
-import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.model.Rating
 import com.mad.carpooling.model.User
@@ -68,6 +66,7 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment)
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
+
         appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.nav_show_profile,
@@ -99,7 +98,7 @@ class MainActivity : AppCompatActivity() {
             } else {
                 model.getTrips().observe(this, Observer {
                     model.getTrips().removeObservers(this)
-                    }
+                }
                 )
                 initDrawerHeader(navView)
             }
@@ -176,6 +175,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @ExperimentalCoroutinesApi
     private fun initDrawerHeader(navView: NavigationView) {
         val headerView: View = navView.getHeaderView(0)
         val ivProfileHeader: ImageView = headerView.findViewById(R.id.nav_header_profile_pic)
@@ -183,7 +183,7 @@ class MainActivity : AppCompatActivity() {
         val tvNicknameHeader: TextView = headerView.findViewById(R.id.nav_header_nickname)
 
         if (auth.currentUser != null)
-            model.getCurrentUser().observe(this, { currentUser ->
+            model.getCurrentUserData().observe(this, { currentUser ->
                 // Update the UI
                 if (currentUser != null) {
                     tvFullNameHeader.text = currentUser.fullname
@@ -205,67 +205,68 @@ class MainActivity : AppCompatActivity() {
                 user.reload()
                 user.getIdToken(true)
                 if (user != null) {
-                    val db = Firebase.firestore
-                    db.collection("users").document(user.uid).get()
-                        .addOnSuccessListener { document ->
-                            if (document.data != null) {
-                                Log.d("LOGIN", "User login")
-                                // timestamp of latest login -> this triggers the observer and loads the user data
-                                val updates = hashMapOf<String, Any>(
-                                    "timestamp" to FieldValue.serverTimestamp()
-                                )
-                                db.collection("users").document(user.uid).update(updates)
-                                    .addOnCompleteListener {
+                    model.checkExistingUser(user.uid).observe(this, Observer { userExists ->
+                        if (userExists) {
+                            Log.d("LOGIN", "User login")
+                            // timestamp of latest login -> this triggers the observer and loads the user data
+                            val updates = hashMapOf<String, Any>(
+                                "timestamp" to FieldValue.serverTimestamp()
+                            )
+                            model.loginUser(user.uid, updates)
+                                .observe(this, Observer { isSuccess ->
+                                    if (isSuccess) {
                                         Snackbar.make(
                                             findViewById(R.id.triplist_rv),
                                             "Login successful",
                                             Snackbar.LENGTH_SHORT
                                         ).show()
-                                        // TODO check if alternative way exists
                                         startActivity(Intent(this, MainActivity::class.java))
+                                        overridePendingTransition(0, 0)
                                         finish()
+                                        overridePendingTransition(0, 0)
                                     }
-                            } else {
-                                Log.d("LOGIN", "New user signed up")
-                                val newUser = User(
-                                    uid = user.uid,
-                                    fullname = if (user.displayName != null) user.displayName else "Fullname",
-                                    email = if (user.email != null) user.email else "email@address.com",
-                                    imageUserRef = if (user.photoUrl != null) user.photoUrl!!.toString() else null
-                                )
-                                val newRating = Rating()
-                                // TODO: check if this works (add user in ratings collection)
-                                db.collection("users").document(user.uid)
-                                    .set(newUser, SetOptions.merge())
-                                    .addOnSuccessListener {
-                                        db.collection("ratings").document(user.uid)
-                                            .set(newRating, SetOptions.merge())
-                                            .addOnSuccessListener {
-                                                Snackbar.make(
-                                                    findViewById(R.id.triplist_rv),
-                                                    "Login successful",
-                                                    Snackbar.LENGTH_SHORT
-                                                ).show()
-                                                startActivity(Intent(this, MainActivity::class.java))
-                                                finish()
-                                            }
-                                    }
+                                })
+                        } else {
+                            Log.d("SIGNUP", "New user signed up")
+                            val newUser = User(
+                                uid = user.uid,
+                                fullname = if (user.displayName != null) user.displayName else "Fullname",
+                                email = if (user.email != null) user.email else "email@address.com",
+                                imageUserRef = if (user.photoUrl != null) user.photoUrl!!.toString() else null
+                            )
+                            val newRating = Rating()
 
-                            }
+                            model.signUpUser(newUser, newRating)
+                                .observe(this, Observer { isSuccess ->
+                                    if (isSuccess) {
+                                        Snackbar.make(
+                                            findViewById(R.id.triplist_rv),
+                                            "Login successful",
+                                            Snackbar.LENGTH_SHORT
+                                        ).show()
+                                        startActivity(Intent(this, MainActivity::class.java))
+                                        overridePendingTransition(0, 0)
+                                        finish()
+                                        overridePendingTransition(0, 0)
+                                    }
+                                })
                         }
 
+                    })
                 }
 
-                Log.d("Login result", "Sign in success")
-                // ...
-            } else {
-                // Sign in failed. If response is null the user canceled the
-                // sign-in flow using the back button. Otherwise check
-                // response.getError().getErrorCode() and handle the error.
-                // ...
-                Log.e("Login result", "Sign in failed")
             }
+
+            Log.d("Login result", "Sign in success")
+            // ...
+        } else {
+            // Sign in failed. If response is null the user canceled the
+            // sign-in flow using the back button. Otherwise check
+            // response.getError().getErrorCode() and handle the error.
+            // ...
+            Log.e("Login result", "Sign in failed")
         }
+
     }
 
 /*    override fun onCreateOptionsMenu(menu: Menu): Boolean {

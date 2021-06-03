@@ -110,7 +110,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
 
         //initSwipeRefresh(swipeContainer, tripAdapter)
 
-        sharedViewModel.getCurrentUser().observe(viewLifecycleOwner, Observer { currentUser ->
+        sharedViewModel.getCurrentUserData().observe(viewLifecycleOwner, Observer { currentUser ->
             // update after login/logout
             sharedViewModel.getOthersTrips().observe(viewLifecycleOwner, Observer { newTripsMap ->
                 // Update the UI

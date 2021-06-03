@@ -8,6 +8,7 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.mad.carpooling.model.Rating
 import com.mad.carpooling.model.Trip
 import com.mad.carpooling.model.User
 import com.mad.carpooling.repository.TripRepository
@@ -269,6 +270,21 @@ class SharedViewModel(
         val res = MutableLiveData<Boolean>()
         viewModelScope.launch{
             val result = tripRepository.terminateTrip(trip)
+    fun signUpUser(newUser: User, newRating: Rating) : LiveData<Boolean>
+    {
+        val res = MutableLiveData<Boolean>()
+        viewModelScope.launch {
+            val result = userRepository.signUpUser(newUser.uid, newUser, newRating)
+            res.postValue(result)
+        }
+        return res
+    }
+
+    fun loginUser(uid: String, updates: HashMap<String,Any>) : LiveData<Boolean>
+    {
+        val res = MutableLiveData<Boolean>()
+        viewModelScope.launch {
+            val result = userRepository.loginUser(uid, updates)
             res.postValue(result)
         }
         return res
@@ -281,6 +297,15 @@ class SharedViewModel(
             res.postValue(result)
         }
         return res
+    fun checkExistingUser(uid: String) : LiveData<Boolean>
+    {
+        val res = MutableLiveData<Boolean>()
+        viewModelScope.launch {
+            val result = userRepository.checkExistingUser(uid)
+            res.postValue(result)
+        }
+        return res
+    }
 
     /** Getters **/
 

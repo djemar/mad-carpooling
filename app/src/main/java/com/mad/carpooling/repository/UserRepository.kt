@@ -7,6 +7,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.mad.carpooling.model.Rating
 import com.mad.carpooling.model.Trip
 import com.mad.carpooling.model.User
 import kotlinx.coroutines.Dispatchers
@@ -23,19 +24,25 @@ class UserRepository {
 
     @ExperimentalCoroutinesApi
     suspend fun loadUser(): Flow<Result<User?>> = callbackFlow {
-        val uid = Firebase.auth.currentUser?.uid
         // 2.- We create a reference to our data inside Firestore
-        val eventDocument =  FirebaseFirestore
-            .getInstance()
+        val eventDocument =  Firebase.firestore
             .collection("users")
-            .document(uid!!)
 
         // 3.- We generate a subscription that is going to let us listen for changes with
         // .addSnapshotListener and then offer those values to the channel that will be collected in our viewmodel
-        val subscription = eventDocument.addSnapshotListener { snapshot, _ ->
-            if(snapshot!!.exists()){
-                val user = snapshot.toObject(User::class.java)
+        val subscription = eventDocument.addSnapshotListener { snapshot, e ->
+            if(e == null){
+                var user: User = User()
+                for (doc in snapshot!!) {
+                    if (doc.id == Firebase.auth.currentUser?.uid)
+                        user = doc.toObject(User::class.java)
+                }
                 this.trySend(Result.success(user)).isSuccess
+            } else{
+                cancel(
+                    message = "error fetching collection myTrips data",
+                    cause = e
+                )
             }
         }
 
@@ -131,6 +138,47 @@ class UserRepository {
             true
         }catch(e: Exception){
             return false
+    suspend fun signUpUser(uid: String, newUser: User, newRating: Rating): Boolean {
+        return try{
+            Firebase.firestore
+                .collection("users")
+                .document(uid)
+                .set(newUser, SetOptions.merge())
+                .await()
+            Firebase.firestore
+                .collection("ratings")
+                .document(uid)
+                .set(newRating, SetOptions.merge())
+                .await()
+            true
+        }catch (e: Exception){
+            false
+        }
+    }
+
+    suspend fun loginUser(uid: String, updates: HashMap<String,Any>): Boolean {
+        return try{
+            Firebase.firestore
+                .collection("users")
+                .document(uid)
+                .update(updates)
+                .await()
+            true
+        }catch (e: Exception){
+            false
+        }
+    }
+
+    suspend fun checkExistingUser(uid: String): Boolean {
+        return try{
+            val doc = Firebase.firestore
+                .collection("users")
+                .document(uid)
+                .get()
+                .await()
+            doc.data != null
+        }catch (e: Exception){
+            false
         }
     }
 
@@ -162,4 +210,5 @@ class UserRepository {
                 return@map mapper(it)
             }
     }
+
 }
