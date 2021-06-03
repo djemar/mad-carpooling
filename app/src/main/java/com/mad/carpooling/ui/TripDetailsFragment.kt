@@ -25,6 +25,8 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
@@ -230,14 +232,14 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private fun initTripDetails(newTripsMap: HashMap<String, Trip>, view: View) {
 
         val args: TripDetailsFragmentArgs by navArgs()
-        val db = Firebase.firestore
+
 
         trip = newTripsMap[args.id]!!
 
         if (trip.imageCarURL != "") {
             Glide.with(view).load(trip.imageCarURL).into(ivCarPic)
         }
-
+        /*
         val userDoc =
             db.collection("users").document(trip.owner!!.id).addSnapshotListener { value, e ->
                 if (e != null) {
@@ -247,7 +249,12 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                 tvNickname.text = value?.get("nickname").toString()
                 Glide.with(view).load(value?.get("imageUserRef"))
                     .into(ivProfilePic)
-            }
+            }*/
+        sharedViewModel.getUserDoc(trip.owner!!.id).observe(viewLifecycleOwner, Observer{ user ->
+            tvNickname.text = user?.nickname.toString()
+            Glide.with(view).load(user?.imageUserRef)
+                .into(ivProfilePic)
+        })
         tvDuration.text = TripUtils.calcDuration(trip.stops)
 
         ivCarPic.setOnClickListener {
@@ -278,7 +285,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
         val bsrv = view.findViewById<RecyclerView>(R.id.rv_bottom_sheet)
         bsrv.layoutManager = LinearLayoutManager(context)
-        val bottomSheetAdapter = BottomSheetAdapter(trip.interestedPeople, trip)
+        val bottomSheetAdapter = BottomSheetAdapter(trip.interestedPeople, trip, sharedViewModel)
         bsrv.adapter = bottomSheetAdapter
         Log.d("users:", bottomSheetAdapter.itemCount.toString())
 
@@ -302,9 +309,9 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
         bsb.state = BottomSheetBehavior.STATE_HIDDEN
 
-        initFab(db, view)
+        initFab(view)
 
-        initBtnTripAndRatingBar(db, view)
+        initBtnTripAndRatingBar(view)
 
         val scrollView = view.findViewById<ScrollView>(R.id.sv_tripDetails)
         scrollView.setOnScrollChangeListener { scrollView, scrollX, scrollY, oldScrollX, oldScrollY ->
@@ -319,30 +326,27 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
     }
 
-    private fun initBtnTripAndRatingBar(db: FirebaseFirestore, view: View) {
+    private fun initBtnTripAndRatingBar(view: View) {
         if (trip.owner!!.id != sharedViewModel.getCurrentUser().value?.uid) {
             ratingBar.visibility = View.VISIBLE
             btnTrip.visibility = View.GONE
 
-            db.collection("ratings").document(trip.owner?.id!!).get()
-                .addOnSuccessListener { res ->
-                    if (res.exists()) {
-                        val mapRatingDriver: Map<String, ArrayList<Any>> =
-                            res.get("driverRatings") as Map<String, ArrayList<Any>>
+            sharedViewModel.getRatings(trip!!.owner?.id!!,"driverRatings").observe(viewLifecycleOwner, Observer { mapRatingDriver ->
                         var vote: Float = 0f
-                        for (array in mapRatingDriver.values)
-                            vote = vote + array[0].toString().toFloat()
-                        ratingBar.rating = (vote) / (mapRatingDriver.size.toFloat())
-                    } else {
+                if (mapRatingDriver != null) {
+                    for (array in mapRatingDriver.values)
+                        vote = vote + array[0].toString().toFloat()
+                ratingBar.rating = (vote) / (mapRatingDriver.size.toFloat())
+                } else {
                         ratingBar.rating = 0f
-                    }
                 }
+            })
             if (trip.finished) {
                 ratingBar.visibility = View.GONE
                 btnTrip.visibility = View.VISIBLE
                 btnTrip.text = "rate"
                 btnTrip.setOnClickListener {
-                    val reviewDial = ReviewDialogFragment(trip, view, "driverRatings", null)
+                    val reviewDial = ReviewDialogFragment(trip, view, "driverRatings", null, sharedViewModel)
                     reviewDial.show(requireActivity().supportFragmentManager, "driverReviewDialog")
                 }
             }
@@ -362,13 +366,13 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             btnTrip.isEnabled =
                 Calendar.getInstance().time >= trip.timestamp.toDate() && !trip.finished
             btnTrip.setOnClickListener {
-                val fragment = EndTripDialogFragment(trip)
+                val fragment = EndTripDialogFragment(trip, sharedViewModel)
                 fragment.show(requireActivity().supportFragmentManager, "endTripDialog")
             }
         }
     }
 
-    class EndTripDialogFragment(private var trip: Trip) :
+    class EndTripDialogFragment(private var trip: Trip, private var sharedViewModel: SharedViewModel) :
         DialogFragment() {
 
         override fun onPause() {
@@ -379,20 +383,21 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
             // Use the Builder class for convenient dialog construction
             val builder: AlertDialog.Builder = AlertDialog.Builder(activity)
-            val db = Firebase.firestore
             builder.setMessage("Do you really want to end this trip?")
                 .setPositiveButton("Confirm", DialogInterface.OnClickListener { dialog, id ->
-                    db.collection("trips").document(trip.id).update("finished", true)
-                    if (trip.interestedPeople != null) {
-                        for (p in trip.interestedPeople!!) {
-                            if (!trip.acceptedPeople?.contains(p)!!) {
-                                db.collection("trips").document(trip.id)
-                                    .update("interestedPeople", FieldValue.arrayRemove(p))
-                                db.collection("users").document(p)
-                                    .update("favTrips", FieldValue.arrayRemove(trip.id))
+                    sharedViewModel.terminateTrip(trip.id).observe(this, Observer{ success ->
+                        if(success){
+                            if (trip.interestedPeople != null) {
+                                for (p in trip.interestedPeople!!) {
+                                    if (!trip.acceptedPeople?.contains(p)!!) {
+                                        sharedViewModel
+                                            .removeInterest(trip.id, "interestedPeople", "favTrips", p)
+                                    }
+                                }
                             }
                         }
-                    }
+                        sharedViewModel.terminateTrip(trip.id).removeObservers(this)
+                    })
                 })
                 .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, id ->
                 })
@@ -402,7 +407,8 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     }
 
     // Review Dialog
-    class ReviewDialogFragment(trip: Trip, view: View, var role: String, var passenger: String?) :
+    class ReviewDialogFragment(trip: Trip, view: View, var role: String, var passenger: String?
+                                , private var sharedViewModel: SharedViewModel) :
         DialogFragment() {
         var tripReview = trip
         var viewReview = view
@@ -430,21 +436,18 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
             // Use the Builder class for convenient dialog construction
 
-            val db = Firebase.firestore
             val builder: AlertDialog.Builder = AlertDialog.Builder(activity)
             builder.setView(R.layout.review_layout)
             uid = if (passenger != null) passenger as String
             else tripReview.owner!!.id
-
-            db.collection("users").document(uid).addSnapshotListener { value, e ->
-                if (e != null) {
-                    Log.e("userDoc exception => ", e.toString())
-                    return@addSnapshotListener
+            sharedViewModel.getUserDoc(uid).observe(this, Observer{ user ->
+                if (user != null) {
+                    reviewNickname?.text = user.nickname.toString()
+                    Glide.with(viewReview).load(user.imageUserRef)
+                        .into(reviewProfilePic!!)
                 }
-                reviewNickname?.text = value?.get("nickname").toString()
-                Glide.with(viewReview).load(value?.get("imageUserRef"))
-                    .into(reviewProfilePic!!)
-            }
+                sharedViewModel.getUserDoc(uid).removeObservers(this)
+            })
 
             builder.setTitle("Add a review")
                 .setPositiveButton("Confirm", DialogInterface.OnClickListener { dialog, id ->
@@ -453,13 +456,10 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                     val newArray: ArrayList<Any> =
                         arrayListOf(rb_review!!.rating.toInt(), etReview?.text?.trim().toString())
 
-                    db.collection("ratings").document(uid).get()
-                        .addOnSuccessListener { res ->
-                            if (res.exists()) {
-                                db.collection("ratings").document(uid)
-                                    .update("${role}.${currentUser}", newArray)
-                            }
-                        }
+                    sharedViewModel.updateRatings(uid, role, currentUser!!, newArray).observe(this, Observer { 
+                        sharedViewModel.updateRatings(uid, role, currentUser!!, newArray).removeObservers(this)
+                    })
+
                 })
                 .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, id ->
                 })
@@ -468,7 +468,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         }
     }
 
-    private fun initFab(db: FirebaseFirestore, view: View) {
+    private fun initFab(view: View) {
         val currentUser = sharedViewModel.getCurrentUser().value?.uid!!
         if (trip.owner!!.id != currentUser) {
 
@@ -757,7 +757,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
 }
 
-class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip: Trip) :
+class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip: Trip, private val sharedViewModel: SharedViewModel) :
     RecyclerView.Adapter<BottomSheetAdapter.BottomSheetViewHolder>() {
 
     class BottomSheetViewHolder(v: View) : RecyclerView.ViewHolder(v) {
@@ -766,14 +766,13 @@ class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip
         private var profilePic: ImageView = v.findViewById(R.id.iv_bottomSheet_pic)
         var btnAccept: MaterialButton = v.findViewById(R.id.btn_bottom_sheet)
 
-        fun bind(user: String?, holder: BottomSheetViewHolder) {
-            val db = Firebase.firestore
+        fun bind(user: String?, holder: BottomSheetViewHolder, sharedViewModel: SharedViewModel) {
             if (user != null) {
-                db.collection("users").document(user).get().addOnSuccessListener {
-                    nickname.text = it.get("nickname").toString()
-                    Glide.with(holder.itemView).load(it?.get("imageUserRef"))
+                sharedViewModel.getUserDoc(user).observe(holder.itemView.context as LifecycleOwner, Observer{ user ->
+                    nickname.text = user?.nickname.toString()
+                    Glide.with(holder.itemView).load(user?.imageUserRef)
                         .into(profilePic)
-                }
+                })
                 profile.setOnClickListener {
                     val action =
                         TripDetailsFragmentDirections.actionNavTripDetailsToNavShowProfile(
@@ -828,8 +827,7 @@ class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip
     }
 
     override fun onBindViewHolder(holder: BottomSheetViewHolder, position: Int) {
-        val db = Firebase.firestore
-        holder.bind(users?.get(position), holder)
+        holder.bind(users?.get(position), holder, sharedViewModel)
         holder.btnAccept.visibility = View.VISIBLE
 
         if (!trip.finished) {
@@ -853,25 +851,27 @@ class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip
 
         holder.btnAccept.setOnClickListener {
             if (holder.btnAccept.text.toString().lowercase(Locale.getDefault()) == "accept") {
-                db.collection("trips").document(trip.id).update(
-                    "acceptedPeople", FieldValue.arrayUnion(users?.get(position))
-                )
-                db.collection("trips").document(trip.id).update(
-                    "seats", FieldValue.increment(-1)
-                )
-                changeButtonState("accept", holder.btnAccept, holder.itemView)
+                if (users != null) {
+                    sharedViewModel
+                        .addAccepted(trip.id, "interestedPeople", "seats", users.get(position), -1)
+                        .observe(holder.itemView.context as LifecycleOwner, Observer { success ->
+                            if (success)
+                                changeButtonState("accept", holder.btnAccept, holder.itemView)
+                        })
+                    }
             } else if (holder.btnAccept.text.toString().lowercase(Locale.getDefault()) == "remove") {
-                db.collection("trips").document(trip.id).update(
-                    "acceptedPeople", FieldValue.arrayRemove(users?.get(position))
-                )
-                db.collection("trips").document(trip.id).update(
-                    "seats", FieldValue.increment(1)
-                )
-                changeButtonState("remove", holder.btnAccept, holder.itemView)
+                if (users != null) {
+                    sharedViewModel
+                        .removeAccepted(trip.id, "acceptedPeople", "seats", users.get(position), 1)
+                        .observe(holder.itemView.context as LifecycleOwner, Observer { success ->
+                            if(success)
+                                changeButtonState("remove", holder.btnAccept, holder.itemView)
+                        })
+                }
             } else {
                 val fragment = TripDetailsFragment.ReviewDialogFragment(
                     trip, holder.itemView, "passengerRatings",
-                    users?.get(position)
+                    users?.get(position), sharedViewModel
                 )
                 val activity = it.context as AppCompatActivity
                 fragment.show(activity.supportFragmentManager, "reviewDialog")

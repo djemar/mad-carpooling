@@ -113,6 +113,19 @@ class UserRepository {
         }
     }
 
+    suspend fun updateRatings(childName: String, role: String, currentUser: String, newArray: ArrayList<Any>): Boolean{
+        return try{
+            Firebase.firestore
+                .collection("ratings")
+                .document(childName)
+                .update("${role}.${currentUser}", newArray)
+                .await()
+            true
+        }catch(e: Exception){
+            return false
+        }
+    }
+
     @ExperimentalCoroutinesApi
     fun Query.getQuerySnapshotFlow(): Flow<QuerySnapshot?> {
         return callbackFlow {

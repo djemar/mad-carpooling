@@ -299,6 +299,48 @@ class SharedViewModel(
         return result
     }
 
+    fun addAccepted(trip: String, fieldTrip: String, incrementField: String, user: String, value: Long): LiveData<Boolean>
+    {
+        val result = MutableLiveData<Boolean>()
+        viewModelScope.launch{
+            val res = tripRepository.getFieldTrip(trip, fieldTrip)
+            if (res.isSuccess) {
+                val tmpArray = res.getOrNull()
+                if (tmpArray != null) {
+                    if (tmpArray.contains(user)) {
+                        if (tripRepository.arrayAddTrip(trip, "acceptedPeople", user))
+                            launch {
+                                val res = tripRepository.incrementTrip(trip, incrementField, value)
+                                result.postValue(res)
+                            }
+                    }
+                }
+            } else {
+                result.postValue(false)
+            }
+
+        }
+        return result
+    }
+
+    fun terminateTrip(trip: String): LiveData<Boolean>
+    {
+        val res = MutableLiveData<Boolean>()
+        viewModelScope.launch{
+            val result = tripRepository.terminateTrip(trip)
+            res.postValue(result)
+        }
+        return res
+    }
+
+    fun updateRatings(uid: String, role: String, currentUser: String, newArray: ArrayList<Any>): LiveData<Boolean>{
+        val res = MutableLiveData<Boolean>()
+        viewModelScope.launch{
+            val result = userRepository.updateRatings(uid, role, currentUser, newArray)
+            res.postValue(result)
+        }
+        return res
+    }
 
 }
 

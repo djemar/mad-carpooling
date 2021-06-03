@@ -118,6 +118,19 @@ class TripRepository {
         }
     }
 
+    suspend fun arrayAddTrip(childName: String, field: String, user: String): Boolean{
+        return try{
+            Firebase.firestore
+                .collection("trips")
+                .document(childName)
+                .update(field, FieldValue.arrayUnion(user))
+                .await()
+            true
+        } catch (e: Exception){
+            false
+        }
+    }
+
     suspend fun getFieldTrip(childName: String, field: String): Result<ArrayList<String>> = withContext(Dispatchers.IO){
         try{
             val data = Firebase.firestore
@@ -141,6 +154,19 @@ class TripRepository {
                 .await()
             true
         } catch (e: Exception){
+            false
+        }
+    }
+
+    suspend fun terminateTrip(childName: String) : Boolean{
+        return try {
+            Firebase.firestore
+                .collection("trips")
+                .document(childName)
+                .update("finished", true)
+                .await()
+            true
+        }catch(e: Exception){
             false
         }
     }
@@ -223,6 +249,5 @@ class TripRepository {
             false
         }
     }
-
 
 }
