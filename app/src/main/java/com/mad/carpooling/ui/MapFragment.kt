@@ -120,7 +120,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         map.overlays.add(rotationGestureOverlay);
 
         selectedMarker.observe(viewLifecycleOwner, { marker ->
-            btnDeleteMarker.isVisible = marker != null
+            btnDeleteMarker.isVisible = marker != null && trip.owner?.id == sharedViewModel.getCurrentUser().value?.uid
             if (marker != null) {
                 map.controller.animateTo(marker.position)
             }
