@@ -570,15 +570,28 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             }*/
             sharedViewModel
                 .getUserRef(sharedViewModel.getCurrentUser().value?.uid!!)
-                .observe(viewLifecycleOwner, Observer{ tripOwner ->
+                .observe(viewLifecycleOwner, Observer { tripOwner ->
                     trip.owner = tripOwner
-                    tripEditViewModel.createTrip(trip).observe(viewLifecycleOwner, Observer { success ->
-                        if(success)
-                            Snackbar.make(requireView(), "Trip created", Snackbar.LENGTH_SHORT).show()
-                        else
-                            Snackbar.make(requireView(), "Failure on create trip", Snackbar.LENGTH_SHORT).show()
-                        navigateToTripDetails(trip.id)
-                    })
+                    Log.d("TEST", "Before observe")
+                    tripEditViewModel.createTrip(trip)
+                        .observe(viewLifecycleOwner, Observer { success ->
+                            Log.d("TEST", success.toString())
+                            navigateToTripDetails(trip.id)
+                            if (success) {
+                                Snackbar.make(
+                                    requireView(),
+                                    "Trip created",
+                                    Snackbar.LENGTH_SHORT
+                                ).show()
+                            } else {
+                                Snackbar.make(
+                                    requireView(),
+                                    "Failure on create trip",
+                                    Snackbar.LENGTH_SHORT
+                                ).show()
+                            }
+                        })
+                    Log.d("TEST", "After observe")
                 })
         } else {
             if (!trip.visibility) {
@@ -591,18 +604,23 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                 trip.acceptedPeople = ArrayList<String>()
                 trip.interestedPeople = ArrayList<String>()
             }
+            Log.d("TEST", "Before observe")
             tripEditViewModel.updateTrip(trip).observe(viewLifecycleOwner, Observer { success ->
-                if(success)
-                    Snackbar.make(requireView(), "Trip updated", Snackbar.LENGTH_SHORT).show()
-                else
-                    Snackbar.make(requireView(), "Failure on update trip", Snackbar.LENGTH_SHORT).show()
+                Log.d("TEST", success.toString())
                 navigateToTripDetails(trip.id)
+                if (success) {
+                    Snackbar.make(requireView(), "Trip updated", Snackbar.LENGTH_SHORT).show()
+                } else {
+                    Snackbar.make(requireView(), "Failure on update trip", Snackbar.LENGTH_SHORT)
+                        .show()
+                }
             })
+            Log.d("TEST", "After observe")
         }
 
     }
 
-    fun navigateToTripDetails(newId: String) {
+    private fun navigateToTripDetails(newId: String) {
         val action = TripEditFragmentDirections.actionNavTripEditToNavTripDetails(
             id = newId
         )

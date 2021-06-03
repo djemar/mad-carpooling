@@ -200,7 +200,7 @@ class MainActivity : AppCompatActivity() {
                     val db = Firebase.firestore
                     db.collection("users").document(user.uid).get()
                         .addOnSuccessListener { document ->
-                            if (document != null) {
+                            if (document.data != null) {
                                 Log.d("LOGIN", "User login")
                                 // timestamp of latest login -> this triggers the observer and loads the user data
                                 val updates = hashMapOf<String, Any>(
@@ -238,6 +238,8 @@ class MainActivity : AppCompatActivity() {
                                                     "Login successful",
                                                     Snackbar.LENGTH_SHORT
                                                 ).show()
+                                                startActivity(Intent(this, MainActivity::class.java))
+                                                finish()
                                             }
                                     }
 

@@ -176,7 +176,7 @@ class TripRepository {
 
     suspend fun updateTrip(trip: Trip) : Boolean{
         return try {
-            val data = Firebase.firestore
+            Firebase.firestore
                 .collection("trips")
                 .document(trip.id)
                 .set(trip)
@@ -189,7 +189,7 @@ class TripRepository {
 
     suspend fun removeFavTrip(user: String, tripId: String): Boolean{
         return try{
-            val data = Firebase.firestore
+            Firebase.firestore
                 .collection("users").document(user)
                 .update("favTrips", FieldValue.arrayRemove(tripId))
                 .await()
