@@ -44,9 +44,9 @@ class TimePickerFragment(val tvTime: TextView) : DialogFragment(),
         val str = "${checkDigit(hourOfDay)}:${checkDigit(minute)}"
         tvTime.text = LocalTime.parse(str, DateTimeFormatter.ISO_LOCAL_TIME)
             .format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
-           /* (SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT, Locale.getDefault())).format(
-                SimpleDateFormat("HH:mm", Locale.getDefault()).parse("$hourOfDay:$minute")!!
-            )*/
+        /* (SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT, Locale.getDefault())).format(
+             SimpleDateFormat("HH:mm", Locale.getDefault()).parse("$hourOfDay:$minute")!!
+         )*/
     }
 
     fun checkDigit(number: Int): String {

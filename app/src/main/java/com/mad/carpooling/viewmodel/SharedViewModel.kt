@@ -4,19 +4,22 @@ import android.util.Log
 import androidx.lifecycle.*
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.model.Trip
 import com.mad.carpooling.model.User
 import com.mad.carpooling.repository.TripRepository
+import com.mad.carpooling.repository.UserRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-class SharedViewModel(private val tripRepository: TripRepository) : ViewModel() {
+class SharedViewModel(
+    private val tripRepository: TripRepository,
+    private val userRepository: UserRepository
+) : ViewModel() {
 
     private val trips: MutableLiveData<HashMap<String, Trip>> by lazy {
         MutableLiveData<HashMap<String, Trip>>().also {
@@ -124,7 +127,6 @@ class SharedViewModel(private val tripRepository: TripRepository) : ViewModel() 
     }
 
 
-
 /*    private fun loadOthersTrips() {
         val db = Firebase.firestore
         val currentUserRef =
@@ -211,12 +213,12 @@ class SharedViewModel(private val tripRepository: TripRepository) : ViewModel() 
         return currentUser
     }
 
-    fun getUserDoc(userId : String) : LiveData<User?>{
+    fun getUserDoc(userId: String): LiveData<User?> {
         val result = MutableLiveData<User?>()
         viewModelScope.launch {
-            val user = tripRepository.getDataFromFireStore(userId)
-            if(user.isSuccess){
-               result.postValue(user.getOrNull())
+            val user = userRepository.getUserDoc(userId)
+            if (user.isSuccess) {
+                result.postValue(user.getOrNull())
             } else {
                 result.postValue(null)
             }

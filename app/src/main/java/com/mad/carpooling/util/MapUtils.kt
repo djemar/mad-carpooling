@@ -28,7 +28,7 @@ object MapUtils {
         val drawable = ContextCompat.getDrawable(ctx, R.drawable.ic_map_marker)!!
         val bitmap = drawable.toBitmap()
 
-        val paint = Paint();
+        val paint = Paint()
         paint.style = Paint.Style.FILL
         paint.color = Color.WHITE
         paint.textAlign = Paint.Align.CENTER
@@ -88,7 +88,8 @@ object MapUtils {
                 ivMap.setImageBitmap(bitmap)
 
             }, MapSnapshot.INCLUDE_FLAG_UPTODATE, mapTileProvider, overlays,
-            Projection(zoom, mapSize, mapSize, box?.centerWithDateLine,
+            Projection(
+                zoom, mapSize, mapSize, box?.centerWithDateLine,
                 0F,
                 true,
                 true,

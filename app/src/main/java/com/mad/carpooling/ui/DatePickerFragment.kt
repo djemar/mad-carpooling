@@ -15,7 +15,7 @@ import java.util.*
 class DatePickerFragment(val tvDate: TextView) : DialogFragment(),
     DatePickerDialog.OnDateSetListener {
 
-   // private val tvDate = tvDate
+    // private val tvDate = tvDate
 
     override fun onPause() {
         super.onPause()
@@ -38,9 +38,13 @@ class DatePickerFragment(val tvDate: TextView) : DialogFragment(),
 
     @SuppressLint("SetTextI18n")
     override fun onDateSet(view: DatePicker, year: Int, month: Int, day: Int) {
-        tvDate.text = (SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT, Locale.getDefault())).format(
-            SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse("${day}/${(month + 1)}/${year}")!!
-        )
+        tvDate.text =
+            (SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT, Locale.getDefault())).format(
+                SimpleDateFormat(
+                    "dd/MM/yyyy",
+                    Locale.getDefault()
+                ).parse("${day}/${(month + 1)}/${year}")!!
+            )
     }
 
 }

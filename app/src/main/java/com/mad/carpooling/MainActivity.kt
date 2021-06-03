@@ -34,6 +34,7 @@ import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.model.Rating
 import com.mad.carpooling.model.User
 import com.mad.carpooling.repository.TripRepository
+import com.mad.carpooling.repository.UserRepository
 import com.mad.carpooling.viewmodel.SharedViewModel
 import com.mad.carpooling.viewmodel.SharedViewModelFactory
 
@@ -46,7 +47,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarLayout: AppBarLayout
     private var userState: FirebaseUser? = null
     private val RC_SIGN_IN: Int = 1
-    private val model: SharedViewModel by viewModels { SharedViewModelFactory(TripRepository()) }
+    private val model: SharedViewModel by viewModels {
+        SharedViewModelFactory(
+            TripRepository(),
+            UserRepository()
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -93,36 +99,36 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        var prof = navView.getMenu().findItem(R.id.nav_show_profile)
-        var myTrips = navView.getMenu().findItem(R.id.nav_trip_list)
-        var intTrips = navView.getMenu().findItem(R.id.nav_interest_trips)
-        var boughtTrips = navView.getMenu().findItem(R.id.nav_bought_trips)
-        var log_item = navView.getMenu().findItem(R.id.nav_log)
+        var prof = navView.menu.findItem(R.id.nav_show_profile)
+        var myTrips = navView.menu.findItem(R.id.nav_trip_list)
+        var intTrips = navView.menu.findItem(R.id.nav_interest_trips)
+        var boughtTrips = navView.menu.findItem(R.id.nav_bought_trips)
+        var log_item = navView.menu.findItem(R.id.nav_log)
 
         val currentUser = auth.currentUser
         if (currentUser != null) {
-            log_item.setTitle("Logout")
+            log_item.title = "Logout"
             log_item.setOnMenuItemClickListener {
                 logout()
                 true
             }
 
-            prof.setVisible(true)
-            myTrips.setVisible(true)
-            intTrips.setVisible(true)
-            boughtTrips.setVisible(true)
+            prof.isVisible = true
+            myTrips.isVisible = true
+            intTrips.isVisible = true
+            boughtTrips.isVisible = true
 
         } else {
-            log_item.setTitle("Login")
+            log_item.title = "Login"
             log_item.setOnMenuItemClickListener {
                 login()
                 true
             }
 
-            prof.setVisible(false)
-            myTrips.setVisible(false)
-            intTrips.setVisible(false)
-            boughtTrips.setVisible(false)
+            prof.isVisible = false
+            myTrips.isVisible = false
+            intTrips.isVisible = false
+            boughtTrips.isVisible = false
         }
     }
 

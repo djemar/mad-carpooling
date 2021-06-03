@@ -24,7 +24,10 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.R
 import com.mad.carpooling.model.User
+import com.mad.carpooling.repository.TripRepository
+import com.mad.carpooling.repository.UserRepository
 import com.mad.carpooling.viewmodel.SharedViewModel
+import com.mad.carpooling.viewmodel.SharedViewModelFactory
 
 
 class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
@@ -45,7 +48,12 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
     private lateinit var cvDriver: MaterialCardView
     private lateinit var cvPassenger: MaterialCardView
     private lateinit var optionsMenu: Menu
-    private val model: SharedViewModel by activityViewModels()
+    private val sharedViewModel: SharedViewModel by activityViewModels {
+        SharedViewModelFactory(
+            TripRepository(),
+            UserRepository()
+        )
+    }
     private val args: ShowProfileFragmentArgs by navArgs()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -69,7 +77,7 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
         cvPassenger = view.findViewById(R.id.ll_rating_passenger)
 
         if (args.uid == "uid") {
-            model.getCurrentUser().observe(viewLifecycleOwner, Observer { currentUser ->
+            sharedViewModel.getCurrentUser().observe(viewLifecycleOwner, Observer { currentUser ->
                 // Update the UI
                 uid = currentUser.uid
                 initProfile(currentUser, view)
@@ -100,9 +108,9 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
         tvEmail.text = user.email
         tvLocation.text = user.location
         Glide.with(view).load(user.imageUserRef).into(ivProfilePic)
-        llEmail.isVisible = uid == model.getCurrentUser().value?.uid
+        llEmail.isVisible = uid == sharedViewModel.getCurrentUser().value?.uid
         val div = view.findViewById<View>(R.id.divider4)
-        div.isVisible = uid == model.getCurrentUser().value?.uid
+        div.isVisible = uid == sharedViewModel.getCurrentUser().value?.uid
 
         val db = Firebase.firestore
 
@@ -122,12 +130,12 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
                         numStarsDriver.text = "${("%.1f".format(rbDriver.rating))}/5"
                         numReviewsDriver.text = "${mapRatingDriver.size} reviews"
                     } else {
-                        rbDriver.rating = 0f;
+                        rbDriver.rating = 0f
                         numStarsDriver.text = "-/5"
                         numReviewsDriver.text = "0 reviews"
                     }
                 } else {
-                    rbDriver.rating = 0f;
+                    rbDriver.rating = 0f
                     numStarsDriver.text = "-/5"
                     numReviewsDriver.text = "0 reviews"
                 }
@@ -145,12 +153,12 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
                         numStarsPassenger.text = "${("%.1f".format(rbPassenger.rating))}/5"
                         numReviewsPassenger.text = "${mapRatingPassenger.size} reviews"
                     } else {
-                        rbPassenger.rating = 0f;
+                        rbPassenger.rating = 0f
                         numStarsPassenger.text = "-/5"
                         numReviewsPassenger.text = "0 reviews"
                     }
                 } else {
-                    rbPassenger.rating = 0f;
+                    rbPassenger.rating = 0f
                     numStarsPassenger.text = "-/5"
                     numReviewsPassenger.text = "0 reviews"
                 }
@@ -161,10 +169,16 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
             bundle.putString("uid", uid)
             bundle.putString("role", "driver")
 
-            if (uid != model.getCurrentUser().value?.uid!!) {
-                findNavController().navigate(R.id.action_nav_show_profile_others_to_nav_reviews_profile, bundle)
+            if (uid != sharedViewModel.getCurrentUser().value?.uid!!) {
+                findNavController().navigate(
+                    R.id.action_nav_show_profile_others_to_nav_reviews_profile,
+                    bundle
+                )
             } else {
-                findNavController().navigate(R.id.action_nav_show_profile_to_nav_reviews_profile, bundle)
+                findNavController().navigate(
+                    R.id.action_nav_show_profile_to_nav_reviews_profile,
+                    bundle
+                )
             }
         }
 
@@ -173,10 +187,16 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
             bundle.putString("uid", uid)
             bundle.putString("role", "passenger")
 
-            if (uid != model.getCurrentUser().value?.uid!!) {
-                findNavController().navigate(R.id.action_nav_show_profile_others_to_nav_reviews_profile, bundle)
+            if (uid != sharedViewModel.getCurrentUser().value?.uid!!) {
+                findNavController().navigate(
+                    R.id.action_nav_show_profile_others_to_nav_reviews_profile,
+                    bundle
+                )
             } else {
-                findNavController().navigate(R.id.action_nav_show_profile_to_nav_reviews_profile, bundle)
+                findNavController().navigate(
+                    R.id.action_nav_show_profile_to_nav_reviews_profile,
+                    bundle
+                )
             }
         }
     }
@@ -207,7 +227,7 @@ class ShowProfileFragment : Fragment(R.layout.fragment_show_profile) {
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
         optionsMenu.findItem(R.id.nav_edit_profile).isVisible =
-            uid == model.getCurrentUser().value?.uid
+            uid == sharedViewModel.getCurrentUser().value?.uid
     }
 
 }

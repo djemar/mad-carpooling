@@ -44,13 +44,14 @@ import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.model.Trip
-import com.mad.carpooling.repository.TripRepository
-import com.mad.carpooling.viewmodel.SharedViewModel
-import com.mad.carpooling.util.TripUtils
 import com.mad.carpooling.repository.MapRepository
+import com.mad.carpooling.repository.TripRepository
+import com.mad.carpooling.repository.UserRepository
 import com.mad.carpooling.util.MapUtils
+import com.mad.carpooling.util.TripUtils
 import com.mad.carpooling.viewmodel.MapViewModel
 import com.mad.carpooling.viewmodel.MapViewModelFactory
+import com.mad.carpooling.viewmodel.SharedViewModel
 import com.mad.carpooling.viewmodel.SharedViewModelFactory
 import kotlinx.coroutines.*
 import org.osmdroid.config.Configuration
@@ -74,7 +75,12 @@ import kotlin.math.hypot
 
 class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
-    private val model: SharedViewModel by activityViewModels { SharedViewModelFactory(TripRepository()) }
+    private val sharedViewModel: SharedViewModel by activityViewModels {
+        SharedViewModelFactory(
+            TripRepository(),
+            UserRepository()
+        )
+    }
     private lateinit var mapViewModel: MapViewModel
     private lateinit var viewModelFactory: MapViewModelFactory
     private lateinit var trip: Trip
@@ -97,7 +103,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     private lateinit var fab: FloatingActionButton
     private lateinit var bottomSheet: ConstraintLayout
     private lateinit var bsb: BottomSheetBehavior<ConstraintLayout>
-    private lateinit var mapClickOverlay: View;
+    private lateinit var mapClickOverlay: View
     private lateinit var btnTrip: MaterialButton
     private lateinit var ratingBar: RatingBar
     private var chattiness = false
@@ -128,7 +134,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         Configuration.getInstance().load(
             requireContext(),
             context?.getSharedPreferences("mad.carpooling.map", Context.MODE_PRIVATE)
-        );
+        )
         viewModelFactory = MapViewModelFactory(MapRepository())
         mapViewModel = ViewModelProvider(this, viewModelFactory)
             .get(MapViewModel::class.java)
@@ -159,7 +165,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         fab = view.findViewById(R.id.fab_tripdetails)
         bsb = BottomSheetBehavior.from(bottomSheet)
         // map = view.findViewById(R.id.mapDetails)
-        model.getTrips().observe(viewLifecycleOwner, { newTripsMap ->
+        sharedViewModel.getTrips().observe(viewLifecycleOwner, { newTripsMap ->
             // Update the UI
             initTripDetails(newTripsMap, view)
             initMapSnapshot()
@@ -278,7 +284,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
         val profileInfo = view.findViewById<ConstraintLayout>(R.id.cl_tripDetails_profile)
 
-        if (trip.owner?.id != model.getCurrentUser().value?.uid) {
+        if (trip.owner?.id != sharedViewModel.getCurrentUser().value?.uid) {
             profileInfo.setOnClickListener {
                 val action = TripDetailsFragmentDirections.actionNavTripDetailsToNavShowProfile(
                     trip.owner?.id!!
@@ -314,7 +320,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     }
 
     private fun initBtnTripAndRatingBar(db: FirebaseFirestore, view: View) {
-        if (trip.owner!!.id != model.getCurrentUser().value?.uid) {
+        if (trip.owner!!.id != sharedViewModel.getCurrentUser().value?.uid) {
             ratingBar.visibility = View.VISIBLE
             btnTrip.visibility = View.GONE
 
@@ -328,7 +334,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                             vote = vote + array[0].toString().toFloat()
                         ratingBar.rating = (vote) / (mapRatingDriver.size.toFloat())
                     } else {
-                        ratingBar.rating = 0f;
+                        ratingBar.rating = 0f
                     }
                 }
             if (trip.finished) {
@@ -355,7 +361,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             btnTrip.text = "end trip"
             btnTrip.isEnabled =
                 Calendar.getInstance().time >= trip.timestamp.toDate() && !trip.finished
-            btnTrip.setOnClickListener() {
+            btnTrip.setOnClickListener {
                 val fragment = EndTripDialogFragment(trip)
                 fragment.show(requireActivity().supportFragmentManager, "endTripDialog")
             }
@@ -463,13 +469,13 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     }
 
     private fun initFab(db: FirebaseFirestore, view: View) {
-        if (trip.owner!!.id != model.getCurrentUser().value?.uid) {
+        if (trip.owner!!.id != sharedViewModel.getCurrentUser().value?.uid) {
 
-            if (trip.interestedPeople?.contains(model.getCurrentUser().value?.uid)!!) {
+            if (trip.interestedPeople?.contains(sharedViewModel.getCurrentUser().value?.uid)!!) {
                 fab.setImageDrawable(
                     ContextCompat.getDrawable(requireContext(), R.drawable.ic_baseline_fullstar)
                 )
-                if (trip.acceptedPeople?.contains(model.getCurrentUser().value?.uid)!!) {
+                if (trip.acceptedPeople?.contains(sharedViewModel.getCurrentUser().value?.uid)!!) {
                     if (trip.finished) fab.hide()
                 }
             } else {
@@ -482,7 +488,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             }
 
             fab.setOnClickListener {
-                if (trip.interestedPeople?.contains(model.getCurrentUser().value?.uid) == true) {
+                if (trip.interestedPeople?.contains(sharedViewModel.getCurrentUser().value?.uid) == true) {
                     fab.setImageDrawable(
                         ContextCompat.getDrawable(
                             requireContext(),
@@ -491,18 +497,19 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                     )
                     db.collection("trips").document(trip.id).update(
                         "interestedPeople",
-                        FieldValue.arrayRemove(model.getCurrentUser().value?.uid)
+                        FieldValue.arrayRemove(sharedViewModel.getCurrentUser().value?.uid)
                     ).addOnSuccessListener {
-                        db.collection("users").document(model.getCurrentUser().value?.uid!!)
+                        db.collection("users")
+                            .document(sharedViewModel.getCurrentUser().value?.uid!!)
                             .update(
                                 "favTrips", FieldValue.arrayRemove(trip.id)
                             )
                     }
 
-                    if (trip.acceptedPeople?.contains(model.getCurrentUser().value?.uid!!) == true) {
+                    if (trip.acceptedPeople?.contains(sharedViewModel.getCurrentUser().value?.uid!!) == true) {
                         db.collection("trips").document(trip.id).update(
                             "acceptedPeople",
-                            FieldValue.arrayRemove(model.getCurrentUser().value?.uid!!)
+                            FieldValue.arrayRemove(sharedViewModel.getCurrentUser().value?.uid!!)
                         ).addOnSuccessListener {
                             db.collection("trips").document(trip.id).update(
                                 "seats", FieldValue.increment(1)
@@ -519,9 +526,10 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
                     db.collection("trips").document(trip.id).update(
                         "interestedPeople",
-                        FieldValue.arrayUnion(model.getCurrentUser().value?.uid)
+                        FieldValue.arrayUnion(sharedViewModel.getCurrentUser().value?.uid)
                     ).addOnSuccessListener {
-                        db.collection("users").document(model.getCurrentUser().value?.uid!!)
+                        db.collection("users")
+                            .document(sharedViewModel.getCurrentUser().value?.uid!!)
                             .update(
                                 "favTrips", FieldValue.arrayUnion(trip.id)
                             )
@@ -756,16 +764,16 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
 
         optionsMenu.findItem(R.id.edit_trip).isVisible =
-            trip.owner!!.id == model.getCurrentUser().value?.uid && !trip.finished && trip.timestamp > Timestamp.now()
+            trip.owner!!.id == sharedViewModel.getCurrentUser().value?.uid && !trip.finished && trip.timestamp > Timestamp.now()
 
         optionsMenu.findItem(R.id.visibility_trip).isVisible =
-            trip.owner!!.id == model.getCurrentUser().value?.uid && !trip.finished
+            trip.owner!!.id == sharedViewModel.getCurrentUser().value?.uid && !trip.finished
 
         if (trip.visibility) {
-            optionsMenu.findItem(R.id.visibility_trip).setIcon(R.drawable.ic_sharp_visibility);
+            optionsMenu.findItem(R.id.visibility_trip).setIcon(R.drawable.ic_sharp_visibility)
         } else {
             optionsMenu.findItem(R.id.visibility_trip)
-                .setIcon(R.drawable.ic_baseline_visibility_off);
+                .setIcon(R.drawable.ic_baseline_visibility_off)
         }
     }
 
@@ -792,12 +800,12 @@ class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip
                 db.collection("users").document(user).get().addOnSuccessListener {
                     nickname.text = it.get("nickname").toString()
                     Glide.with(holder.itemView).load(it?.get("imageUserRef"))
-                        .into(profilePic!!)
+                        .into(profilePic)
                 }
                 profile.setOnClickListener {
                     val action =
                         TripDetailsFragmentDirections.actionNavTripDetailsToNavShowProfile(
-                            user!!
+                            user
                         )
                     it.findNavController().navigate(action)
                 }
@@ -812,7 +820,7 @@ class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip
     }
 
     private fun changeButtonState(state: String, btn: MaterialButton, view: View) {
-        if (state.toLowerCase() == "accept") {
+        if (state.lowercase(Locale.getDefault()) == "accept") {
             btn.text = "remove"
             btn.setTextColor(ContextCompat.getColor(view.context, R.color.red_700))
             btn.strokeColor = ContextCompat.getColorStateList(view.context, R.color.red_700)
@@ -824,11 +832,11 @@ class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip
     }
 
     private fun initButtonState(state: String, btn: MaterialButton, view: View) {
-        if (state.toLowerCase() == "accept") {
+        if (state.lowercase(Locale.getDefault()) == "accept") {
             btn.text = "accept"
             btn.setTextColor(ContextCompat.getColor(view.context, R.color.green_700))
             btn.strokeColor = ContextCompat.getColorStateList(view.context, R.color.green_700)
-        } else if (state.toLowerCase() == "remove") {
+        } else if (state.lowercase(Locale.getDefault()) == "remove") {
             btn.text = "remove"
             btn.setTextColor(ContextCompat.getColor(view.context, R.color.red_700))
             btn.strokeColor = ContextCompat.getColorStateList(view.context, R.color.red_700)
@@ -872,7 +880,7 @@ class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip
         }
 
         holder.btnAccept.setOnClickListener {
-            if (holder.btnAccept.text.toString().toLowerCase() == "accept") {
+            if (holder.btnAccept.text.toString().lowercase(Locale.getDefault()) == "accept") {
                 db.collection("trips").document(trip.id).update(
                     "acceptedPeople", FieldValue.arrayUnion(users?.get(position))
                 )
@@ -880,7 +888,7 @@ class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip
                     "seats", FieldValue.increment(-1)
                 )
                 changeButtonState("accept", holder.btnAccept, holder.itemView)
-            } else if (holder.btnAccept.text.toString().toLowerCase() == "remove") {
+            } else if (holder.btnAccept.text.toString().lowercase(Locale.getDefault()) == "remove") {
                 db.collection("trips").document(trip.id).update(
                     "acceptedPeople", FieldValue.arrayRemove(users?.get(position))
                 )

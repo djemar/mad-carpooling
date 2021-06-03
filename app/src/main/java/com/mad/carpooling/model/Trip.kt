@@ -25,5 +25,4 @@ data class Trip(
     var geopoints: ArrayList<GeoPoint> = ArrayList<GeoPoint>(),
     var visibility: Boolean = true,
     var finished: Boolean = false
-) {
-}
+)

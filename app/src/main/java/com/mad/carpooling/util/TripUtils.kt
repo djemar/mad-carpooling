@@ -8,7 +8,7 @@ import com.mad.carpooling.model.Trip
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.ArrayList
+import java.util.*
 
 object TripUtils {
     fun checkStopsValidity(stops: ArrayList<String>): Boolean {
@@ -21,9 +21,9 @@ object TripUtils {
 
     fun calcDuration(stops: ArrayList<String>): String {
         val str1 =
-            stops?.get(0)?.split(",")?.get(2) + "T" + stops?.get(0)?.split(",")?.get(3)
-        val str2 = stops?.get(stops!!.size - 1)?.split(",")
-            ?.get(2) + "T" + stops?.get(stops!!.size - 1)?.split(",")?.get(3)
+            stops.get(0).split(",").get(2) + "T" + stops.get(0).split(",").get(3)
+        val str2 = stops.get(stops.size - 1).split(",")
+            .get(2) + "T" + stops.get(stops.size - 1).split(",").get(3)
 
         val d1 = LocalDateTime.parse(str1, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
         val d2 = LocalDateTime.parse(str2, DateTimeFormatter.ISO_LOCAL_DATE_TIME)

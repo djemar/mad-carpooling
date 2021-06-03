@@ -21,12 +21,11 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.R
 import com.mad.carpooling.repository.TripRepository
+import com.mad.carpooling.repository.UserRepository
 import com.mad.carpooling.viewmodel.SharedViewModel
 import com.mad.carpooling.viewmodel.SharedViewModelFactory
 import com.taufiqrahman.reviewratings.BarLabels
 import com.taufiqrahman.reviewratings.RatingReviews
-import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.math.roundToInt
 
 
@@ -35,7 +34,12 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
     private lateinit var tv_stars: TextView
     private lateinit var tv_reviews: TextView
     private lateinit var rb_ratings: RatingBar
-    private val model: SharedViewModel by activityViewModels { SharedViewModelFactory(TripRepository()) }
+    private val model: SharedViewModel by activityViewModels {
+        SharedViewModelFactory(
+            TripRepository(),
+            UserRepository()
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,11 +63,11 @@ class ReviewsProfileFragment : Fragment(R.layout.fragment_reviews_profile) {
         rb_ratings = view.findViewById<RatingBar>(R.id.rb_fragment_review)
 
         rv.layoutManager = LinearLayoutManager(context)
-        rv.isNestedScrollingEnabled = false; //prevent toolbar to expand on scroll
+        rv.isNestedScrollingEnabled = false //prevent toolbar to expand on scroll
 
         lateinit var userList: Array<String>
-        var stars = intArrayOf(0, 0, 0, 0, 0);
-        var totStars = 0;
+        var stars = intArrayOf(0, 0, 0, 0, 0)
+        var totStars = 0
 
         val ratingReviews = view.findViewById(R.id.rating_reviews) as RatingReviews
 

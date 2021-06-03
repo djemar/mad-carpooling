@@ -47,10 +47,13 @@ import com.google.firebase.storage.ktx.storage
 import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.model.Trip
+import com.mad.carpooling.repository.TripRepository
+import com.mad.carpooling.repository.UserRepository
 import com.mad.carpooling.ui.DatePickerFragment
-import com.mad.carpooling.viewmodel.SharedViewModel
 import com.mad.carpooling.ui.TimePickerFragment
 import com.mad.carpooling.util.TripUtils
+import com.mad.carpooling.viewmodel.SharedViewModel
+import com.mad.carpooling.viewmodel.SharedViewModelFactory
 import com.mad.carpooling.viewmodel.TripEditViewModel
 import java.io.File
 import java.io.FileOutputStream
@@ -69,7 +72,12 @@ private lateinit var tvDuration: TextView
 
 class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
 
-    private val sharedViewModel: SharedViewModel by activityViewModels()
+    private val sharedViewModel: SharedViewModel by activityViewModels {
+        SharedViewModelFactory(
+            TripRepository(),
+            UserRepository()
+        )
+    }
     private val tripEditViewModel: TripEditViewModel by activityViewModels()
     private lateinit var optionsMenu: Menu
     private lateinit var ivCarPic: ImageView
@@ -146,7 +154,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             val previousFragment = findNavController().previousBackStackEntry?.destination?.id
             if (!args.isNew) {  // navigating from any edit btn
                 if (!args.fromMap && args.id != "id")
-                viewModel.setTrip(tripMap?.get(args.id)!!.copy())
+                    viewModel.setTrip(tripMap?.get(args.id)!!.copy())
             } else { // navigating from tripList FAB
                 (activity as MainActivity).supportActionBar?.title = "Create New Trip"
                 if (!args.fromMap)
@@ -181,7 +189,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
             }
         }
 
-        stops = trip.stops!!.toMutableList() as ArrayList<String>
+        stops = trip.stops.toMutableList() as ArrayList<String>
         val stopEditAdapter = StopEditAdapter(stops)
         if (stops.isNotEmpty() && TripUtils.checkStopsValidity(stops)) tvDuration.text =
             TripUtils.calcDuration(stops)
@@ -509,7 +517,11 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
                     saveCarImage()
                 } else {
                     if (!validateSave()) {
-                        Snackbar.make(requireView(), "Please fill all the fields", Snackbar.LENGTH_SHORT).show()
+                        Snackbar.make(
+                            requireView(),
+                            "Please fill all the fields",
+                            Snackbar.LENGTH_SHORT
+                        ).show()
                     } else {
                         updateFirestoreTrips()
                     }

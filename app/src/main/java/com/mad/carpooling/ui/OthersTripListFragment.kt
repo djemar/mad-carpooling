@@ -37,6 +37,7 @@ import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.model.Trip
 import com.mad.carpooling.repository.TripRepository
+import com.mad.carpooling.repository.UserRepository
 import com.mad.carpooling.viewmodel.SharedViewModel
 import com.mad.carpooling.viewmodel.SharedViewModelFactory
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -70,7 +71,12 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
     private lateinit var chipSearchResults: Chip
     private lateinit var emptyView: TextView
     private var searchIsValid: Boolean = false
-    private val model: SharedViewModel by activityViewModels { SharedViewModelFactory(TripRepository()) }
+    private val model: SharedViewModel by activityViewModels {
+        SharedViewModelFactory(
+            TripRepository(),
+            UserRepository()
+        )
+    }
 
     // Use the 'by activityViewModels()' Kotlin property delegate
     // from the fragment-ktx artifact
@@ -127,7 +133,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
             emptyView.isVisible = tripMap.isEmpty()
             tripAdapter.submitList(tripMap.values.toList())
             initSearch(tripMap, tripAdapter)
-            swipeContainer.isRefreshing = false;
+            swipeContainer.isRefreshing = false
         }
     }
 
@@ -297,7 +303,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
         etSearchTime.addTextChangedListener(textWatcher)
     }
 
-    class OthersTripAdapter() :
+    class OthersTripAdapter :
         ListAdapter<Trip, OthersTripAdapter.TripViewHolder>(TaskDiffCallback()) {
 
         class TaskDiffCallback : DiffUtil.ItemCallback<Trip>() {
@@ -340,7 +346,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
                 var auth = Firebase.auth
                 val currentUser = auth.currentUser
                 if (currentUser == null) {
-                    btnStar.visibility = View.GONE;
+                    btnStar.visibility = View.GONE
                 } else {
                     btnStar.setOnCheckedChangeListener(null)
                     btnStar.isChecked = trip.interestedPeople?.contains(user?.uid) == true
@@ -382,7 +388,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
 
 
             if (currentUser == null) {
-                holder.btnStar.visibility = View.GONE;
+                holder.btnStar.visibility = View.GONE
             } else {
                 holder.btnStar.visibility = View.VISIBLE
                 holder.btnStar.setOnCheckedChangeListener { it, isChecked ->
@@ -408,7 +414,7 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
                                     it.get("acceptedPeople") as java.util.ArrayList<String>
                                 if (tmpArray.contains(user?.uid!!)) {
                                     db.collection("trips").document(getItem(position).id).update(
-                                        "acceptedPeople", FieldValue.arrayRemove(user?.uid)
+                                        "acceptedPeople", FieldValue.arrayRemove(user.uid)
                                     ).addOnSuccessListener {
                                         db.collection("trips").document(getItem(position).id)
                                             .update(
@@ -468,10 +474,10 @@ class OthersTripListFragment : Fragment(R.layout.fragment_trip_list) {
                     )).format(trip.timestamp.toDate())
                         .toString()
 
-                if (trip.departure.toLowerCase(Locale.ROOT)
-                        .contains(departure.toLowerCase(Locale.ROOT))
-                    && trip.arrival.toLowerCase(Locale.ROOT)
-                        .contains(arrival.toLowerCase(Locale.ROOT))
+                if (trip.departure.lowercase(Locale.ROOT)
+                        .contains(departure.lowercase(Locale.ROOT))
+                    && trip.arrival.lowercase(Locale.ROOT)
+                        .contains(arrival.lowercase(Locale.ROOT))
                     && trip.price >= prices[0] && trip.price <= prices[1]
                     && tripDate.contains(formattedDate)
                     && tripTime.contains(formattedTime) //TODO this seems useless, better use a range slider for time too

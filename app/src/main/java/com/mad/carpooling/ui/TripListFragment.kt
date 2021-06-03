@@ -22,10 +22,11 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.Timestamp
 import com.mad.carpooling.R
 import com.mad.carpooling.model.Trip
+import com.mad.carpooling.repository.TripRepository
+import com.mad.carpooling.repository.UserRepository
 import com.mad.carpooling.viewmodel.SharedViewModel
+import com.mad.carpooling.viewmodel.SharedViewModelFactory
 import java.text.SimpleDateFormat
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 
 class TripListFragment : Fragment(R.layout.fragment_trip_list) {
@@ -34,7 +35,12 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
 
     // Use the 'by activityViewModels()' Kotlin property delegate
     // from the fragment-ktx artifact
-    private val model: SharedViewModel by activityViewModels()
+    private val sharedViewModel: SharedViewModel by activityViewModels {
+        SharedViewModelFactory(
+            TripRepository(),
+            UserRepository()
+        )
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -43,7 +49,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
         //val swipeContainer = view.findViewById<SwipeRefreshLayout>(R.id.swipeContainer)
         //swipeContainer.isEnabled = false
 
-        model.getMyTrips().observe(viewLifecycleOwner, Observer { newTripsMap ->
+        sharedViewModel.getMyTrips().observe(viewLifecycleOwner, Observer { newTripsMap ->
             // Update the UI
             emptyView.isVisible = newTripsMap.isEmpty()
             updateTripList(newTripsMap, view)
@@ -54,7 +60,7 @@ class TripListFragment : Fragment(R.layout.fragment_trip_list) {
     private fun updateTripList(tripsMap: HashMap<String, Trip>, view: View) {
         rv = view.findViewById<RecyclerView>(R.id.triplist_rv)
         rv.layoutManager = LinearLayoutManager(context)
-        rv.isNestedScrollingEnabled = false; //prevent toolbar to expand on scroll
+        rv.isNestedScrollingEnabled = false //prevent toolbar to expand on scroll
 
         val tripAdapter = TripAdapter(ArrayList((tripsMap.values)))
         rv.adapter = tripAdapter

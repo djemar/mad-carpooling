@@ -8,5 +8,4 @@ class User(
     var location: String = "City",
     var imageUserRef: String? = null,
     var favTrips: ArrayList<String>? = java.util.ArrayList<String>()
-) {
-}
+)

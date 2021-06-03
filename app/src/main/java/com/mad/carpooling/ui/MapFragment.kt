@@ -20,11 +20,10 @@ import com.google.android.material.snackbar.Snackbar
 import com.mad.carpooling.R
 import com.mad.carpooling.model.Trip
 import com.mad.carpooling.repository.MapRepository
-import com.mad.carpooling.viewmodel.SharedViewModel
-import com.mad.carpooling.viewmodel.TripEditViewModel
+import com.mad.carpooling.repository.TripRepository
+import com.mad.carpooling.repository.UserRepository
 import com.mad.carpooling.util.MapUtils
-import com.mad.carpooling.viewmodel.MapViewModel
-import com.mad.carpooling.viewmodel.MapViewModelFactory
+import com.mad.carpooling.viewmodel.*
 import com.vmadalin.easypermissions.EasyPermissions
 import com.vmadalin.easypermissions.dialogs.SettingsDialog
 import org.osmdroid.config.Configuration.getInstance
@@ -44,11 +43,16 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
 
 class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionCallbacks {
-    private lateinit var map: MapView;
-    private lateinit var btnDeleteMarker: MaterialButton;
+    private lateinit var map: MapView
+    private lateinit var btnDeleteMarker: MaterialButton
     private lateinit var mapViewModel: MapViewModel
     private lateinit var viewModelFactory: MapViewModelFactory
-    private val sharedViewModel: SharedViewModel by activityViewModels()
+    private val sharedViewModel: SharedViewModel by activityViewModels {
+        SharedViewModelFactory(
+            TripRepository(),
+            UserRepository()
+        )
+    }
     private val tripEditViewModel: TripEditViewModel by activityViewModels()
     private lateinit var trip: Trip
     private lateinit var optionsMenu: Menu
@@ -71,7 +75,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         getInstance().load(
             requireContext(),
             context?.getSharedPreferences("mad.carpooling.map", Context.MODE_PRIVATE)
-        );
+        )
         viewModelFactory = MapViewModelFactory(MapRepository())
         mapViewModel = ViewModelProvider(this, viewModelFactory)
             .get(MapViewModel::class.java)
@@ -83,7 +87,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         btnDeleteMarker = view.findViewById(R.id.btn_delete_marker)
         val args: MapFragmentArgs by navArgs()
         map = view.findViewById<MapView>(R.id.map)
-        map.setTileSource(TileSourceFactory.MAPNIK);
+        map.setTileSource(TileSourceFactory.MAPNIK)
         map.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
 
         if (savedInstanceState == null) {
@@ -91,7 +95,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
             if (previousFragment == R.id.nav_trip_edit) {
                 if (args.tid == null) {
                     trip = tripEditViewModel.getTrip()
-                    if (trip.stops?.size!! > 0) initFromEdit()
+                    if (trip.stops.size > 0) initFromEdit()
                     else initFromNew()
                 } else {
                     trip = tripEditViewModel.getTrip()
@@ -107,7 +111,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
             initFromEdit()
         }
 
-        map.invalidate();
+        map.invalidate()
         super.onViewCreated(view, savedInstanceState)
     }
 
@@ -115,12 +119,13 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         val selectedMarker = MutableLiveData<Marker?>(null)
         val waypoints = ArrayList<Marker>()
         val stopsMarkers = FolderOverlay()
-        val rotationGestureOverlay = RotationGestureOverlay(map);
-        map.setMultiTouchControls(true);
-        map.overlays.add(rotationGestureOverlay);
+        val rotationGestureOverlay = RotationGestureOverlay(map)
+        map.setMultiTouchControls(true)
+        map.overlays.add(rotationGestureOverlay)
 
         selectedMarker.observe(viewLifecycleOwner, { marker ->
-            btnDeleteMarker.isVisible = marker != null && trip.owner?.id == sharedViewModel.getCurrentUser().value?.uid
+            btnDeleteMarker.isVisible =
+                marker != null && trip.owner?.id == sharedViewModel.getCurrentUser().value?.uid
             if (marker != null) {
                 map.controller.animateTo(marker.position)
             }
@@ -164,14 +169,15 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         MapUtils.redrawMarkers(waypoints, map, requireContext())
 
         map.post {
-            run() {
+            run {
                 val box = MapUtils.computeArea(
-                    trip.geopoints.map { gp -> GeoPoint(gp.latitude, gp.longitude) }.toList() as ArrayList<GeoPoint>
+                    trip.geopoints.map { gp -> GeoPoint(gp.latitude, gp.longitude) }
+                        .toList() as ArrayList<GeoPoint>
                 )
-                map.zoomToBoundingBox(box, false, 110);
+                map.zoomToBoundingBox(box, false, 110)
                 map.invalidate()
             }
-        };
+        }
 
         var routeOverlay: Polyline
         mapViewModel.route.observe(viewLifecycleOwner, { newRouteOverlay ->
@@ -194,9 +200,9 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         var routeOverlay: Polyline = Polyline()
         //val waypoints = ArrayList<Marker>()
         val stopsMarkers = FolderOverlay()
-        val rotationGestureOverlay = RotationGestureOverlay(map);
-        map.setMultiTouchControls(true);
-        map.overlays.add(rotationGestureOverlay);
+        val rotationGestureOverlay = RotationGestureOverlay(map)
+        map.setMultiTouchControls(true)
+        map.overlays.add(rotationGestureOverlay)
 
         selectedMarker.observe(viewLifecycleOwner, { marker ->
             btnDeleteMarker.isVisible = marker != null
@@ -313,14 +319,15 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         MapUtils.redrawMarkers(waypoints, map, requireContext())
 
         map.post {
-            run() {
+            run {
                 val box = MapUtils.computeArea(
-                    trip.geopoints.map { gp -> GeoPoint(gp.latitude, gp.longitude) }.toList() as ArrayList<GeoPoint>
+                    trip.geopoints.map { gp -> GeoPoint(gp.latitude, gp.longitude) }
+                        .toList() as ArrayList<GeoPoint>
                 )
-                map.zoomToBoundingBox(box, false, 110);
+                map.zoomToBoundingBox(box, false, 110)
                 map.invalidate()
             }
-        };
+        }
 
         mapViewModel.route.observe(viewLifecycleOwner, { newRouteOverlay ->
             if (newRouteOverlay != null) {
@@ -368,9 +375,9 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         mapController.setZoom(15.0)
         locationOverlay.enableFollowLocation()
         map.overlays.add(locationOverlay)
-        val rotationGestureOverlay = RotationGestureOverlay(map);
-        map.setMultiTouchControls(true);
-        map.overlays.add(rotationGestureOverlay);
+        val rotationGestureOverlay = RotationGestureOverlay(map)
+        map.setMultiTouchControls(true)
+        map.overlays.add(rotationGestureOverlay)
 //        val waypoints = arrayListOf<Marker>()
         val stopsMarkers = FolderOverlay()
         var routeOverlay: Polyline = Polyline()
@@ -530,19 +537,19 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
     }
 
     private fun createStopsArray() {
-        val stops : ArrayList<String> = ArrayList<String>()
+        val stops: ArrayList<String> = ArrayList<String>()
         val geopoints = ArrayList<com.google.firebase.firestore.GeoPoint>()
         //var i = 0
 
         waypoints.forEach {
-            val marker = it as Marker
+            val marker = it
             val gp = com.google.firebase.firestore.GeoPoint(
                 marker.position.latitude, marker.position.longitude
             )
             if (trip.geopoints.contains(gp)
             ) {
                 val i = trip.geopoints.indexOf(gp)
-                val stopDetails = trip.stops!![i].split(',')
+                val stopDetails = trip.stops[i].split(',')
                 stops.add(
                     "${stopDetails[0]},${stopDetails[1]},${
                         stopDetails[2]
@@ -563,15 +570,15 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
     override fun onSaveInstanceState(outState: Bundle) {
         val previousFragment = findNavController().previousBackStackEntry?.destination?.id
         if (this::trip.isInitialized && previousFragment != R.id.nav_trip_details && waypoints.size > 0) {
-           // createStopsArray()
-           // tripEditViewModel.setStops(trip.stops!!, trip.geopoints)
+            // createStopsArray()
+            // tripEditViewModel.setStops(trip.stops!!, trip.geopoints)
             outState.putBoolean("state", true)
         }
         super.onSaveInstanceState(outState)
     }
 
     override fun onResume() {
-        super.onResume();
+        super.onResume()
         //this will refresh the osmdroid configuration on resuming.
         //if you make changes to the configuration, use
         //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -579,12 +586,12 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         getInstance().load(
             requireContext(),
             context?.getSharedPreferences("mad.carpooling.map", Context.MODE_PRIVATE)
-        );
-        map.onResume(); //needed for compass, my location overlays, v6.0.0 and up
+        )
+        map.onResume() //needed for compass, my location overlays, v6.0.0 and up
     }
 
     override fun onPause() {
-        super.onPause();
+        super.onPause()
         //this will refresh the osmdroid configuration on resuming.
         //if you make changes to the configuration, use
         //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -592,7 +599,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         getInstance().save(
             requireContext(),
             context?.getSharedPreferences("mad.carpooling.map", Context.MODE_PRIVATE)
-        );
+        )
         val previousFragment = findNavController().previousBackStackEntry?.destination?.id
         if (this::trip.isInitialized && previousFragment != R.id.nav_trip_details && waypoints.size > 0) {
             createStopsArray()
@@ -600,7 +607,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
             //outState.putBoolean("state", true)
         }
         map.overlays.clear()
-        map.onPause();  //needed for compass, my location overlays, v6.0.0 and up
+        map.onPause()  //needed for compass, my location overlays, v6.0.0 and up
     }
 
     private fun hasLocationPermission() =

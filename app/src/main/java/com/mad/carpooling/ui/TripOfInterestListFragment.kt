@@ -28,8 +28,10 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.R
 import com.mad.carpooling.model.Trip
-import com.mad.carpooling.ui.TripOfInterestListFragmentDirections
+import com.mad.carpooling.repository.TripRepository
+import com.mad.carpooling.repository.UserRepository
 import com.mad.carpooling.viewmodel.SharedViewModel
+import com.mad.carpooling.viewmodel.SharedViewModelFactory
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -43,7 +45,12 @@ class TripOfInterestListFragment : Fragment(R.layout.fragment_trip_list) {
 
     // Use the 'by activityViewModels()' Kotlin property delegate
     // from the fragment-ktx artifact
-    private val model: SharedViewModel by activityViewModels()
+    private val sharedViewModel: SharedViewModel by activityViewModels {
+        SharedViewModelFactory(
+            TripRepository(),
+            UserRepository()
+        )
+    }
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -51,14 +58,14 @@ class TripOfInterestListFragment : Fragment(R.layout.fragment_trip_list) {
         val emptyView = view.findViewById<TextView>(R.id.no_trips_available)
         rv = view.findViewById<RecyclerView>(R.id.triplist_rv)
         rv.layoutManager = LinearLayoutManager(context)
-        rv.isNestedScrollingEnabled = false; //prevent toolbar to expand on scroll
+        rv.isNestedScrollingEnabled = false //prevent toolbar to expand on scroll
         val tripAdapter = InterestedTripAdapter()
         rv.adapter = tripAdapter
 
         //val swipeContainer = view.findViewById<SwipeRefreshLayout>(R.id.swipeContainer)
         //swipeContainer.isEnabled = false
 
-        model.getInterestedTrips().observe(viewLifecycleOwner, Observer { newTripsMap ->
+        sharedViewModel.getInterestedTrips().observe(viewLifecycleOwner, Observer { newTripsMap ->
             // Update the UI
             emptyView.isVisible = newTripsMap.isEmpty()
             tripAdapter.submitList(newTripsMap.values.toList())
@@ -68,7 +75,7 @@ class TripOfInterestListFragment : Fragment(R.layout.fragment_trip_list) {
 
     }
 
-    class InterestedTripAdapter() :
+    class InterestedTripAdapter :
         ListAdapter<Trip, InterestedTripAdapter.TripViewHolder>(TaskDiffCallback()) {
 
         class TaskDiffCallback : DiffUtil.ItemCallback<Trip>() {
@@ -99,9 +106,12 @@ class TripOfInterestListFragment : Fragment(R.layout.fragment_trip_list) {
                 if (!trip.visibility)
                     tripRL.alpha = 0.5f
                 location.text = "${trip.departure} - ${trip.arrival}"
-                timestamp.text = (LocalDateTime.ofInstant(trip.timestamp.toDate().toInstant(),
-                    ZoneId.systemDefault())).format(
-                    DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT))
+                timestamp.text = (LocalDateTime.ofInstant(
+                    trip.timestamp.toDate().toInstant(),
+                    ZoneId.systemDefault()
+                )).format(
+                    DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
+                )
                 price.text = "Price: ${("%.2f".format(trip.price))} €"
                 if (trip.imageCarURL != "") {
                     Glide.with(this.itemView).load(trip.imageCarURL).into(ivCar)
@@ -142,22 +152,22 @@ class TripOfInterestListFragment : Fragment(R.layout.fragment_trip_list) {
                             if (tmpArray.contains(user?.uid!!)) {
                                 db.collection("trips").document(getItem(holder.adapterPosition).id)
                                     .update(
-                                        "acceptedPeople", FieldValue.arrayRemove(user?.uid)
+                                        "acceptedPeople", FieldValue.arrayRemove(user.uid)
                                     ).addOnSuccessListener {
-                                    db.collection("trips")
-                                        .document(getItem(holder.adapterPosition).id)
-                                        .update(
-                                            "seats", FieldValue.increment(1)
-                                        )
-                                }
+                                        db.collection("trips")
+                                            .document(getItem(holder.adapterPosition).id)
+                                            .update(
+                                                "seats", FieldValue.increment(1)
+                                            )
+                                    }
                             }
-                            db.collection("users").document(user?.uid!!).update(
+                            db.collection("users").document(user.uid).update(
                                 "favTrips",
                                 FieldValue.arrayRemove(getItem(holder.adapterPosition).id)
                             ).addOnSuccessListener {
                                 db.collection("trips").document(getItem(holder.adapterPosition).id)
                                     .update(
-                                        "interestedPeople", FieldValue.arrayRemove(user?.uid)
+                                        "interestedPeople", FieldValue.arrayRemove(user.uid)
                                     )
                             }
                         }

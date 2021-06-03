@@ -17,32 +17,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
-class TripRepository {
-
-/*    @ExperimentalCoroutinesApi
-    suspend fun loadOthersTrips(currentUser: LiveData<User>): Flow<HashMap<String, Trip>> =
-        callbackFlow {
-            val db = Firebase.firestore
-            val currentUserRef =
-                FirebaseFirestore.getInstance().document("users/${currentUser.value?.uid}")
-
-            val subscription = db.collection("trips").whereNotEqualTo("owner", currentUserRef)
-                .whereEqualTo("visibility", true)
-                //.whereEqualTo("finished", false)
-                .addSnapshotListener { value, e ->
-                    if (e != null) {
-                        offer(HashMap())
-                        Log.e("loadTrips() exception => ", e.toString())
-                        return@addSnapshotListener
-                    }
-                    val tripsMap: HashMap<String, Trip> = HashMap()
-                    for (doc in value!!) {
-                        tripsMap[doc.id] = doc.toObject(Trip::class.java)
-                    }
-                    offer(tripsMap.filterValues { t -> !t.finished && t.timestamp > Timestamp.now() } as HashMap<String, Trip>)
-                }
-            awaitClose { subscription.remove() }
-        }*/
+class UserRepository {
 
     @ExperimentalCoroutinesApi
     fun loadOthersTrips(currentUser: LiveData<User>): Flow<HashMap<String, Trip>> {

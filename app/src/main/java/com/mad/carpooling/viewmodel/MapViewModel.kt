@@ -48,18 +48,18 @@ class MapViewModel(
     }
 
     fun getRoute(waypoints: ArrayList<Marker>, ctx: Context) {
-        if(waypoints.size > 1)
-        viewModelScope.launch {
-            val result = try {
-                mapRepository.getRoute(waypoints, ctx)
-            } catch (e: Exception) {
-                Log.e("getRoute -> ", e.message.toString())
+        if (waypoints.size > 1)
+            viewModelScope.launch {
+                val result = try {
+                    mapRepository.getRoute(waypoints, ctx)
+                } catch (e: Exception) {
+                    Log.e("getRoute -> ", e.message.toString())
+                }
+                when (result) {
+                    is Polyline -> route.postValue(result)
+                    else -> route.postValue(null) // Show error in UI
+                }
             }
-            when (result) {
-                is Polyline -> route.postValue(result)
-                else -> route.postValue(null) // Show error in UI
-            }
-        }
     }
 
     fun setTrip(trip: Trip) {

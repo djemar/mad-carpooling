@@ -35,8 +35,11 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import com.mad.carpooling.R
 import com.mad.carpooling.model.User
+import com.mad.carpooling.repository.TripRepository
+import com.mad.carpooling.repository.UserRepository
 import com.mad.carpooling.viewmodel.EditProfileViewModel
 import com.mad.carpooling.viewmodel.SharedViewModel
+import com.mad.carpooling.viewmodel.SharedViewModelFactory
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -55,7 +58,12 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
     private lateinit var user: User
     private var currentPhotoPath: String? = null
     private val viewModel: EditProfileViewModel by viewModels()
-    private val model: SharedViewModel by activityViewModels()
+    private val sharedViewModel: SharedViewModel by activityViewModels {
+        SharedViewModelFactory(
+            TripRepository(),
+            UserRepository()
+        )
+    }
     private var REQUEST_IMAGE_CAPTURE = 1
     private var REQUEST_IMAGE_FROM_GALLERY = 2
     private var TMP_FILENAME_IMG = "temp_profile_pic_img.jpg"
@@ -76,7 +84,7 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
         etLocation = view.findViewById<EditText>(R.id.et_location)
         ivEditProfilePic = view.findViewById<ImageView>(R.id.et_profile_pic)
 
-        initProfile(model.getCurrentUser().value!!, viewModel, savedInstanceState)
+        initProfile(sharedViewModel.getCurrentUser().value!!, viewModel, savedInstanceState)
 
         val btnCamera = view.findViewById<ImageButton>(R.id.btn_camera)
         registerForContextMenu(btnCamera)

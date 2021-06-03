@@ -5,7 +5,6 @@ import android.location.Address
 import android.util.Log
 import com.mad.carpooling.BuildConfig
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import org.osmdroid.bonuspack.location.GeocoderNominatim
 import org.osmdroid.bonuspack.routing.OSRMRoadManager
