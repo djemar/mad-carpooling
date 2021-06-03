@@ -128,6 +128,19 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         ibtnMusic = view.findViewById(R.id.btn_edit_music)
         btnMap = view.findViewById(R.id.btn_tripEdit_map)
 
+        ibtnChattiness.setOnClickListener {
+            trip.chattiness = changeStatePreference(!trip.chattiness, ibtnChattiness)
+        }
+        ibtnSmoking.setOnClickListener {
+            trip.smoking = changeStatePreference(!trip.smoking, ibtnSmoking)
+        }
+        ibtnPets.setOnClickListener {
+            trip.pets = changeStatePreference(!trip.pets, ibtnPets)
+        }
+        ibtnMusic.setOnClickListener {
+            trip.music = changeStatePreference(!trip.music, ibtnMusic)
+        }
+
         val btnCamera = view.findViewById<MaterialButton>(R.id.btn_tripEdit_camera)
         registerForContextMenu(btnCamera)
         btnCamera.setOnClickListener { activity?.openContextMenu(btnCamera) }
@@ -512,6 +525,7 @@ class TripEditFragment : Fragment(R.layout.fragment_trip_edit) {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
+    @ExperimentalCoroutinesApi
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.nav_trip_details -> {
