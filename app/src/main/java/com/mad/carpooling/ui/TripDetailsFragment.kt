@@ -29,7 +29,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -41,10 +40,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.Timestamp
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.MainActivity
 import com.mad.carpooling.R
 import com.mad.carpooling.model.Trip
@@ -179,14 +174,19 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         tileSystem= TileSystemWebMercator()
         displayMetrics = resources.displayMetrics
         map   = MapView(requireContext())
+        val args: TripDetailsFragmentArgs by navArgs()
 
         sharedViewModel.getTrips().observe(viewLifecycleOwner, { newTripsMap ->
             // Update the UI
             if(!newTripsMap.equals(oldTripsMap)) {
                 oldTripsMap = newTripsMap
-                initTripDetails(newTripsMap, view)
-                initMapSnapshot()
-                (activity as MainActivity).invalidateOptionsMenu()
+                if(newTripsMap.containsKey(args.id)){
+                    initTripDetails(newTripsMap, view, args)
+                    initMapSnapshot()
+                    (activity as MainActivity).invalidateOptionsMenu()
+                } else {
+                    trip = Trip()
+                }
             }
         })
     }
@@ -244,9 +244,14 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
     @ExperimentalCoroutinesApi
     @SuppressLint("SetTextI18n")
-    private fun initTripDetails(newTripsMap: HashMap<String, Trip>, view: View) {
+    private fun initTripDetails(
+        newTripsMap: HashMap<String, Trip>,
+        view: View,
+        args: TripDetailsFragmentArgs
+    ) {
 
-        val args: TripDetailsFragmentArgs by navArgs()
+        Log.d("TEST", args.id)
+        Log.d("TEST", newTripsMap.toString())
 
         trip = newTripsMap[args.id]!!
 
@@ -738,6 +743,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     @ExperimentalCoroutinesApi
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
+        if(trip.id != "id") {
             optionsMenu.findItem(R.id.edit_trip).isVisible =
                 trip.owner!!.id == sharedViewModel.getCurrentUser().value?.uid && !trip.finished && trip.timestamp > Timestamp.now()
 
@@ -750,6 +756,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                 optionsMenu.findItem(R.id.visibility_trip)
                     .setIcon(R.drawable.ic_baseline_visibility_off)
             }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
