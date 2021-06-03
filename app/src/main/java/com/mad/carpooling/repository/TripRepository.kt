@@ -3,14 +3,12 @@ package com.mad.carpooling.repository
 import android.util.Log
 import android.view.View
 import androidx.lifecycle.LiveData
-import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mad.carpooling.model.Trip
 import com.mad.carpooling.model.User
-import com.mad.carpooling.ui.trip_edit.TripEditFragment
-import com.mad.carpooling.viewmodel.SharedViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
@@ -18,13 +16,11 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
 
 class TripRepository {
 
-/*    @ExperimentalCoroutinesApi
-    suspend fun loadOthersTrips(currentUser: LiveData<User>): Flow<HashMap<String, Trip>> =
+    @ExperimentalCoroutinesApi
+    suspend fun loadOthersTrips(currentUser: LiveData<User?>): Flow<Result<HashMap<String, Trip>>> =
         callbackFlow {
             val db = Firebase.firestore
             val currentUserRef =
@@ -33,23 +29,45 @@ class TripRepository {
             val subscription = db.collection("trips").whereNotEqualTo("owner", currentUserRef)
                 .whereEqualTo("visibility", true)
                 //.whereEqualTo("finished", false)
-                .addSnapshotListener { value, e ->
-                    if (e != null) {
-                        offer(HashMap())
-                        Log.e("loadTrips() exception => ", e.toString())
-                        return@addSnapshotListener
+                .addSnapshotListener { snapshot, e ->
+                    if (e == null) {
+                        val tripsMap: HashMap<String, Trip> = HashMap()
+                        for (doc in snapshot!!) {
+                            tripsMap[doc.id] = doc.toObject(Trip::class.java)
+                        }
+                        val filteredMap: HashMap<String, Trip> =
+                            tripsMap.filterValues { t -> !t.finished && t.timestamp > Timestamp.now() } as HashMap<String, Trip>
+                        this.trySend(Result.success(filteredMap)).isSuccess
+                    } else {
+                        this.trySend(Result.success(HashMap<String, Trip>())).isFailure
                     }
-                    val tripsMap: HashMap<String, Trip> = HashMap()
-                    for (doc in value!!) {
-                        tripsMap[doc.id] = doc.toObject(Trip::class.java)
-                    }
-                    offer(tripsMap.filterValues { t -> !t.finished && t.timestamp > Timestamp.now() } as HashMap<String, Trip>)
                 }
             awaitClose { subscription.remove() }
-        }*/
+        }
 
     @ExperimentalCoroutinesApi
-    fun loadOthersTrips(currentUser: LiveData<User>): Flow<HashMap<String, Trip>> {
+    suspend fun loadTrips(): Flow<Result<HashMap<String, Trip>>> =
+        callbackFlow {
+            val db = Firebase.firestore
+
+            val subscription = db.collection("trips")
+                //.whereEqualTo("finished", false)
+                .addSnapshotListener { snapshot, e ->
+                    if (e == null) {
+                        val tripsMap: HashMap<String, Trip> = HashMap()
+                        for (doc in snapshot!!) {
+                            tripsMap[doc.id] = doc.toObject(Trip::class.java)
+                        }
+                        this.trySend(Result.success(tripsMap)).isSuccess
+                    } else {
+                        this.trySend(Result.success(HashMap<String, Trip>())).isFailure
+                    }
+                }
+            awaitClose { subscription.remove() }
+        }
+
+/*    @ExperimentalCoroutinesApi
+    fun loadOthersTrips(currentUser: LiveData<User?>): Flow<HashMap<String, Trip>> {
         val db = Firebase.firestore
         val currentUserRef =
             FirebaseFirestore.getInstance().document("users/${currentUser.value?.uid}")
@@ -250,4 +268,6 @@ class TripRepository {
         }
     }
 
+
+}
 }

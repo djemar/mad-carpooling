@@ -291,7 +291,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
         val profileInfo = view.findViewById<ConstraintLayout>(R.id.cl_tripDetails_profile)
 
-        if (trip.owner?.id != sharedViewModel.getCurrentUser().value?.uid) {
+        if (trip.owner?.id != sharedViewModel.getCurrentUserData().value?.uid) {
             profileInfo.setOnClickListener {
                 val action = TripDetailsFragmentDirections.actionNavTripDetailsToNavShowProfile(
                     trip.owner?.id!!
@@ -452,7 +452,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             builder.setTitle("Add a review")
                 .setPositiveButton("Confirm", DialogInterface.OnClickListener { dialog, id ->
                     //TODO: add new value to a map into DB
-                    val currentUser = model.getCurrentUser().value?.uid
+                    val currentUser = model.getCurrentUserData().value?.uid
                     val newArray: ArrayList<Any> =
                         arrayListOf(rb_review!!.rating.toInt(), etReview?.text?.trim().toString())
 
@@ -736,10 +736,10 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
 
         optionsMenu.findItem(R.id.edit_trip).isVisible =
-            trip.owner!!.id == sharedViewModel.getCurrentUser().value?.uid && !trip.finished && trip.timestamp > Timestamp.now()
+            trip.owner!!.id == sharedViewModel.getCurrentUserData().value?.uid && !trip.finished && trip.timestamp > Timestamp.now()
 
         optionsMenu.findItem(R.id.visibility_trip).isVisible =
-            trip.owner!!.id == sharedViewModel.getCurrentUser().value?.uid && !trip.finished
+            trip.owner!!.id == sharedViewModel.getCurrentUserData().value?.uid && !trip.finished
 
         if (trip.visibility) {
             optionsMenu.findItem(R.id.visibility_trip).setIcon(R.drawable.ic_sharp_visibility)

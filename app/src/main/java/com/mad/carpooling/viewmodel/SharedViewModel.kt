@@ -47,29 +47,30 @@ class SharedViewModel(
         }
     }
 
-    @ExperimentalCoroutinesApi
+/*    @ExperimentalCoroutinesApi
     @InternalCoroutinesApi
     private val othersTrips: MutableLiveData<HashMap<String, Trip>> by lazy {
         MutableLiveData<HashMap<String, Trip>>().also {
             loadOthersTrips()
         }
-    }
+    }*/
 
-    @InternalCoroutinesApi
+/*    @InternalCoroutinesApi
     @ExperimentalCoroutinesApi
     private fun loadOthersTrips() {
-
+        if(currentUser.value != null){
         viewModelScope.launch {
             tripRepository.loadOthersTrips(currentUser).collect {
                 othersTrips.postValue(it)
             }
         }
+        }
 
-    }
+    }*/
 
     @ExperimentalCoroutinesApi
     @InternalCoroutinesApi
-    fun getOthersTrips(): LiveData<HashMap<String, Trip>> {
+    fun getOthersTripsData(): LiveData<HashMap<String, Trip>> {
         return othersTrips
     }
 
@@ -128,31 +129,6 @@ class SharedViewModel(
             }
     }
 
-
-/*    private fun loadOthersTrips() {
-        val db = Firebase.firestore
-        val currentUserRef =
-            FirebaseFirestore.getInstance().document("users/${currentUser.value?.uid}" )
-
-        db.collection("trips").whereNotEqualTo("owner", currentUserRef)
-            .whereEqualTo("visibility", true)
-            //.whereEqualTo("finished", false)
-            .addSnapshotListener { value, e ->
-                if (e != null) {
-                    othersTrips.postValue(HashMap())
-                    Log.e("loadTrips() exception => ", e.toString())
-                    return@addSnapshotListener
-                }
-                val tripsMap: HashMap<String, Trip> = HashMap()
-                for (doc in value!!) {
-                    tripsMap[doc.id] = doc.toObject(Trip::class.java)
-                }
-                othersTrips.postValue(tripsMap.filterValues { t -> !t.finished && t.timestamp>Timestamp.now() } as HashMap<String, Trip>?)
-            }
-    } */
-
-
-
     private fun loadTrips() {
         // Do an asynchronous operation to fetch trips.
         val db = Firebase.firestore
@@ -186,23 +162,18 @@ class SharedViewModel(
         return interestTrips
     }
 
-
-    private fun loadUser() {
-        // Do an asynchronous operation to fetch user.
-        val db = Firebase.firestore
-        db.collection("users").addSnapshotListener { value, e ->
-            if (e != null) {
-                currentUser.value = null
-                Log.e("loadUser() exception => ", e.toString())
-                return@addSnapshotListener
+    @ExperimentalCoroutinesApi
+    private val othersTrips = liveData<HashMap<String, Trip>>(Dispatchers.IO) {
+        //emit(Result.Loading())
+        try{
+            tripRepository.loadOthersTrips(currentUser).collect {
+                emit(it.getOrDefault(HashMap()))
             }
-            var user = User()
-            for (doc in value!!) {
-                if (doc.id == Firebase.auth.currentUser?.uid)
-                    user = doc.toObject(User::class.java)
-            }
-            currentUser.postValue(user)
+        }catch (e: Exception){
+            emit(HashMap())
+            Log.e("ERROR:",e.message!!)
         }
+    }
 
     @ExperimentalCoroutinesApi
     private val currentUser = liveData<User?>(Dispatchers.IO) {
@@ -222,6 +193,7 @@ class SharedViewModel(
     fun getCurrentUserData(): LiveData<User?> {
         return currentUser
     }
+
 
     fun getUserDoc(userId: String): LiveData<User?> {
         val result = MutableLiveData<User?>()
