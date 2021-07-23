@@ -6,6 +6,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.mad.carpooling.Event
 import com.mad.carpooling.model.Trip
 import com.mad.carpooling.model.User
 import kotlinx.coroutines.Dispatchers
@@ -122,7 +123,7 @@ class TripRepository {
         }
 
     @ExperimentalCoroutinesApi
-    suspend fun loadTrips(): Flow<Result<HashMap<String, Trip>>> =
+    suspend fun loadTrips(): Flow<Result<Event<HashMap<String, Trip>>>> =
         callbackFlow {
             val db = Firebase.firestore
 
@@ -134,7 +135,7 @@ class TripRepository {
                         for (doc in snapshot!!) {
                             tripsMap[doc.id] = doc.toObject(Trip::class.java)
                         }
-                        this.trySend(Result.success(tripsMap)).isSuccess
+                        this.trySend(Result.success(Event(tripsMap))).isSuccess
                     } else {
                         cancel(
                             message = "error fetching collection myTrips data",

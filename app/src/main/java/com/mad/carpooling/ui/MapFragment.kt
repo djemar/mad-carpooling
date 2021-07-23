@@ -26,6 +26,7 @@ import com.mad.carpooling.util.MapUtils
 import com.mad.carpooling.viewmodel.*
 import com.vmadalin.easypermissions.EasyPermissions
 import com.vmadalin.easypermissions.dialogs.SettingsDialog
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.osmdroid.config.Configuration.getInstance
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -83,6 +84,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 
+    @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         btnDeleteMarker = view.findViewById(R.id.btn_delete_marker)
         val args: MapFragmentArgs by navArgs()
@@ -102,7 +104,7 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
                     initFromEdit()
                 }
             } else {
-                trip = sharedViewModel.getTrips().value!![args.tid]!!
+                trip = sharedViewModel.getTrips().value!!.peekContent()?.get(args.tid)!!
                 setHasOptionsMenu(false)
                 initFromDetails()
             }

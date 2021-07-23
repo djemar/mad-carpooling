@@ -3,6 +3,7 @@ package com.mad.carpooling.viewmodel
 import android.util.Log
 import androidx.lifecycle.*
 import com.google.firebase.firestore.DocumentReference
+import com.mad.carpooling.Event
 import com.mad.carpooling.model.Rating
 import com.mad.carpooling.model.Trip
 import com.mad.carpooling.model.User
@@ -100,15 +101,15 @@ class SharedViewModel(
     }
 
     @ExperimentalCoroutinesApi
-    private val trips = liveData<HashMap<String, Trip>>(Dispatchers.IO) {
+    private val trips = liveData<Event<HashMap<String, Trip>>>(Dispatchers.IO) {
         //emit(Result.Loading())
         try {
             tripRepository.loadTrips().collect {
-                emit(it.getOrDefault(HashMap()))
-                Log.d("TRIPS: ", it.getOrNull().toString())
+                emit(it.getOrDefault(Event(HashMap<String, Trip>())))
+                //Log.d("TRIPS: ", it.getOrNull().toString())
             }
         } catch (e: Exception) {
-            emit(HashMap())
+            emit(Event(HashMap<String, Trip>()))
             Log.e("ERROR:", e.message!!)
         }
     }
@@ -309,7 +310,7 @@ class SharedViewModel(
             /** Getters **/
 
             @ExperimentalCoroutinesApi
-            fun getTrips(): LiveData<HashMap<String, Trip>> {
+            fun getTrips(): LiveData<Event<HashMap<String, Trip>>> {
                 return trips
             }
 

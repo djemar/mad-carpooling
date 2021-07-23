@@ -52,7 +52,7 @@ import com.mad.carpooling.viewmodel.MapViewModel
 import com.mad.carpooling.viewmodel.MapViewModelFactory
 import com.mad.carpooling.viewmodel.SharedViewModel
 import com.mad.carpooling.viewmodel.SharedViewModelFactory
-import kotlinx.coroutines.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.MapTileProviderBasic
 import org.osmdroid.util.GeoPoint
@@ -63,7 +63,8 @@ import org.osmdroid.views.overlay.FolderOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Overlay
 import org.osmdroid.views.overlay.Polyline
-import java.time.*
+import java.time.LocalDate
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.*
@@ -81,7 +82,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             UserRepository()
         )
     }
-    private val mapViewModel : MapViewModel by viewModels{ MapViewModelFactory(MapRepository())}
+    private val mapViewModel: MapViewModel by viewModels { MapViewModelFactory(MapRepository()) }
     private lateinit var viewModelFactory: MapViewModelFactory
     private lateinit var trip: Trip
     private lateinit var ivCarPic: ImageView
@@ -120,12 +121,12 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     // very frequently.
     private var shortAnimationDuration: Int = 0
 
-    private lateinit var overlays :  ArrayList<Overlay>
-    private lateinit var waypoints : ArrayList<Marker>
-    private lateinit var stopsMarkers : FolderOverlay
+    private lateinit var overlays: ArrayList<Overlay>
+    private lateinit var waypoints: ArrayList<Marker>
+    private lateinit var stopsMarkers: FolderOverlay
     private lateinit var tileSystem: TileSystem
-    private lateinit var displayMetrics : DisplayMetrics
-    private lateinit var map :  MapView
+    private lateinit var displayMetrics: DisplayMetrics
+    private lateinit var map: MapView
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -167,27 +168,32 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         bottomSheet = view.findViewById(R.id.bottom_sheet)
         fab = view.findViewById(R.id.fab_tripdetails)
         bsb = BottomSheetBehavior.from(bottomSheet)
-        var oldTripsMap : HashMap<String, Trip> = HashMap()
-        overlays  = ArrayList<Overlay>()
-        waypoints  = ArrayList<Marker>()
+        var oldTripsMap: HashMap<String, Trip> = HashMap()
+        overlays = ArrayList<Overlay>()
+        waypoints = ArrayList<Marker>()
         stopsMarkers = FolderOverlay()
-        tileSystem= TileSystemWebMercator()
+        tileSystem = TileSystemWebMercator()
         displayMetrics = resources.displayMetrics
-        map   = MapView(requireContext())
+        map = MapView(requireContext())
         val args: TripDetailsFragmentArgs by navArgs()
+        val previousFragment = findNavController().previousBackStackEntry?.destination?.id
 
-        sharedViewModel.getTrips().observe(viewLifecycleOwner, { newTripsMap ->
+        sharedViewModel.getTrips().observe(viewLifecycleOwner, {
             // Update the UI
-            if(!newTripsMap.equals(oldTripsMap)) {
-                oldTripsMap = newTripsMap
-                if(newTripsMap.containsKey(args.id)){
+            if (previousFragment != R.id.nav_trip_edit) {
+                it.peekContent().let { newTripsMap ->
                     initTripDetails(newTripsMap, view, args)
                     initMapSnapshot()
                     (activity as MainActivity).invalidateOptionsMenu()
-                } else {
-                    trip = Trip()
                 }
+            } else
+            it.getContentIfNotHandled()?.let { newTripsMap ->
+                initTripDetails(newTripsMap, view, args)
+                initMapSnapshot()
+                (activity as MainActivity).invalidateOptionsMenu()
             }
+
+
         })
     }
 
@@ -259,7 +265,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             Glide.with(view).load(trip.imageCarURL).into(ivCarPic)
         }
 
-        sharedViewModel.getUserDoc(trip.owner!!.id).observe(viewLifecycleOwner, Observer{ user ->
+        sharedViewModel.getUserDoc(trip.owner!!.id).observe(viewLifecycleOwner, Observer { user ->
             tvNickname.text = user?.nickname.toString()
             Glide.with(view).load(user?.imageUserRef)
                 .into(ivProfilePic)
@@ -340,22 +346,24 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             ratingBar.visibility = View.VISIBLE
             btnTrip.visibility = View.GONE
 
-            sharedViewModel.getRatings(trip!!.owner?.id!!,"driverRatings").observe(viewLifecycleOwner, Observer { mapRatingDriver ->
-                        var vote: Float = 0f
-                if (mapRatingDriver != null) {
-                    for (array in mapRatingDriver.values)
-                        vote = vote + array[0].toString().toFloat()
-                ratingBar.rating = (vote) / (mapRatingDriver.size.toFloat())
-                } else {
+            sharedViewModel.getRatings(trip!!.owner?.id!!, "driverRatings")
+                .observe(viewLifecycleOwner, Observer { mapRatingDriver ->
+                    var vote: Float = 0f
+                    if (mapRatingDriver != null) {
+                        for (array in mapRatingDriver.values)
+                            vote = vote + array[0].toString().toFloat()
+                        ratingBar.rating = (vote) / (mapRatingDriver.size.toFloat())
+                    } else {
                         ratingBar.rating = 0f
-                }
-            })
+                    }
+                })
             if (trip.finished) {
                 ratingBar.visibility = View.GONE
                 btnTrip.visibility = View.VISIBLE
                 btnTrip.text = "rate"
                 btnTrip.setOnClickListener {
-                    val reviewDial = ReviewDialogFragment(trip, view, "driverRatings", null, sharedViewModel)
+                    val reviewDial =
+                        ReviewDialogFragment(trip, view, "driverRatings", null, sharedViewModel)
                     reviewDial.show(requireActivity().supportFragmentManager, "driverReviewDialog")
                 }
             }
@@ -381,7 +389,10 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
         }
     }
 
-    class EndTripDialogFragment(private var trip: Trip, private var sharedViewModel: SharedViewModel) :
+    class EndTripDialogFragment(
+        private var trip: Trip,
+        private var sharedViewModel: SharedViewModel
+    ) :
         DialogFragment() {
 
         override fun onPause() {
@@ -394,13 +405,18 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             val builder: AlertDialog.Builder = AlertDialog.Builder(activity)
             builder.setMessage("Do you really want to end this trip?")
                 .setPositiveButton("Confirm", DialogInterface.OnClickListener { dialog, id ->
-                    sharedViewModel.terminateTrip(trip.id).observe(this, Observer{ success ->
-                        if(success){
+                    sharedViewModel.terminateTrip(trip.id).observe(this, Observer { success ->
+                        if (success) {
                             if (trip.interestedPeople != null) {
                                 for (p in trip.interestedPeople!!) {
                                     if (!trip.acceptedPeople?.contains(p)!!) {
                                         sharedViewModel
-                                            .removeInterest(trip.id, "interestedPeople", "favTrips", p)
+                                            .removeInterest(
+                                                trip.id,
+                                                "interestedPeople",
+                                                "favTrips",
+                                                p
+                                            )
                                     }
                                 }
                             }
@@ -416,8 +432,13 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     }
 
     // Review Dialog
-    class ReviewDialogFragment(trip: Trip, view: View, var role: String, var passenger: String?
-                                , private var sharedViewModel: SharedViewModel) :
+    class ReviewDialogFragment(
+        trip: Trip,
+        view: View,
+        var role: String,
+        var passenger: String?,
+        private var sharedViewModel: SharedViewModel
+    ) :
         DialogFragment() {
         var tripReview = trip
         var viewReview = view
@@ -449,7 +470,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
             builder.setView(R.layout.review_layout)
             uid = if (passenger != null) passenger as String
             else tripReview.owner!!.id
-            sharedViewModel.getUserDoc(uid).observe(this, Observer{ user ->
+            sharedViewModel.getUserDoc(uid).observe(this, Observer { user ->
                 if (user != null) {
                     reviewNickname?.text = user.nickname.toString()
                     Glide.with(viewReview).load(user.imageUserRef)
@@ -465,9 +486,11 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                     val newArray: ArrayList<Any> =
                         arrayListOf(rb_review!!.rating.toInt(), etReview?.text?.trim().toString())
 
-                    sharedViewModel.updateRatings(uid, role, currentUser!!, newArray).observe(this, Observer { 
-                        sharedViewModel.updateRatings(uid, role, currentUser!!, newArray).removeObservers(this)
-                    })
+                    sharedViewModel.updateRatings(uid, role, currentUser!!, newArray)
+                        .observe(this, Observer {
+                            sharedViewModel.updateRatings(uid, role, currentUser!!, newArray)
+                                .removeObservers(this)
+                        })
 
                 })
                 .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, id ->
@@ -505,8 +528,19 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                             R.drawable.sl_favourite
                         )
                     )
-                    sharedViewModel.removeInterest(trip.id, "interestedPeople", "favTrips", currentUser)
-                    sharedViewModel.removeAccepted(trip.id, "acceptedPeople", "seats", currentUser, 1)
+                    sharedViewModel.removeInterest(
+                        trip.id,
+                        "interestedPeople",
+                        "favTrips",
+                        currentUser
+                    )
+                    sharedViewModel.removeAccepted(
+                        trip.id,
+                        "acceptedPeople",
+                        "seats",
+                        currentUser,
+                        1
+                    )
                 } else {
                     fab.setImageDrawable(
                         ContextCompat.getDrawable(
@@ -514,7 +548,12 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
                             R.drawable.ic_baseline_fullstar
                         )
                     )
-                    sharedViewModel.addInterest(trip.id, "interestedPeople", "favTrips", currentUser)
+                    sharedViewModel.addInterest(
+                        trip.id,
+                        "interestedPeople",
+                        "favTrips",
+                        currentUser
+                    )
                 }
             }
         } else {
@@ -743,7 +782,7 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
     @ExperimentalCoroutinesApi
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
-        if(trip.id != "id") {
+        if (this::trip.isInitialized && trip.id != "id") {
             optionsMenu.findItem(R.id.edit_trip).isVisible =
                 trip.owner!!.id == sharedViewModel.getCurrentUser().value?.uid && !trip.finished && trip.timestamp > Timestamp.now()
 
@@ -767,7 +806,11 @@ class TripDetailsFragment : Fragment(R.layout.fragment_trip_details) {
 
 }
 
-class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip: Trip, private val sharedViewModel: SharedViewModel) :
+class BottomSheetAdapter(
+    private val users: ArrayList<String>?,
+    private val trip: Trip,
+    private val sharedViewModel: SharedViewModel
+) :
     RecyclerView.Adapter<BottomSheetAdapter.BottomSheetViewHolder>() {
 
     class BottomSheetViewHolder(v: View) : RecyclerView.ViewHolder(v) {
@@ -778,11 +821,12 @@ class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip
 
         fun bind(user: String?, holder: BottomSheetViewHolder, sharedViewModel: SharedViewModel) {
             if (user != null) {
-                sharedViewModel.getUserDoc(user).observe(holder.itemView.context as LifecycleOwner, Observer{ user ->
-                    nickname.text = user?.nickname.toString()
-                    Glide.with(holder.itemView).load(user?.imageUserRef)
-                        .into(profilePic)
-                })
+                sharedViewModel.getUserDoc(user)
+                    .observe(holder.itemView.context as LifecycleOwner, Observer { user ->
+                        nickname.text = user?.nickname.toString()
+                        Glide.with(holder.itemView).load(user?.imageUserRef)
+                            .into(profilePic)
+                    })
                 profile.setOnClickListener {
                     val action =
                         TripDetailsFragmentDirections.actionNavTripDetailsToNavShowProfile(
@@ -868,13 +912,15 @@ class BottomSheetAdapter(private val users: ArrayList<String>?, private val trip
                             if (success)
                                 changeButtonState("accept", holder.btnAccept, holder.itemView)
                         })
-                    }
-            } else if (holder.btnAccept.text.toString().lowercase(Locale.getDefault()) == "remove") {
+                }
+            } else if (holder.btnAccept.text.toString()
+                    .lowercase(Locale.getDefault()) == "remove"
+            ) {
                 if (users != null) {
                     sharedViewModel
                         .removeAccepted(trip.id, "acceptedPeople", "seats", users.get(position), 1)
                         .observe(holder.itemView.context as LifecycleOwner, Observer { success ->
-                            if(success)
+                            if (success)
                                 changeButtonState("remove", holder.btnAccept, holder.itemView)
                         })
                 }
