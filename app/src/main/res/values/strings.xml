@@ -1,8 +1,45 @@
 <resources>
-    <string name="app_name">Carpooling</string>
+    <string name="app_name">Stop &amp; Go</string>
     <string name="full_name">Full Name</string>
     <string name="nickname">Nickname</string>
-    <string name="email_address">email@address</string>
+    <string name="email_address">E-mail</string>
     <string name="location">Location</string>
+    <string name="default_fullName">John Wick</string>
+    <string name="default_nickname">Babayaga</string>
+    <string name="default_email">johnny@continental.com</string>
+    <string name="default_location">Torino</string>
     <string name="edit">Edit</string>
+    <string name="logout">Logout</string>
+    <string name="visibility">Visibility</string>
+    <string name="select_from_gallery">Select from gallery</string>
+    <string name="take_a_new_photo">Take a new photo</string>
+    <string name="save">Save</string>
+    <string name="saved_profile_data">saved_data</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">John Wick</string>
+    <string name="nav_header_subtitle">Babayaga</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_trip_list">My Trips</string>
+    <string name="menu_show_myprofile">My Profile</string>
+    <string name="menu_show_profile">Profile</string>
+    <string name="menu_trip_details">Trip Details</string>
+    <string name="menu_trip_edit">Edit Trip</string>
+    <string name="menu_edit_profile">Edit Profile</string>
+    <string name="departure">Departure</string>
+    <string name="date">Date</string>
+    <string name="time">Time</string>
+    <string name="arrival">Arrival</string>
+    <string name="duration">Duration</string>
+    <string name="price">Price</string>
+    <string name="seats">Seats</string>
+    <string name="description">Description</string>
+    <string name="lorem_ipsum">Lorem ipsum dolor sit amet.</string>
+    <string name="menu_others_trips">Trips</string>
+    <string name="add_a_comment">Add an optional comment</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

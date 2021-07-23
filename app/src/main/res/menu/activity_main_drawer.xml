@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group
+        android:checkableBehavior="single"
+        android:id="@+id/gm_menu">
+        <item
+            android:id="@+id/nav_show_profile"
+            android:icon="@drawable/ic_menu_account"
+            android:title="@string/menu_show_profile" />
+        <item
+            android:id="@+id/nav_trip_list"
+            android:icon="@drawable/ic_menu_list"
+            android:title="@string/menu_trip_list" />
+        <item
+            android:id="@+id/nav_interest_trips"
+            android:icon="@drawable/ic_baseline_fullstar"
+            android:title="Trips You Like" />
+
+        <item
+            android:id="@+id/nav_bought_trips"
+            android:icon="@drawable/ic_price"
+            android:title="Bought Trips" />
+
+        <item
+            android:id="@+id/nav_others_trip_list"
+            android:icon="@drawable/ic_baseline_car"
+            android:title="@string/menu_others_trips" />
+    </group>
+
+    <group
+        android:checkableBehavior="single"
+        android:id="@+id/gm_log">
+        <item
+            android:id="@+id/nav_log"
+            android:icon="@drawable/ic_logout"
+            android:title="@string/logout"/>
+    </group>
+
+</menu>

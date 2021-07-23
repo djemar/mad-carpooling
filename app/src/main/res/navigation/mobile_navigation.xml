@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@id/nav_others_trip_list">
+
+    <fragment
+        android:id="@+id/nav_trip_list"
+        android:name="com.mad.carpooling.ui.TripListFragment"
+        android:label="@string/menu_trip_list"
+        tools:layout="@layout/fragment_trip_list">
+        <action
+            android:id="@+id/action_nav_trip_list_to_nav_trip_details"
+            app:destination="@id/nav_trip_details"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:popUpTo="@id/nav_trip_list" />
+        <action
+            android:id="@+id/action_nav_trip_list_to_nav_trip_edit"
+            app:destination="@id/nav_trip_edit"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:popUpTo="@id/nav_trip_list" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_others_trip_list"
+        android:name="com.mad.carpooling.ui.OthersTripListFragment"
+        android:label="@string/menu_others_trips"
+        tools:layout="@layout/fragment_trip_list">
+        <action
+            android:id="@+id/action_nav_others_trip_list_to_nav_trip_edit"
+            app:destination="@id/nav_trip_edit"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:popUpTo="@id/nav_others_trip_list" />
+        <action
+            android:id="@+id/action_nav_others_trip_list_to_nav_trip_details"
+            app:destination="@id/nav_trip_details"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:popUpTo="@id/nav_others_trip_list" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_show_profile"
+        android:name="com.mad.carpooling.ui.ShowProfileFragment"
+        android:label="@string/menu_show_myprofile"
+        tools:layout="@layout/fragment_show_profile">
+        <argument
+            android:name="uid"
+            android:defaultValue="uid"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_nav_show_profile_to_nav_reviews_profile"
+            app:destination="@id/nav_reviews_profile"
+            app:popUpTo="@id/nav_show_profile" />
+        <action
+            android:id="@+id/action_nav_show_profile_to_nav_edit_profile"
+            app:destination="@id/nav_edit_profile" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_show_profile_others"
+        android:name="com.mad.carpooling.ui.ShowProfileFragment"
+        android:label="@string/menu_show_profile"
+        tools:layout="@layout/fragment_show_profile">
+        <argument
+            android:name="uid"
+            android:defaultValue="uid"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_nav_show_profile_others_to_nav_reviews_profile"
+            app:destination="@id/nav_reviews_profile"
+            app:popUpTo="@id/nav_show_profile_others" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_edit_profile"
+        android:name="com.mad.carpooling.ui.EditProfileFragment"
+        android:label="@string/menu_edit_profile"
+        tools:layout="@layout/fragment_edit_profile">
+        <action
+            android:id="@+id/action_nav_edit_profile_to_nav_show_profile"
+            app:destination="@id/nav_show_profile"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:popUpTo="@id/nav_others_trip_list" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_trip_details"
+        android:name="com.mad.carpooling.ui.trip_details.TripDetailsFragment"
+        android:label="@string/menu_trip_details"
+        tools:layout="@layout/fragment_trip_details">
+        <action
+            android:id="@+id/action_nav_trip_details_to_nav_trip_edit"
+            app:destination="@id/nav_trip_edit"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:popUpTo="@id/nav_trip_details"
+            app:popUpToInclusive="true" />
+        <argument
+            android:name="id"
+            app:argType="string" />
+        <argument
+            android:name="currentPhotoPath"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <action
+            android:id="@+id/action_nav_trip_details_to_nav_show_profile"
+            app:destination="@id/nav_show_profile_others"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:popUpTo="@id/nav_trip_details" />
+        <action
+            android:id="@+id/action_nav_trip_details_to_nav_map"
+            app:destination="@id/nav_map"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:popUpTo="@id/nav_trip_details" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_trip_edit"
+        android:name="com.mad.carpooling.ui.trip_edit.TripEditFragment"
+        android:label="@string/menu_trip_edit"
+        tools:layout="@layout/fragment_trip_edit">
+        <action
+            android:id="@+id/action_nav_trip_edit_to_nav_trip_details"
+            app:destination="@id/nav_trip_details"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:popUpTo="@id/nav_trip_edit"
+            app:popUpToInclusive="true" />
+        <argument
+            android:name="id"
+            app:argType="string"
+            android:defaultValue="id" />
+        <argument
+            android:name="isNew"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="currentPhotoPath"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <action
+            android:id="@+id/action_nav_trip_edit_to_nav_map"
+            app:destination="@id/nav_map"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:popUpTo="@id/nav_trip_edit" />
+        <argument
+            android:name="fromMap"
+            app:argType="boolean"
+            android:defaultValue="false" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_bought_trips"
+        android:name="com.mad.carpooling.ui.BoughtTripsListFragment"
+        android:label="Bought Trips"
+        tools:layout="@layout/fragment_trip_list">
+        <action
+            android:id="@+id/action_nav_bought_trips_to_nav_trip_details"
+            app:destination="@id/nav_trip_details"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:popUpTo="@id/nav_bought_trips" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_interest_trips"
+        android:name="com.mad.carpooling.ui.TripOfInterestListFragment"
+        android:label="Trips you like"
+        tools:layout="@layout/fragment_trip_list">
+        <action
+            android:id="@+id/action_nav_interest_trips_to_nav_trip_details"
+            app:destination="@id/nav_trip_details"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:popUpTo="@id/nav_interest_trips" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_map"
+        android:name="com.mad.carpooling.ui.MapFragment"
+        android:label="Map"
+        tools:layout="@layout/fragment_map">
+        <argument
+            android:name="tid"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+        <action
+            android:id="@+id/action_nav_map_to_nav_trip_edit"
+            app:destination="@id/nav_trip_edit"
+            app:popUpTo="@id/nav_trip_edit"
+            app:popUpToInclusive="true" />
+<!--        <action
+            android:id="@+id/action_nav_map_to_nav_trip_edit_skip_details"
+            app:destination="@id/nav_trip_edit"
+            app:popUpTo="@id/nav_trip_list" />
+        <action
+            android:id="@+id/action_nav_map_to_nav_trip_edit_new"
+            app:destination="@id/nav_trip_edit"
+            app:popUpTo="@id/nav_others_trip_list" />-->
+    </fragment>
+    <fragment
+        android:id="@+id/nav_reviews_profile"
+        android:name="com.mad.carpooling.ui.ReviewsProfileFragment"
+        android:label="Reviews profile"
+        tools:layout="@layout/fragment_reviews_profile">
+        <argument
+            android:name="review"
+            app:argType="android.os.Bundle"
+            app:nullable="true"
+            android:defaultValue="@null"/>
+    </fragment>
+
+</navigation>
