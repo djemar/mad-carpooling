@@ -411,38 +411,43 @@ class MapFragment : Fragment(R.layout.fragment_map), EasyPermissions.PermissionC
                     address.locality,
                     address.countryName
                 ).filterNotNull()
-                marker.title = address.locality
-                marker.snippet = strAddress.joinToString(", ")
-                marker.position = GeoPoint(address.latitude, address.longitude)
-                marker.showInfoWindow()
-                waypoints.add(marker)
-                marker.icon =
-                    MapUtils.getNumMarker(waypoints.size.toString(), requireContext())
-                marker.id = waypoints.size.toString()
-                marker.isDraggable = true
-                marker.setOnMarkerClickListener { markerClick, _ ->
-                    selectedMarker.postValue(markerClick)
-                    true
-                }
-                marker.setOnMarkerDragListener(object : OnMarkerDragListener {
-                    override fun onMarkerDragStart(marker: Marker) {}
-
-                    override fun onMarkerDragEnd(marker: Marker) {
-                        selectedMarker.postValue(marker)
-                        if (marker.title == null) mapViewModel.getFromLocation(
-                            marker.position,
-                            requireContext()
-                        )
-                        mapViewModel.getRoute(waypoints, requireContext())
+                if (selectedMarker.value != null) {
+                    selectedMarker.value!!.title = address.locality
+                    selectedMarker.value!!.snippet = strAddress.joinToString(", ")
+                    selectedMarker.value!!.showInfoWindow()
+                } else {
+                    marker.title = address.locality
+                    marker.snippet = strAddress.joinToString(", ")
+                    marker.position = GeoPoint(address.latitude, address.longitude)
+                    marker.showInfoWindow()
+                    waypoints.add(marker)
+                    marker.icon =
+                        MapUtils.getNumMarker(waypoints.size.toString(), requireContext())
+                    marker.id = waypoints.size.toString()
+                    marker.isDraggable = true
+                    marker.setOnMarkerClickListener { markerClick, _ ->
+                        selectedMarker.postValue(markerClick)
+                        true
                     }
+                    marker.setOnMarkerDragListener(object : OnMarkerDragListener {
+                        override fun onMarkerDragStart(marker: Marker) {}
 
-                    override fun onMarkerDrag(marker: Marker) {}
-                })
-                stopsMarkers.add(marker)
-                selectedMarker.postValue(marker)
-                map.invalidate()
-                mapViewModel.getRoute(waypoints, requireContext())
-            } else {
+                        override fun onMarkerDragEnd(marker: Marker) {
+                            selectedMarker.postValue(marker)
+                            mapViewModel.getFromLocation(
+                                marker.position,
+                                requireContext()
+                            )
+                            mapViewModel.getRoute(waypoints, requireContext())
+                        }
+
+                        override fun onMarkerDrag(marker: Marker) {}
+                    })
+                    stopsMarkers.add(marker)
+                    selectedMarker.postValue(marker)
+                    map.invalidate()
+                    mapViewModel.getRoute(waypoints, requireContext())
+                }} else {
                 Snackbar.make(
                     map,
                     "There was an error: check your internet connection",
